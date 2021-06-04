@@ -23,7 +23,6 @@
 #include "golay.h"
 
 using namespace std;
-//using namespace ex2::sdr;
 
 #include "gtest/gtest.h"
 

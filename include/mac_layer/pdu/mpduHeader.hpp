@@ -39,16 +39,18 @@ namespace ex2 {
       /*!
        * @brief Constructor
        *
+       * @param[in] uhfPacketLength The UHF radio packet length (Data Field 1)
        * @param[in] modulation The UHF radio modulation (RF mode)
        * @param[in] errorCorrectionScheme The error correction scheme
        * @param[in] codewordFragmentIndex The index of the codeword
        * @param[in] packetNumber The packet number
        */
-      MPDUHeader(const RF_Mode::RF_ModeNumber modulation,
-          const ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme,
-          const uint8_t codewordFragmentIndex,
-          const uint16_t userPacketLength,
-          const uint8_t userPacketFragmentIndex);
+      MPDUHeader(const uint8_t uhfPacketLength,
+        const RF_Mode::RF_ModeNumber modulation,
+        const ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme,
+        const uint8_t codewordFragmentIndex,
+        const uint16_t userPacketLength,
+        const uint8_t userPacketFragmentIndex);
 
       /*!
        * @brief Constructor
@@ -81,19 +83,19 @@ namespace ex2 {
       }
 
       uint8_t
-      getMCodewordFragmentIndex () const
+      getCodewordFragmentIndex () const
       {
         return m_codewordFragmentIndex;
       }
 
       ErrorCorrection::ErrorCorrectionScheme
-      getMErrorCorrectionScheme () const
+      getErrorCorrectionScheme () const
       {
         return m_errorCorrectionScheme;
       }
 
       const std::vector<uint8_t>&
-      getMHeaderPayload () const
+      getHeaderPayload () const
       {
         return m_headerPayload;
       }
@@ -105,21 +107,27 @@ namespace ex2 {
       }
 
       RF_Mode::RF_ModeNumber
-      getMRfModeNumber () const
+      getRfModeNumber () const
       {
         return m_rfModeNumber;
       }
 
       uint16_t
-      getMUserPacketFragmentIndex () const
+      getUserPacketFragmentIndex () const
       {
         return m_userPacketFragmentIndex;
       }
 
       uint16_t
-      getMUserPacketLength () const
+      getUserPacketLength () const
       {
         return m_userPacketLength;
+      }
+
+      uint8_t
+      getUhfPacketLength () const
+      {
+        return m_uhfPacketLength;
       }
 
     private:
@@ -142,6 +150,7 @@ namespace ex2 {
           k_userPacketLength +
           k_userPacketFragmentIndex;
 
+      uint8_t m_uhfPacketLength;
       RF_Mode::RF_ModeNumber m_rfModeNumber;
       ErrorCorrection::ErrorCorrectionScheme m_errorCorrectionScheme;
       uint8_t  m_codewordFragmentIndex;
