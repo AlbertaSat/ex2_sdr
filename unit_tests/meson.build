@@ -8,3 +8,14 @@ test('golay', unit_test_golay,
     timeout: 30
     )
     
+unit_test_mpduHeader = executable('unit_test-mpduHeader', 'qa_mpduHeader.cpp',
+    include_directories : incdir,
+    dependencies: [gtest_dep],
+    link_with: ExSDRTxRxlib
+    )
+    
+test('mpduHeader', unit_test_mpduHeader,
+    timeout: 30
+    )
+    
+    

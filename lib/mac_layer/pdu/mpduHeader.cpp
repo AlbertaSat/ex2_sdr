@@ -21,19 +21,23 @@ namespace ex2 {
     MPDUHeaderException::MPDUHeaderException(const std::string& message) :
        runtime_error(message) { }
 
-    MPDUHeader::MPDUHeader(const RF_Mode::RF_ModeNumber modulation,
+    MPDUHeader::MPDUHeader(const uint8_t uhfPacketLength,
+      const RF_Mode::RF_ModeNumber modulation,
       const ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme,
       const uint8_t codewordFragmentIndex,
       const uint16_t userPacketLength,
       const uint8_t userPacketFragmentIndex) :
-          m_rfModeNumber(modulation),
-          m_errorCorrectionScheme(errorCorrectionScheme),
-          m_codewordFragmentIndex(codewordFragmentIndex),
-          m_userPacketLength(userPacketLength),
-          m_userPacketFragmentIndex(userPacketFragmentIndex)
+        m_uhfPacketLength(uhfPacketLength),
+        m_rfModeNumber(modulation),
+        m_errorCorrectionScheme(errorCorrectionScheme),
+        m_codewordFragmentIndex(codewordFragmentIndex),
+        m_userPacketLength(userPacketLength),
+        m_userPacketFragmentIndex(userPacketFragmentIndex)
     {
       // Set and encode the MAC header bytes
-      m_headerPayload.resize(9,0);
+      m_headerPayload.resize(10,0);
+
+      m_headerPayload[0] = m_uhfPacketLength;
 
       encodeMACHeader();
 
@@ -42,7 +46,7 @@ namespace ex2 {
 
     MPDUHeader::MPDUHeader (std::vector<uint8_t> &packet){
 
-      m_headerPayload.resize(9,0);
+//      m_headerPayload.resize(9,0);
 
       if (decodeMACHeader(packet, true)) {
         // The header may be valid, but if there were more than 4 errors in the
@@ -71,6 +75,7 @@ namespace ex2 {
 
     MPDUHeader::MPDUHeader (MPDUHeader& header)
     {
+      m_uhfPacketLength = header.m_uhfPacketLength;
       m_rfModeNumber = header.m_rfModeNumber;
       m_errorCorrectionScheme = header.m_errorCorrectionScheme;
       m_codewordFragmentIndex = header.m_codewordFragmentIndex;
@@ -91,7 +96,10 @@ namespace ex2 {
       // Decode the codewords and if all decode properly, return true
 
       uint16_t headerStart = 0;
-      if (dataField1Included) headerStart++;
+
+      if (dataField1Included) {
+        m_uhfPacketLength = packet[headerStart++];
+      }
 
       // Remember, the first byte is the Data Field 1, the packet length
       // Decode the first 3 bytes (24 bits)
@@ -159,11 +167,11 @@ namespace ex2 {
 
       uint32_t codeword = golay_encode(msgBits);
 
+      m_headerPayload[3] = (uint8_t)(codeword & 0x000000FF);
+      codeword >>= 8;
       m_headerPayload[2] = (uint8_t)(codeword & 0x000000FF);
       codeword >>= 8;
       m_headerPayload[1] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
-      m_headerPayload[0] = (uint8_t)(codeword & 0x000000FF);
 
       msgBits = 0;
       msgBits = (m_codewordFragmentIndex << 8) & 0x00000F00;        // bottom 4 bits
@@ -171,11 +179,11 @@ namespace ex2 {
 
       codeword = golay_encode(msgBits);
 
+      m_headerPayload[6] = (uint8_t)(codeword & 0x000000FF);
+      codeword >>= 8;
       m_headerPayload[5] = (uint8_t)(codeword & 0x000000FF);
       codeword >>= 8;
       m_headerPayload[4] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
-      m_headerPayload[3] = (uint8_t)(codeword & 0x000000FF);
 
       msgBits = 0;
       msgBits = (m_userPacketLength << 8) & 0x00000F00;
@@ -183,11 +191,11 @@ namespace ex2 {
 
       codeword = golay_encode(msgBits);
 
+      m_headerPayload[9] = (uint8_t)(codeword & 0x000000FF);
+      codeword >>= 8;
       m_headerPayload[8] = (uint8_t)(codeword & 0x000000FF);
       codeword >>= 8;
       m_headerPayload[7] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
-      m_headerPayload[6] = (uint8_t)(codeword & 0x000000FF);
     } // encodeMACHeader
 
 
