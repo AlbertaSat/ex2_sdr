@@ -53,21 +53,16 @@ namespace ex2
   namespace sdr
   {
     /*!
-     * @brief This is the Darkstar media access controller (MAC)
-     * @ingroup darkstar
+     * @brief This is the media access controller (MAC)
      *
-     * @details The MAC class interfaces with the App layer to process and
-     * forward received APDUs to the PHY layer as MPDUs. It interfaces with the
-     * PHY layer to process received MPDUs and forward the resulting APDUs to
-     * the App layer.
+     * @details The MAC class is a singleton that instantiates two tasks that
+     * manage queues to the CSP server. One queue transports CSP packets from
+     * the CSP server to the MAC that are to be transmitted by the UHF radio.
+     * The other queue is used by the MAC to send CSP packets up to the CSP
+     * server that are reconstructed from packets received by the UHF Radio.
      *
-     * The MAC comprises two components:
-     * @li mac_high - an interface layer that handles Application Layer PDUs
-     * @li mac_low - an interface layer that handles PHY Layer PDUs
-     * The MAC configures and connects these components, sets up and presents
-     * the message interfaces.
      *
-     * @todo Add stack diagram?
+     * @todo Add diagrams (state machine, messaging, other)?
      */
     class MAC
     {
@@ -93,88 +88,96 @@ namespace ex2
 
       ~MAC ();
 
-      /************************************************************************
-       * Functions to handle Application Protocol Data Units
-       ***********************************************************************/
-
       /*!
-       * @brief Provide a function to send APDUs.
+       * @brief The task that receives CSP packets via a queue from the CSP
+       * server.
        *
-       * @details It's assumed that an upper layer (Application) submits APDUs
-       * to the MAC via @p sendApdu.
-       */
-      //      APDU::apdu_function_t sendApdu();
-
-      /*!
-       * @brief Set the receive APDU function.
+       * @details The task monitors the queue and when a CSP packet arrives, it
+       * processes it into Transparent Mode packets that are sent in sequence
+       * to the UHF Radio via the UART interface.
        *
-       * @details It's assumed that upper layer (Application) provides a
-       * function pointer that accepts APDUs from the MAC.
-       *
-       * @param[in] receiveApdu Pointer to the forwarding function
-       */
-      //      void setReceiveApdu(APDU::apdu_function_t receiveApdu);
-
-      /*!
-       * @brief The recommended APDU payload length in bytes.
-       *
-       * @details If possible, the application should send APDUs of this payload
-       * length. Obviously, it's very likely the final APDU will be shorter, but
-       * when the MAC @p stop() or @p flush() methods are called.
-       *
-       * @return recommended APDU payload length in bytes.
-       */
-      //      uint32_t apduPayloadLength() const;
-
-      /************************************************************************
-       * Functions to handle PHY Protocol Data Units to/from the lower layer
-       ***********************************************************************/
-
-      /*!
-       * @brief Set the send PPDU function.
-       *
-       * @details It's assumed that lower layer (PHY) provides a function
-       * pointer that accepts PPDUs from the MAC.
-       *
-       * @param[in] sendPpdu Pointer to the send function
-       */
-      //      void setSendPpdu(PPDU_u8::ppdu_function_t sendPpdu);
-
-      /*!
-       * @brief Provide a function to receive PPDUs.
-       *
-       * @details It's assumed that a lower layer (PHY) submits PPDUs to
-       * the MAC via @p receivePpdu.
-       *
-       * @return receivePpdu Pointer to the receiving function
-       */
-      //      PPDU_f::ppdu_function_t receivePpdu();
-
-
-      /*!
-       * @brief The task that receives CSP packets via a queue from the application layer.
-       *
-       * @param taskParameters
+       * @param taskParameters Just a placeholder
        */
       static void queueReceiveTask( void *taskParameters );
 
       /*!
-       * @brief The task that sends CSP packets via a queue to the application layer.
+       * @brief The task that send CSP packets via a queue to the CSP server.
        *
-       * @param taskParameters
+       * @details The task monitors the UART interface from the UHF Radio for
+       * Transparent Mode packets. It processes those received and reconstructs
+       * the source CSP packet. When a CSP packet is complete, it is sent via a
+       * queue to the CSP server.
+       *
+       * @param taskParameters Just a placeholder
        */
       static void queueSendTask( void *taskParameters );
 
+      /*!
+       * @brief Accessor
+       *
+       * @return The Send queue handle
+       */
       QueueHandle_t
       getSendQueueHandle () const
       {
         return xSendQueue;
       }
 
+      /*!
+       * @brief Accessor
+       *
+       * @return The Receive queue handle
+       */
       QueueHandle_t
       getRecvQueueHandle () const
       {
         return xRecvQueue;
+      }
+
+      /*!
+       * @brief Accessor
+       *
+       * @return The ErrorCorrectionScheme in use
+       */
+      ErrorCorrection::ErrorCorrectionScheme
+      getMErrorCorrectionScheme () const
+      {
+        return m_errorCorrection->getErrorCorrectionScheme();
+      }
+
+      /*!
+       * @brief Accessor
+       *
+       * @param mErrorCorrectionScheme The ErrorCorrectionScheme to use
+       */
+      void
+      setMErrorCorrectionScheme (
+        ErrorCorrection::ErrorCorrectionScheme ecScheme)
+      {
+        m_errorCorrection->setErrorCorrectionScheme(ecScheme);
+      }
+
+      /*!
+       * @brief Accessor
+       *
+       * @return The UHF Radio RF Mode in use
+       */
+      RF_Mode::RF_ModeNumber
+      getMRfModeNumber () const
+      {
+        return m_rfModeNumber;
+      }
+
+      /*!
+       * @brief Accessor
+       *
+       * @param mRfModeNumber The UHF Radio RF Mode to use
+       */
+      void
+      setMRfModeNumber (
+        RF_Mode::RF_ModeNumber mRfModeNumber)
+      {
+        m_rfModeNumber = mRfModeNumber;
       }
 
     private:
@@ -198,9 +201,14 @@ namespace ex2
       bool isAX25Packet(std::vector<uint8_t> &packet);
 
       void processReceivedCSP(csp_packet_t *packet);
+      void processReceivedUARTPPacket(std::vector<uint8_t> &packet);
+
+      ErrorCorrection *m_errorCorrection;
 
       RF_Mode::RF_ModeNumber m_rfModeNumber;
-      ErrorCorrection::ErrorCorrectionScheme m_errorCorrectionScheme;
+
+      uint16_t m_numCodewordFragments;
+      uint16_t m_messageLength;
 
     };
 

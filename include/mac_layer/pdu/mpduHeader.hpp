@@ -14,7 +14,6 @@
 #ifndef EX2_SDR_MAC_LAYER_PDU_FRAME_HEADER_H_
 #define EX2_SDR_MAC_LAYER_PDU_FRAME_HEADER_H_
 
-#include <chrono>
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
@@ -80,6 +79,16 @@ namespace ex2 {
       MACHeaderLength ()
       {
         return k_MACHeaderLength;
+      }
+
+      /*!
+       * @brief Accessor
+       * @return MAC payload length in bytes
+       */
+      static uint16_t
+      MACPayloadLength ()
+      {
+        return 0x0080 + (uint16_t) k_MACHeaderLength / 0x0008;
       }
 
       uint8_t
@@ -148,7 +157,8 @@ namespace ex2 {
           k_modulationFECScheme +
           k_codewordFragmentIndex +
           k_userPacketLength +
-          k_userPacketFragmentIndex;
+          k_userPacketFragmentIndex +
+          k_parityBits;
 
       uint8_t m_uhfPacketLength;
       RF_Mode::RF_ModeNumber m_rfModeNumber;
