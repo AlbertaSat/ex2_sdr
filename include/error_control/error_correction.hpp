@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace ex2 {
   namespace sdr {
@@ -124,6 +125,49 @@ namespace ex2 {
       ~ErrorCorrection();
 
       /*!
+       * @brief Decode the codeword using the current ErrorCorrectionScheme
+       *
+       * @note Not all schemes are supported yet.
+       *
+       * @param [in out] codeword On invocation, the codeword to decode. If
+       * successful, the message replaces the contents. If not successful,
+       * the contents are indeterminate, invalid.
+       * @return If successful, the message is returned. If not, a zero-length
+       * vector is returned.
+       */
+      std::vector<uint8_t> & decode(std::vector<uint8_t> &codeword);
+
+      /*!
+       * @brief Encode the message using the current ErrorCorrectionScheme
+       *
+       * @param message
+       * @return If successful, the codeword is returned. If not, a zero-length
+       * vector is returned.
+       */
+      std::vector<uint8_t> & encode(std::vector<uint8_t> &codeword);
+
+      /*!
+       * @brief Accessor
+       * @return The ErrorCorrectionScheme
+       */
+      ErrorCorrectionScheme
+      getErrorCorrectionScheme () const
+      {
+        return m_errorCorrectionScheme;
+      }
+
+      /*!
+       * @brief Accessor
+       * @param mErrorCorrectionScheme The ErrorCorrectionScheme to use
+       */
+      void
+      setErrorCorrectionScheme (
+        ErrorCorrectionScheme mErrorCorrectionScheme)
+      {
+        m_errorCorrectionScheme = mErrorCorrectionScheme;
+      }
+
+      /*!
        * @brief Return the rate
        * @return The rate
        */
@@ -133,7 +177,7 @@ namespace ex2 {
 
       /*!
        * @brief Accessor
-       * @return
+       * @return The length of the codeword in bytes
        */
       uint32_t getCodewordLen() const {
         return m_codewordLen;
@@ -141,7 +185,7 @@ namespace ex2 {
 
       /*!
        * @brief Accessor
-       * @return
+       * @return The length of the message in bytes
        */
       uint32_t getMessageLen() const {
         return m_messageLen;
@@ -149,7 +193,7 @@ namespace ex2 {
 
       /*!
        * @brief Accessor
-       * @return
+       * @return The coding rate
        */
       double getRate() const {
         return m_rate;
