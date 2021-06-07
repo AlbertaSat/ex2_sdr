@@ -18,4 +18,14 @@ test('mpduHeader', unit_test_mpduHeader,
     timeout: 30
     )
     
+unit_test_mpdu = executable('unit_test-mpdu', 'qa_mpdu.cpp',
+    include_directories : incdir,
+    dependencies: [gtest_dep],
+    link_with: ExSDRTxRxlib
+    )
+    
+test('mpdu', unit_test_mpdu,
+    timeout: 30
+    )
+    
     
