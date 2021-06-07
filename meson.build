@@ -97,7 +97,7 @@ core_source_files = [
 ##    'lib/mac_layer/mac.cpp',
 #    'lib/mac_layer/mac_high.cpp',
 #    'lib/mac_layer/mac_low.cpp',
-#    'lib/mac_layer/pdu/mpdu.cpp',
+    'lib/mac_layer/pdu/mpdu.cpp',
     'lib/mac_layer/pdu/mpduHeader.cpp',
 #    'lib/phy_layer/mls.cpp',
 #    'lib/utilities/version.cpp',
