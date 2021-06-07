@@ -1,5 +1,5 @@
 /*!
- * @file mpdu.h
+ * @file mpdu.hpp
  * @author Steven Knudsen
  * @date May 25, 2021
  *
@@ -14,22 +14,39 @@
 #ifndef EX2_SDR_MAC_LAYER_PDU_FRAME_H_
 #define EX2_SDR_MAC_LAYER_PDU_FRAME_H_
 
-#include <functional>
-#include <chrono>
+#include <cstdint>
+#include <stdexcept>
+#include <vector>
 
 #include "pdu.hpp"
-//#include "configuration.h"
 #include "mpduHeader.hpp"
+
+/*!
+ * The Maximum Transmission Unit for the Endurosat UHF radio is 128 bytes.
+ * After accounting for the MPDU Header, it becomes 119 bytes.
+ *
+ * @todo This should be defined someplace more accessible
+ */
+#define MPDU_MTU 119 // bytes
+#define MPDU_DATA_FIELD_1_SIZE 1 // byte
+#define MPDU_LENGTH (MPDU_DATA_FIELD_1_SIZE + MPDU_MTU + MPDUHeader::MACHeaderLength()/8)
 
 namespace ex2
 {
   namespace sdr
   {
+
+    class MPDUException: public std::runtime_error {
+
+    public:
+      MPDUException(const std::string& message);
+    };
+
     /*!
      * @brief Defines the MPDU.
      *
      * @details The MAC Protocol Data Unit (MPDU) comprises the MAC header and
-     * codeword. The codeword comprises the message and parity bits, if any.
+     * codeword. The codeword comprises the message and parity bits.
      *
      * The MAC header and codeword are contained in the Data Field 2 of the
      * transparent mode packet. The fields and their length are shown in the
@@ -46,8 +63,8 @@ namespace ex2
      *       <TD bgcolor="#ffffff" COLSPAN="5" Align = "Center"></TD>
      *       </TR>
      *       <TR>
-     *       <TD bgcolor="#ff7777" COLSPAN="1" Align = "Center">MAC Header (4 bytes)</TD>
-     *       <TD bgcolor="#77ff77" COLSPAN="4" Align = "Center">Codeword (Message + Parity) (0 - 124 bytes)</TD>
+     *       <TD bgcolor="#ff7777" COLSPAN="1" Align = "Center">MAC Header (9 bytes)</TD>
+     *       <TD bgcolor="#77ff77" COLSPAN="4" Align = "Center">Codeword (Message + Parity) (0 - 119 bytes)</TD>
      *       </TR>
      *     </TABLE>
      *   >];
@@ -57,22 +74,26 @@ namespace ex2
      * * the Modulation/FEC scheme (9 bits)
      *   * the Modulation (3 bits)
      *   * the FEC Scheme (6 bits)
-     * * the Codeword index (7 bits), an index used to order split codewords when a FEC scheme codeword is longer than 124 bytes
-     * * the Packet Number (2 bytes), an index used to order the codewords in a multi-packet transmission, such as happens when the CSP packet is longer than 124 bytes
+     * * the Codeword Fragment Index (7 bits), an index used to order split codewords when a FEC scheme codeword is longer than 119 bytes
+     * * the User Packet Length, the length of the user packet provided to the MAC, which should be a CSP packet
+     * * the User Packet Fragement Index, which of the User Packet fragments this is
+     * *
      * @dot
      * digraph html {
      *   packet [shape=none, margin=0, label=<
      *     <TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
      *       <TR >
-     *       <TD bgcolor="#ff7777" COLSPAN="12" Align = "Center">MAC Header (4 bytes)</TD>
+     *       <TD bgcolor="#ff7777" COLSPAN="25" Align = "Center">MAC Header (9 bytes)</TD>
      *       </TR>
      *       <TR>
-     *       <TD bgcolor="#ffffff" COLSPAN="12"></TD>
+     *       <TD bgcolor="#ffffff" COLSPAN="25"></TD>
      *       </TR>
      *       <TR>
      *       <TD bgcolor="#ff7777" COLSPAN="3" Align = "Center">Modulation/FEC Scheme (9 bits)</TD>
-     *       <TD bgcolor="#ff7777" COLSPAN="4" Align = "Center">Codeword Index (7 bits)</TD>
-     *       <TD bgcolor="#ff7777" COLSPAN="5" Align = "Center">Packet Number (2 bytes)</TD>
+     *       <TD bgcolor="#ff7777" COLSPAN="4" Align = "Center">Codeword Fragment Index (7 bits)</TD>
+     *       <TD bgcolor="#ff7777" COLSPAN="5" Align = "Center">User Packet Length (12 bits)</TD>
+     *       <TD bgcolor="#ff7777" COLSPAN="6" Align = "Center">User Packet Fragment Index (8 bits)</TD>
+     *       <TD bgcolor="#ff7777" COLSPAN="7" Align = "Center">Golay parity bits[Note 1] (36 bits)</TD>
      *       </TR>
      *       <TR>
      *       <TD bgcolor="#ffffff" COLSPAN="3"></TD>
@@ -87,21 +108,23 @@ namespace ex2
      * @enddot
      *
      */
-    class MPDU :
-        public PDU<uint8_t>
-    {
+    class MPDU {
     public:
 
-      class MPDUHeaderException: public std::runtime_error {
-
-      public:
-        MPDUHeaderException(const std::string& message);
-      };
-
       /*!
-       * @brief MPDU function type.
+       * @brief Constructor
+       *
+       * @details The @p header should be constructed new for each MPDU created
+       * so that the correct indices are set. See @p MPDUHeader class. The
+       * @p codeword is assumed to be an FEC encoded message and must be MPDU_MTU
+       * bytes long.
+       *
+       * @param[in] header The header corresponding to this MPDU
+       * @param[in] codeword MAC service data unit (aka payload)
        */
-      typedef std::function< void(MPDU&) > mpdu_function_t;
+      MPDU (
+        MPDUHeader& header,
+        const std::vector<uint8_t>& codeword);
 
       /*!
        * @brief Constructor
@@ -109,31 +132,24 @@ namespace ex2
        * @details Used when reconstructing an MPDU based on a received
        * transparent mode packet
 
-       * @param[in] rawPayload The received transparent mode packet
-       * @note The @p rawPayload should always be 128 bytes
+       * @param[in] rawMPDU The received transparent mode packet as a byte vector
+       * @note The @p rawMPDU should always be 128 bytes
        */
       MPDU (
-        const payload_t& rawPayload);
+        std::vector<uint8_t>& rawMPDU);
 
-      /*!
-       * @brief Constructor
-       *
-       * @param[in] header The header corresponding to this MPDU
-       * @param[in] payload MAC service data unit (aka payload)
-       */
-      MPDU (
-        MPDUHeader& header,
-        const payload_t& payload);
 
       ~MPDU ();
 
       /*!
-       * @brief Accessor for the payload.
+       * @brief Accessor for the MPDU as a byte vector.
        *
-       * @return The payload.
+       * @return The MPDU as a byte vector.
        */
-      const payload_t& getPayload() const {
-        return m_payload;
+      const std::vector<uint8_t>& getMPDU() const;
+
+      const std::vector<uint8_t>& getCodeword() const {
+        return m_codeword;
       }
 
       /*!
@@ -146,6 +162,8 @@ namespace ex2
 
     private:
       MPDUHeader *m_mpduHeader;
+      std::vector<uint8_t> m_codeword;
+      std::vector<uint8_t> m_payload;
     };
 
   } // namespace sdr
