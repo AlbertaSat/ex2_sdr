@@ -22,6 +22,8 @@
 #include "pdu.hpp"
 #include "rfMode.hpp"
 
+#define TRANSPARENT_MODE_DATA_FIELD_2_MAX_LEN 128 // bytes
+
 namespace ex2 {
   namespace sdr {
 
@@ -41,8 +43,9 @@ namespace ex2 {
        * @param[in] uhfPacketLength The UHF radio packet length (Data Field 1)
        * @param[in] modulation The UHF radio modulation (RF mode)
        * @param[in] errorCorrectionScheme The error correction scheme
-       * @param[in] codewordFragmentIndex The index of the codeword
-       * @param[in] packetNumber The packet number
+       * @param[in] codewordFragmentIndex The index of the codeword fragment
+       * @param[in] userPacketLength The length of the original user (CSP) packet
+       * @param[in] userPacketFragmentIndex The current fragment of the user (CSP) packet
        */
       MPDUHeader(const uint8_t uhfPacketLength,
         const RF_Mode::RF_ModeNumber modulation,
@@ -88,7 +91,8 @@ namespace ex2 {
       static uint16_t
       MACPayloadLength ()
       {
-        return 0x0080 + (uint16_t) k_MACHeaderLength / 0x0008;
+        return (uint16_t) TRANSPARENT_MODE_DATA_FIELD_2_MAX_LEN +
+            (uint16_t) k_MACHeaderLength / 0x0008;
       }
 
       uint8_t
@@ -109,11 +113,6 @@ namespace ex2 {
         return m_headerPayload;
       }
 
-      bool
-      isMHeaderValid () const
-      {
-        return m_headerValid;
-      }
 
       RF_Mode::RF_ModeNumber
       getRfModeNumber () const
@@ -139,6 +138,11 @@ namespace ex2 {
         return m_uhfPacketLength;
       }
 
+      bool
+      isMHeaderValid () const
+      {
+        return m_headerValid;
+      }
     private:
 
       /*!

@@ -17,6 +17,8 @@
 #ifndef EX2_SDR_MAC_LAYER_MAC_H_
 #define EX2_SDR_MAC_LAYER_MAC_H_
 
+#include <mutex>
+#include <stdexcept>
 #include <vector>
 #include <time.h>
 
@@ -26,32 +28,37 @@ extern "C" {
 
 #include "csp_types.h"
 
-#include "FreeRTOS.h"
-#include "FreeRTOSConfig.h"
-
-#include "queue.h"
-
 #ifdef __cplusplus
 }
 #endif
 
+#include "FEC.hpp"
 #include "ppdu_cf.hpp"
 #include "ppdu_u8.hpp"
-//#include "configuration.h"
 #include "mpdu.hpp"
 #include "rfMode.hpp"
 
-// For FreeRTOS queues
-#define QUEUE_LENGTH ( 5 )
+// TODO This definition belongs somewhere else
+#define CSP_MTU_LENGTH ( 4096 )
 
-/* Priorities at which the tasks are created. */
-#define mainQUEUE_RECEIVE_TASK_PRIORITY   ( tskIDLE_PRIORITY + 2 )
-#define mainQUEUE_SEND_TASK_PRIORITY      ( tskIDLE_PRIORITY + 1 )
+// TODO This definition belongs to the MAC service
+#define MAC_SERVICE_QUEUE_LENGTH ( 5 )
+
+#define MAC_MAX_RX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
+#define MAC_MAX_TX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
+
 
 namespace ex2
 {
   namespace sdr
   {
+
+    class MACException: public std::runtime_error {
+
+    public:
+      MACException(const std::string& message);
+    };
+
     /*!
      * @brief This is the media access controller (MAC)
      *
@@ -88,51 +95,116 @@ namespace ex2
 
       ~MAC ();
 
-      /*!
-       * @brief The task that receives CSP packets via a queue from the CSP
-       * server.
-       *
-       * @details The task monitors the queue and when a CSP packet arrives, it
-       * processes it into Transparent Mode packets that are sent in sequence
-       * to the UHF Radio via the UART interface.
-       *
-       * @param taskParameters Just a placeholder
-       */
-      static void queueReceiveTask( void *taskParameters );
+      // @TODO keep this old code for use in the wrapper
+//      /*!
+//       * @brief The task that receives CSP packets via a queue from the CSP
+//       * server.
+//       *
+//       * @details The task monitors the queue and when a CSP packet arrives, it
+//       * processes it into Transparent Mode packets that are sent in sequence
+//       * to the UHF Radio via the UART interface.
+//       *
+//       * @param taskParameters Just a placeholder
+//       */
+//       static void queueSendToUHFTask( void *taskParameters );
+//
+//      /*!
+//       * @brief The task that send CSP packets via a queue to the CSP server.
+//       *
+//       * @details The task monitors the UART interface from the UHF Radio for
+//       * Transparent Mode packets. It processes those received and reconstructs
+//       * the source CSP packet. When a CSP packet is complete, it is sent via a
+//       * queue to the CSP server.
+//       *
+//       * @param taskParameters Just a placeholder
+//       */
+//       static void queueReceiveFromUHFTask( void *taskParameters );
+//
+//      /*!
+//       * @brief Accessor
+//       *
+//       * @return The Send queue handle
+//       */
+//      QueueHandle_t
+//      getSendQueueHandle () const
+//      {
+//        return xSendToUHFQueue;
+//      }
+//
+//      /*!
+//       * @brief Accessor
+//       *
+//       * @return The Receive queue handle
+//       */
+//      QueueHandle_t
+//      getRecvQueueHandle () const
+//      {
+//        return xRecvFromUHFQueue;
+//      }
 
       /*!
-       * @brief The task that send CSP packets via a queue to the CSP server.
+       * @brief Process the received UHF data as an MPDU.
        *
-       * @details The task monitors the UART interface from the UHF Radio for
-       * Transparent Mode packets. It processes those received and reconstructs
-       * the source CSP packet. When a CSP packet is complete, it is sent via a
-       * queue to the CSP server.
+       * @details Process each MPDU received (UHF received data in transparent
+       * mode) until a full CSP packet is received or there is an error.
        *
-       * @param taskParameters Just a placeholder
+       * @param mpdu
+       *
+       * @throw MACException out of sequence
+       * @throw MACException CSP complete
        */
-      static void queueSendTask( void *taskParameters );
+      void processUHFPacket(MPDU &mpdu);
+
+      /*!
+       * @brief Reset the processing of received UHF data.
+       *
+       * @details Some kind of error (dropped packet, bad packet, etc.) has
+       * happened and the current CSP packet cannot be recovered. Reset the
+       * processing.
+       */
+      void resetUHFProcessing();
+
+      /*!
+       * @brief A complete CSP packet is ready to be sent up to the the CSP Server.
+       *
+       * @return true if there is a CSP packet, false otherwise
+       */
+      bool isCSPPacketReady();
 
       /*!
        * @brief Accessor
        *
-       * @return The Send queue handle
+       * @details After the CSP packet has been retrieved, call @p resetUHFProcessing.
+       *
+       * @return Pointer to the completed CSP packet.
        */
-      QueueHandle_t
-      getSendQueueHandle () const
-      {
-        return xSendQueue;
-      }
+      csp_packet_t * getCSPPacket();
 
       /*!
-       * @brief Accessor
+       * @brief Receive a new CSP packet.
        *
-       * @return The Receive queue handle
+       * @details Initialize processing of the received CSP packet. This function
+       * should be followed by repeated calls to @p nextMPDU until all MPDUs
+       * corresponding to the current CSP have been created and transimitted.
+       *
+       * @param cspPacket
        */
-      QueueHandle_t
-      getRecvQueueHandle () const
-      {
-        return xRecvQueue;
-      }
+      void newCSPPacket(csp_packet_t * cspPacket);
+
+      /*!
+       * @brief A kind of iterator that provides MPDUs corresponding to a CSP packet.
+       *
+       * @details Each invocation of this function returns the next MPDU
+       * corresponding to a CSP packet that was passed to @p newCSPPacket.
+       *
+       * @param[in out] mpdu The MPDU contents are replaced by the next MPDU
+       * corresponding to the received CSP packet, or zeroed if there are no more.
+       *
+       * @return true if there is at least one more MPDU, in which case the @p
+       * mpdu contains a valid MPDU that should be transmitted. false if there
+       * are no more MPDUs.
+       */
+      bool nextMPDU(MPDU &mpdu);
 
       /*!
        * @brief Accessor
@@ -140,7 +212,7 @@ namespace ex2
        * @return The ErrorCorrectionScheme in use
        */
       ErrorCorrection::ErrorCorrectionScheme
-      getMErrorCorrectionScheme () const
+      getErrorCorrectionScheme () const
       {
         return m_errorCorrection->getErrorCorrectionScheme();
       }
@@ -148,12 +220,15 @@ namespace ex2
       /*!
        * @brief Accessor
        *
-       * @param mErrorCorrectionScheme The ErrorCorrectionScheme to use
+       * @param ecScheme The ErrorCorrectionScheme to use
        */
       void
-      setMErrorCorrectionScheme (
+      setErrorCorrectionScheme (
         ErrorCorrection::ErrorCorrectionScheme ecScheme)
       {
+        // Lock things to ensure that a currently processing packet is incorrectly
+        // encoded or decoded
+        std::unique_lock<std::mutex> lck(m_ecSchemeMutex);
         m_errorCorrection->setErrorCorrectionScheme(ecScheme);
       }
 
@@ -163,7 +238,7 @@ namespace ex2
        * @return The UHF Radio RF Mode in use
        */
       RF_Mode::RF_ModeNumber
-      getMRfModeNumber () const
+      getRFModeNumber () const
       {
         return m_rfModeNumber;
       }
@@ -171,21 +246,18 @@ namespace ex2
       /*!
        * @brief Accessor
        *
-       * @param mRfModeNumber The UHF Radio RF Mode to use
+       * @param rfModeNumber The UHF Radio RF Mode to use
        */
       void
-      setMRfModeNumber (
-        RF_Mode::RF_ModeNumber mRfModeNumber)
+      setRFModeNumber (
+        RF_Mode::RF_ModeNumber rfModeNumber)
       {
-        m_rfModeNumber = mRfModeNumber;
+        m_rfModeNumber = rfModeNumber;
       }
 
     private:
 
       static MAC* m_instance;
-
-      QueueHandle_t xSendQueue = NULL;
-      QueueHandle_t xRecvQueue = NULL;
 
       /*!
        * @brief Constructor
@@ -200,16 +272,22 @@ namespace ex2
 
       bool isAX25Packet(std::vector<uint8_t> &packet);
 
-      void processReceivedCSP(csp_packet_t *packet);
-      void processReceivedUARTPPacket(std::vector<uint8_t> &packet);
-
       ErrorCorrection *m_errorCorrection;
+
+      FEC *m_FEC;
 
       RF_Mode::RF_ModeNumber m_rfModeNumber;
 
       uint16_t m_numCodewordFragments;
       uint16_t m_messageLength;
 
+      // Mutexs to ensure that in progress packet processing is not corrupted
+      // by an inadvertant change in FEC parameters
+      std::mutex m_ecSchemeMutex;
+
+      std::vector<uint8_t> m_receiveUHFBuffer;
+      uint32_t m_codewordFragmentCount;
+      uint32_t m_userPacketFragementCount;
     };
 
   } // namespace sdr

@@ -43,8 +43,6 @@ namespace ex2
     MPDU::MPDU (
       std::vector<uint8_t>& rawPayload) {
 
-      //      uint16_t rawPayloadLength = MPDU_DATA_FIELD_1_SIZE + MPDU_MTU + MPDUHeader::MACHeaderLength()/8;
-
       // the @p rawPayload is assumed to contain Data Field 1, the raw header,
       // and the codeword.
       if (rawPayload.size() != (long unsigned int) MPDU_LENGTH) {

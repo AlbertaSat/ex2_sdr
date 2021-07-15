@@ -1,5 +1,5 @@
 /*!
- * @file error_correction.h
+ * @file error_correction.hpp
  * @author StevenKnudsen
  * @date April 30, 2021
  *
@@ -177,7 +177,7 @@ namespace ex2 {
 
       /*!
        * @brief Accessor
-       * @return The length of the codeword in bytes
+       * @return The length of the codeword in bits
        */
       uint32_t getCodewordLen() const {
         return m_codewordLen;
@@ -185,7 +185,7 @@ namespace ex2 {
 
       /*!
        * @brief Accessor
-       * @return The length of the message in bytes
+       * @return The length of the message in bits
        */
       uint32_t getMessageLen() const {
         return m_messageLen;
@@ -197,6 +197,25 @@ namespace ex2 {
        */
       double getRate() const {
         return m_rate;
+      }
+
+      /*!
+       * @brief Calculate how many codewords in N bytes
+       *
+       * @param length The number of bytes containing the codeword(s)
+       * @return -1 if the @p length is less than the codeword length,
+       * otherwise return the number of codewords needed to encode @p length
+       * bytes.
+       */
+      int32_t getNumberCodewords(uint32_t length) {
+        // @TODO we assume that all codeword lengths are multiples of 8
+        uint32_t cwLenBytes = m_codewordLen / 8;
+        int32_t codewords = length / cwLenBytes;
+        if (codewords < 1)
+          return -1;
+
+        if (length % cwLenBytes != 0) codewords++;
+        return codewords;
       }
 
     private:

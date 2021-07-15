@@ -36,6 +36,8 @@ namespace ex2 {
     ErrorCorrection::ErrorCorrection(ErrorCorrectionScheme scheme) :
     m_errorCorrectionScheme(scheme)
     {
+      // TODO this is hard coded. Find a more elegant way to update the code for
+      // new implemented FEC schemes
       if (scheme < ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2 ||
           scheme > ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6) {
         throw ECException("Invalid FEC Scheme");
@@ -281,52 +283,52 @@ namespace ex2 {
         case ErrorCorrectionScheme::REED_SOLOMON_255_223_INTERLEAVING_4:
         case ErrorCorrectionScheme::REED_SOLOMON_255_223_INTERLEAVING_5:
         case ErrorCorrectionScheme::REED_SOLOMON_255_223_INTERLEAVING_8:
-          codewordLen = 255;
+          codewordLen = 255*8; // bits
           break;
         case ErrorCorrectionScheme::CCSDS_TURBO_1784_R_1_2:
         case ErrorCorrectionScheme::CCSDS_TURBO_1784_R_1_3:
         case ErrorCorrectionScheme::CCSDS_TURBO_1784_R_1_4:
         case ErrorCorrectionScheme::CCSDS_TURBO_1784_R_1_6:
-          codewordLen = 1784;
+          codewordLen = 1784; // bits
           break;
         case ErrorCorrectionScheme::CCSDS_TURBO_3568_R_1_2:
         case ErrorCorrectionScheme::CCSDS_TURBO_3568_R_1_3:
         case ErrorCorrectionScheme::CCSDS_TURBO_3568_R_1_4:
         case ErrorCorrectionScheme::CCSDS_TURBO_3568_R_1_6:
-          codewordLen = 3568;
+          codewordLen = 3568; // bits
           break;
         case ErrorCorrectionScheme::CCSDS_TURBO_7136_R_1_2:
         case ErrorCorrectionScheme::CCSDS_TURBO_7136_R_1_3:
         case ErrorCorrectionScheme::CCSDS_TURBO_7136_R_1_4:
         case ErrorCorrectionScheme::CCSDS_TURBO_7136_R_1_6:
-          codewordLen = 7136;
+          codewordLen = 7136; // bits
           break;
         case ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_1280:
-          codewordLen = 1288;
+          codewordLen = 1288; // bits
           break;
         case ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_1356:
-          codewordLen = 1356;
+          codewordLen = 1356; // bits
           break;
         case ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_2048:
-          codewordLen = 2048;
+          codewordLen = 2048; // bits
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2:
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3:
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4:
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6:
-          codewordLen = 648;
+          codewordLen = 648; // bits
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2:
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3:
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4:
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6:
-          codewordLen = 1296;
+          codewordLen = 1296; // bits
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2:
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3:
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4:
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6:
-          codewordLen = 1944;
+          codewordLen = 1944; // bits
           break;
 
         case ErrorCorrectionScheme::CONVOLUTIONAL_CODING_R_1_2:
