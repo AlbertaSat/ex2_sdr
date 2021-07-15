@@ -97,7 +97,7 @@ using namespace ex2::sdr;
  * @brief Test Main Constructors, the one that is parameterized, and the one
  * that takes the received packet as input
  */
-TEST(mpdu, Constructor )
+TEST(mpdu, Constructor)
 {
   /* ---------------------------------------------------------------------
    * Check all accessors for both constructors

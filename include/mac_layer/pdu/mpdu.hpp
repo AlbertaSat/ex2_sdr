@@ -133,7 +133,7 @@ namespace ex2
        * transparent mode packet
 
        * @param[in] rawMPDU The received transparent mode packet as a byte vector
-       * @note The @p rawMPDU should always be 128 bytes
+       * @note The @p rawMPDU should always be MPDU_LENGTH bytes
        */
       MPDU (
         std::vector<uint8_t>& rawMPDU);

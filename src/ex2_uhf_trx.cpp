@@ -20,6 +20,25 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <pthread.h>
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "csp_types.h"
+
+#ifdef __cplusplus
+}
+#endif
+
+
 using namespace std;
 using namespace boost::program_options;
 namespace bf = boost::filesystem;
