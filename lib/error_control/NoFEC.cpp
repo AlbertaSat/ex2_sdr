@@ -27,7 +27,7 @@ namespace ex2 {
     }
 
     uint32_t
-    NoFEC::decode(PPDU_u8::payload_t& encodedPayload, float snrEstimate,
+    NoFEC::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
       PPDU_u8::payload_t& decodedPayload) {
 
       (void) snrEstimate;
