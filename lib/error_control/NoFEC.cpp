@@ -16,9 +16,6 @@
 namespace ex2 {
   namespace sdr {
 
-    //      NoFEC::NoFEC(ErrorCorrection::ErrorCorrectionScheme ecScheme) : FEC(ecScheme) {
-    //      }
-
     NoFEC::~NoFEC() {  }
 
     PPDU_u8
@@ -33,10 +30,6 @@ namespace ex2 {
       (void) snrEstimate;
       decodedPayload.resize(0);
       decodedPayload = encodedPayload;
-//      uint32_t i;
-//      for (i = 0; i < encodedPayload.size(); i++) {
-//        decodedPayload.push_back(encodedPayload[i]);
-//      }
 
       return 0;
     }
