@@ -52,8 +52,8 @@ namespace ex2 {
        * @param[out] decodedPayload The resulting decoded payload
        * @return The number of bit errors from the decoding process
        */
-      virtual uint32_t decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
-        PPDU_u8::payload_t& decodedPayload) = 0;
+      virtual uint32_t decode(const PPDU_u8::payload_t &encodedPayload, float snrEstimate,
+        PPDU_u8::payload_t &decodedPayload) = 0;
 
     private:
       ErrorCorrection::ErrorCorrectionScheme m_ecScheme;
