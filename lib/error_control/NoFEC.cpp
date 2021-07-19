@@ -27,8 +27,12 @@ namespace ex2 {
     NoFEC::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
       PPDU_u8::payload_t& decodedPayload) {
 
-      (void) snrEstimate;
-      decodedPayload.resize(0);
+      (void) snrEstimate; // Not used in this mmethod
+
+      decodedPayload.resize(0); // Resize in all FEC decode methods
+
+      // Here is where we apply the FEC decode algorithm.
+      // For no FEC, just copy the data
       decodedPayload = encodedPayload;
 
       return 0;
