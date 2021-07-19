@@ -33,8 +33,8 @@ boost_dep = dependency('boost', modules: [
         ],
     )
 
-glog_dep = dependency('libglog')
-eigen_dep = dependency('eigen3')
+#glog_dep = dependency('libglog')
+#eigen_dep = dependency('eigen3')
 #csp_dep = dependency('csp')
 
 #liquid_dep = dependency('liquid', required: false)
