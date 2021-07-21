@@ -11,8 +11,8 @@ project('ex2_uhf_trx', 'c', 'cpp',
         ],
     )
 
-add_project_arguments(
-    language: 'c,cpp')
+#add_project_arguments(
+#    language: 'c,cpp')
 
 cpp = meson.get_compiler('cpp')
 
@@ -220,6 +220,26 @@ executable('ex2_uhf_trx', 'src/ex2_uhf_trx.cpp', core_source_files,
 #    )
 
 gtest_dep = dependency('gtest_main', required: false)
+
+if not gtest_dep.found()
+    foreach incdir: ['/usr/include/gtest', '/usr/local/include/gtest']
+        if cpp.has_header('gtest.h', args: '-I' + incdir)
+            gtest_inc = include_directories(incdir)
+            break
+        endif
+    endforeach
+    
+    gtest_dep = declare_dependency(
+        dependencies: [cpp.find_library('gtest'),cpp.find_library('gtest_main')],
+        include_directories: gtest_inc,
+        )
+endif
+
+if not gtest_dep.found()
+    error('unable to find gtest dependency')
+endif
+
+#thread_dep = dependency('threads')
 if gtest_dep.found()
     subdir('unit_tests')
 endif
