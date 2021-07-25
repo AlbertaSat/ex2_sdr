@@ -14,10 +14,8 @@ jobs:
     docker:
       - image: cimg/base:2021.04
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "e8:1c:0d:55:b0:66:41:8c:52:de:81:2f:bc:af:20:53"
       - checkout
+      - run: pip3 install meson
       - run: meson setup build
       - slack/notify:
           channel: software
@@ -27,10 +25,8 @@ jobs:
     docker:
       - image: cimg/base:2021.04
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "e8:1c:0d:55:b0:66:41:8c:52:de:81:2f:bc:af:20:53"
       - checkout
+      - run: pip3 install meson 
       - run: meson setup build
       - run: cd build
       - run: ninja
