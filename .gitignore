@@ -1,6 +1,7 @@
 build**
 Debug**
 FreeRTOS**
+.vscode**
 .cproject
 .project
 .settings
