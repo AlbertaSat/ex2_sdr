@@ -1,5 +1,5 @@
 /*!
- * @file convCodeR_1_2.cpp
+ * @file convCode27.cpp
  * @author Arash Yazdani
  * @date July 21, 2021
  *
@@ -11,17 +11,17 @@
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
  */
 
-#include "convCodeR_1_2.hpp"
+#include "convCode27.hpp"
 #include "pdu.hpp"
 
 
 namespace ex2 {
   namespace sdr {
 
-    convCodeR_1_2::~convCodeR_1_2() {  }
+    convCode27::~convCode27() {  }
 
     PPDU_u8
-    convCodeR_1_2::encode(PPDU_u8 &payload) {
+    convCode27::encode(PPDU_u8 &payload) {
       
       PPDU_u8 encodedPayload;
       
@@ -30,12 +30,12 @@ namespace ex2 {
       std::vector<uint8_t> g1 = [0, 1, 2, 3, 6];
       std::vector<uint8_t> g2 = [0, 2, 3, 5, 6];
       
-      payload_t * PayloadData = payload.getPayload();
+      PPDU_u8::payload_t * PayloadData = payload.getPayload();
       // append 0 at beginning for k-1
-      payload_t AppendedPayloadData (constraint_length - 1, 0);
+      PPDU_u8::payload_t AppendedPayloadData (constraint_length - 1, 0);
       AppendedPayloadData.insert(AppendedPayloadData.end(), PayloadData.begin(), PayloadData.end());
       
-      payload_t encodedPayloadData;
+      PPDU_u8::payload_t encodedPayloadData;
       // for loop of encoding 
       // hardcoded for rate = 1/2
       for(uint8_t i = 0; i<payload.payloadLength(); i++){
@@ -49,7 +49,7 @@ namespace ex2 {
     }
 
     uint32_t
-    convCodeR_1_2::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
+    convCode27::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
       PPDU_u8::payload_t& decodedPayload) {
 
       (void) snrEstimate; // Not used in this mmethod
