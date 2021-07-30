@@ -13,6 +13,7 @@
 
 #include "convCode27.hpp"
 #include "pdu.hpp"
+#include "viterbi.h"
 
 
 namespace ex2 {
