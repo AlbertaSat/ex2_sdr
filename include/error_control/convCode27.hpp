@@ -1,5 +1,5 @@
 /*!
- * @file convCodeR_1_2.hpp
+ * @file convCode27.hpp
  * @author Arash Yazdani
  * @date July 21, 2021
  *
@@ -11,8 +11,8 @@
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
  */
 
-#ifndef EX2_SDR_ERROR_CONTROL_CONVCODER_1_2_H_
-#define EX2_SDR_ERROR_CONTROL_CONVCODER_1_2_H_
+#ifndef EX2_SDR_ERROR_CONTROL_CONVCODE27_H_
+#define EX2_SDR_ERROR_CONTROL_CONVCODE27_H_
 
 #include "FEC.hpp"
 
@@ -22,12 +22,12 @@ namespace ex2 {
     /*!
      * @brief Define a forward error correction scheme.
      */
-    class convCodeR_1_2 : public FEC {
+    class convCode27 : public FEC {
     public:
 
-      convCodeR_1_2(ErrorCorrection::ErrorCorrectionScheme ecScheme) : FEC(ecScheme) { }
+      convCode27(ErrorCorrection::ErrorCorrectionScheme ecScheme) : FEC(ecScheme) { }
 
-      ~convCodeR_1_2();
+      ~convCode27();
 
       PPDU_u8 encode(PPDU_u8 &payload);
 
@@ -43,4 +43,4 @@ namespace ex2 {
   } /* namespace sdr */
 } /* namespace ex2 */
 
-#endif /* EX2_SDR_ERROR_CONTROL_CONVCODER_1_2_H_ */
+#endif /* EX2_SDR_ERROR_CONTROL_CONVCODE27_H_ */
