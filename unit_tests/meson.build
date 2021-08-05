@@ -37,3 +37,12 @@ unit_test_noFEC = executable('unit_test-noFEC', 'qa_NoFEC.cpp', core_source_file
 test('noFEC', unit_test_noFEC,
     timeout: 30
     )
+
+unit_test_CC27 = executable('unit_test-CC27', 'qa_convCode27.cpp', core_source_files,
+    include_directories : incdir,
+    dependencies: [gtest_dep, csp_dep]
+    )
+    
+test('noFEC', unit_test_CC27,
+    timeout: 30
+    )
