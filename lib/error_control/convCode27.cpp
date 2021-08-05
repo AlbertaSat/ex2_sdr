@@ -57,8 +57,24 @@ namespace ex2 {
 
       decodedPayload.resize(0); // Resize in all FEC decode methods
 
+      /* Init Vitrbi */
+      void *vp;
+      int framebits = 2048; // hardcoded for 27
+      if((vp = create_viterbi27(framebits)) == NULL){
+        // Init failed.
+      }
+
+      // TODO: Use snrEstimate here.
+
+      /* Decode it and make sure we get the right answer */
+      /* Initialize Viterbi decoder */
+      init_viterbi27(vp,0);
       
-      //decodedPayload = encodedPayload;
+      /* Decode block */
+      update_viterbi27_blk(vp,encodedPayload,framebits+constraint_length-1);
+      
+      /* Do Viterbi chainback */
+      chainback_viterbi27(vp,decodedPayload,framebits,0);
 
       return 0;
     }
