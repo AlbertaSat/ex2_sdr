@@ -19,19 +19,21 @@
 namespace ex2 {
   namespace sdr {
 
-    convCode27::~convCode27() {  }
+    convCode27::~convCode27() {
+      //rate = 1/2;
+      //constraint_length = 7;
+    }
 
     PPDU_u8
     convCode27::encode(PPDU_u8 &payload) {
       
-      PPDU_u8 encodedPayload;
-      
-      encodedPayload.resize((1/rate) * sizeof(payload)); //what if not integer?
+      //encodedPayload.resize((1/rate) * sizeof(payload)); //what if not integer?
       // hardcoded for k = 7 and rate = 1/2
-      std::vector<uint8_t> g1 = [0, 1, 2, 3, 6];
-      std::vector<uint8_t> g2 = [0, 2, 3, 5, 6];
+      std::vector<uint8_t> g1 = {0, 1, 2, 3, 6};
+      std::vector<uint8_t> g2 = {0, 2, 3, 5, 6};
       
-      PPDU_u8::payload_t * PayloadData = payload.getPayload();
+      PPDU_u8::payload_t PayloadData = payload.getPayload();
+      PayloadData.resize((1/rate) * sizeof(payload));
       // append 0 at beginning for k-1
       PPDU_u8::payload_t AppendedPayloadData (constraint_length - 1, 0);
       AppendedPayloadData.insert(AppendedPayloadData.end(), PayloadData.begin(), PayloadData.end());
@@ -43,7 +45,7 @@ namespace ex2 {
         encodedPayloadData[i] = adder(AppendedPayloadData[i + constraint_length - 1],g1);
         encodedPayloadData[i + 1] = adder(AppendedPayloadData[i + constraint_length - 1],g2);
       }
-      encodedPayload.PDU(encodedPayloadData);
+      PPDU_u8 encodedPayload(encodedPayloadData);
       
       return encodedPayload;
       
@@ -71,21 +73,28 @@ namespace ex2 {
       init_viterbi27(vp,0);
       
       /* Decode block */
-      update_viterbi27_blk(vp,encodedPayload,framebits+constraint_length-1);
+      uint8_t encodedArr[framebits+constraint_length-1];
+      std::copy(encodedPayload.begin(), encodedPayload.end(), encodedArr);
+      //uint8_t * encodedPtr = &encodedPayload[0];
+      update_viterbi27_blk(vp,encodedArr,framebits+constraint_length-1);
       
       /* Do Viterbi chainback */
-      chainback_viterbi27(vp,decodedPayload,framebits,0);
+      //uint8_t * decodedPtr = &decodedPayload[0];
+      uint8_t decodedArr[framebits];
+      std::copy(decodedPayload.begin(), decodedPayload.end(), decodedArr);
+      chainback_viterbi27(vp,decodedArr,framebits,0);
 
       return 0;
     }
 
-    uint8_t adder(uint8_t * payload_sym , std::vector<uint8_t> g){
+    uint8_t
+    adder(uint8_t * payload_sym , std::vector<uint8_t> g){
         uint8_t sum = * payload_sym;
 
         for (int i =0; i < g.size(); i++){
-          if (g[i] < constraint_length && g[i]>0) {
+          //if (g[i] < constraint_length && g[i]>0) {
             sum += *(payload_sym - g[i]);
-          }
+          //}
           // else throw sth?
         }
         // Should it necessarily be modulo-2? PDU looks like general

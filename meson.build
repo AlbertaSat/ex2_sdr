@@ -66,6 +66,8 @@ core_source_files = [
     PRJ_DIR / 'lib/error_control/FEC.cpp',
     PRJ_DIR / 'lib/error_control/NoFEC.cpp',
     PRJ_DIR / 'lib/error_control/golay.cpp',
+    PRJ_DIR / 'lib/error_control/convCode27.cpp',
+    PRJ_DIR / 'lib/error_control/viterbi27_port.c',
 #    PRJ_DIR / 'lib/math/gf2poly.cpp',
 #    PRJ_DIR / 'lib/math/galoisLFSR.cpp',
     PRJ_DIR / 'lib/pdu/pdu.cpp',
