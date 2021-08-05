@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <limits.h>
-#include "fec.h"
+#include "viterbi.h"
 
 
 typedef union { unsigned int w[64]; } metric_t;
