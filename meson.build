@@ -132,6 +132,7 @@ core_source_files = [
 #    PRJ_DIR / 'lib/phy_layer/mls.cpp',
 #    PRJ_DIR / 'lib/utilities/version.cpp',
 #    PRJ_DIR / 'lib/utilities/vectorTools.cpp',
+    PRJ_DIR / 'lib/utilities/partab.c',
 #    PRJ_DIR / 'lib/error_control/qcldpc/ldpc.cpp',
 #    PRJ_DIR / 'lib/error_control/qcldpc/parity_check.cpp',
 #    PRJ_DIR / 'lib/app_layer/pdu/apdu.cpp',
