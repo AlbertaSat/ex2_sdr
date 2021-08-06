@@ -37,7 +37,7 @@ namespace ex2 {
     private:
       const double rate = 1/2;// can be read from FEC method
       const uint8_t constraint_length = 7; // aka K
-      uint8_t adder(uint8_t payload_sym , std::vector<uint8_t> g);
+      uint8_t adder(uint8_t * payload_sym , std::vector<uint8_t> g);
     };
 
   } /* namespace sdr */

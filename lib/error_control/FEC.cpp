@@ -15,6 +15,7 @@
 
 #include "FEC.hpp"
 #include "NoFEC.hpp"
+#include "convCode27.hpp"
 
 namespace ex2 {
   namespace sdr {
