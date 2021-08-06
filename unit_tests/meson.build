@@ -43,6 +43,6 @@ unit_test_CC27 = executable('unit_test-CC27', 'qa_convCode27.cpp', core_source_f
     dependencies: [gtest_dep, csp_dep]
     )
     
-test('noFEC', unit_test_CC27,
+test('CC27', unit_test_CC27,
     timeout: 30
     )

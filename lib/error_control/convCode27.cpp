@@ -13,7 +13,16 @@
 
 #include "convCode27.hpp"
 #include "pdu.hpp"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "viterbi.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 
 namespace ex2 {
@@ -42,8 +51,8 @@ namespace ex2 {
       // for loop of encoding 
       // hardcoded for rate = 1/2
       for(uint8_t i = 0; i<payload.payloadLength(); i++){
-        encodedPayloadData[i] = adder(AppendedPayloadData[i + constraint_length - 1],g1);
-        encodedPayloadData[i + 1] = adder(AppendedPayloadData[i + constraint_length - 1],g2);
+        encodedPayloadData.push_back(adder(&AppendedPayloadData[i + constraint_length - 1],g1));
+        encodedPayloadData.push_back(adder(&AppendedPayloadData[i + constraint_length - 1],g2));
       }
       PPDU_u8 encodedPayload(encodedPayloadData);
       
@@ -88,7 +97,7 @@ namespace ex2 {
     }
 
     uint8_t
-    adder(uint8_t * payload_sym , std::vector<uint8_t> g){
+    convCode27::adder(uint8_t * payload_sym , std::vector<uint8_t> g){
         uint8_t sum = * payload_sym;
 
         for (int i =0; i < g.size(); i++){
