@@ -47,14 +47,22 @@ namespace ex2 {
       //AppendedPayloadData.insert(AppendedPayloadData.end(), PayloadData.begin(), PayloadData.end());
       
       PPDU_u8::payload_t encodedPayloadData;
-      encodedPayloadData.resize(2 * sizeof(PayloadData));
+      //encodedPayloadData.resize(2 * sizeof(PayloadData));
       // for loop of encoding 
       // hardcoded for rate = 1/2
       uint8_t shiftreg = 0;
-      for(uint8_t i = 0; i<payload.payloadLength() + constraint_length - 1; i++){
-        shiftreg = (shiftreg << 1) | PayloadData[i];
-        encodedPayloadData.push_back(parity(shiftreg & V27POLYA));
-        encodedPayloadData.push_back(parity(shiftreg & V27POLYB));
+      uint8_t sum = 0;
+      for(int i = 0; i<8*payload.payloadLength() + constraint_length - 1; i++){       
+        //printf("shiftreg = %d    Payloadbit = %d\n", shiftreg, (PayloadData[i/8] >> (i%8))&1);
+        shiftreg = (shiftreg << 1) | ((PayloadData[i/8] >> (i%8)) & 1);
+        sum = sum | (parity(shiftreg & V27POLYA) << (2 * (i%4)));
+        sum = sum | (parity(shiftreg & V27POLYB) << (2 * (i%4) + 1));
+        if (i%4 == 3){
+            //sum = shiftreg;
+            encodedPayloadData.push_back(sum);
+            sum = 0;
+            //shiftreg = 0;
+        }
         //encodedPayloadData.push_back(adder(&AppendedPayloadData[i + constraint_length - 1],g1));
         //encodedPayloadData.push_back(adder(&AppendedPayloadData[i + constraint_length - 1],g2));
       }
