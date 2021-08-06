@@ -113,6 +113,12 @@ TEST(CC27, Foo )
     std::vector<uint8_t> iPayload = inputPayload.getPayload();
     std::vector<uint8_t> ePayload = encodedPayload.getPayload();
 
+
+    // Look at the contents :-)
+    for (int i = 0; i < ePayload.size(); i++) {
+      printf("input[%d] = 0x%02x    encoded[%d] = 0x%02x\n", i, iPayload[i], i, ePayload[i]);
+    }
+
     // Noise-free channel to check if the algorithms are working correctly
     for (unsigned long i = 0; i < 1; i++) {
       same = same & (iPayload[i] == ePayload[i]);
