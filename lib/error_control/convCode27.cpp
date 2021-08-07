@@ -53,8 +53,8 @@ namespace ex2 {
       uint8_t shiftreg = 0;
       uint8_t sum = 0;
       for(int i = 0; i<8*payload.payloadLength() + constraint_length - 1; i++){       
-        //printf("shiftreg = %d    Payloadbit = %d\n", shiftreg, (PayloadData[i/8] >> (i%8))&1);
         shiftreg = (shiftreg << 1) | ((PayloadData[i/8] >> (i%8)) & 1);
+        //c3 -> e8....so it's not a stream
         sum = sum | (parity(shiftreg & V27POLYA) << (2 * (i%4)));
         sum = sum | (parity(shiftreg & V27POLYB) << (2 * (i%4) + 1));
         if (i%4 == 3){
@@ -80,9 +80,11 @@ namespace ex2 {
 
       decodedPayload.resize(0); // Resize in all FEC decode methods
 
+      //printf("encodedpayload[0] = %0x%02x\n", encodedPayload[0]);
+
       /* Init Vitrbi */
       void *vp;
-      int framebits = 2048; // hardcoded for 27
+      int framebits = 8*encodedPayload.size();
       if((vp = create_viterbi27_port(framebits)) == NULL){
         // Init failed.
       }
@@ -94,16 +96,28 @@ namespace ex2 {
       init_viterbi27_port(vp,0);
       
       /* Decode block */
-      uint8_t encodedArr[framebits+constraint_length-1];
-      std::copy(encodedPayload.begin(), encodedPayload.end(), encodedArr);
+      uint8_t encodedArr[8*framebits+constraint_length-1];
+      for (int i; i<sizeof(encodedArr); i++){
+        encodedArr[i] = 82 + 90*((encodedPayload[i/8] >> (i%8)) & 1);//offset needed
+      }
+      //std::copy(encodedPayload.begin(), encodedPayload.end(), encodedArr);
       //uint8_t * encodedPtr = &encodedPayload[0];
       update_viterbi27_blk_port(vp,encodedArr,framebits+constraint_length-1);
       
       /* Do Viterbi chainback */
       //uint8_t * decodedPtr = &decodedPayload[0];
-      uint8_t decodedArr[framebits];
-      std::copy(decodedPayload.begin(), decodedPayload.end(), decodedArr);
+      uint8_t decodedArr[framebits/2];
+      //std::copy(decodedPayload.begin(), decodedPayload.end(), decodedArr);
       chainback_viterbi27_port(vp,decodedArr,framebits,0);
+      
+      //decodedPayload.insert(decodedPayload.end(), &decodedArr[0], &decodedArr[framebits]);
+      for (int i; i<sizeof(decodedArr); i++){
+        unsigned char revertbit = 0;
+        for (int j=0; j<8; j++){
+          revertbit = revertbit | (((decodedArr[i] >> j) & 1)<<(7-j));
+        }
+        decodedPayload.push_back(revertbit);
+      }
 
       return 0;
     }
