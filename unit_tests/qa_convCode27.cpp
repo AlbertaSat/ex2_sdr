@@ -114,27 +114,31 @@ TEST(CC27, Foo )
     std::vector<uint8_t> ePayload = encodedPayload.getPayload();
 
 
-    // Look at the contents :-)
-    for (int i = 0; i < ePayload.size(); i++) {
-      printf("input[%d] = 0x%02x    encoded[%d] = 0x%02x\n", i, iPayload[i], i, ePayload[i]);
-    }
+//    // Look at the contents :-)
+//    for (int i = 0; i < ePayload.size(); i++) {
+//      printf("input[%d] = 0x%02x    encoded[%d] = 0x%02x\n", i, iPayload[i], i, ePayload[i]);
+//    }
 
     // Noise-free channel to check if the algorithms are working correctly
     for (unsigned long i = 0; i < 1; i++) {
       same = same & (iPayload[i] == ePayload[i]);
     }
 
-    ASSERT_TRUE(same);
+    //ASSERT_TRUE(same);
 
-    PPDU_u8::payload_t dPayload;
+    std::vector<uint8_t> dPayload;
+    //dPayload.push_back(0x23);
+
     // const PPDU_u8 ecopyPayload(encodedPayload);
     uint32_t bitErrors = CC27->decode(encodedPayload.getPayload(), 100.0, dPayload);
 
     same = true;
     for (unsigned long i = 0; i < iPayload.size(); i++) {
       same = same & (iPayload[i] == dPayload[i]);
+      printf("input[%d] = 0x%02x    encoded[%d] = 0x%02x    decoded[%d] = 0x%02x\n", i, iPayload[i], i, ePayload[i], i, dPayload[i]);
     }
 
+    ASSERT_TRUE(same);    
     //ASSERT_TRUE(same) << "decoded payload does not match input payload";
     //ASSERT_TRUE(bitErrors == 0) << "Bit error count > 0";
 
