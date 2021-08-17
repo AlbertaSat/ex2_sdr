@@ -37,3 +37,13 @@ unit_test_noFEC = executable('unit_test-noFEC', 'qa_NoFEC.cpp', core_source_file
 test('noFEC', unit_test_noFEC,
     timeout: 30
     )
+
+unit_test_matrix2d = executable('unit_test-matrix2d', 'qa_matrix2d.cpp',
+    include_directories : incdir,
+    dependencies: [boost_dep, gtest_dep],
+#    link_with: DarkstarTxRxlib
+    )
+    
+test('matrix2d', unit_test_matrix2d,
+    timeout: 30
+    )
