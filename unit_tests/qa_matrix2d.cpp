@@ -15,7 +15,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include "matrix2d.h"
+#include "math/eigen/matrix2d.h"
 
 #include "gtest/gtest.h"
 
