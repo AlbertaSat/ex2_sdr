@@ -3,9 +3,10 @@
  * @author Sknud
  * @date Jul. 14, 2021
  *
- * @details 
+ * @details The "No FEC" scheme just copies the input vectors to outputs.
+ * No FEC operations are performed, so there is no error correction ability.
  *
- * @copyright 
+ * @copyright AlbertaSat 2021
  *
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
@@ -27,7 +28,7 @@ namespace ex2 {
     NoFEC::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
       PPDU_u8::payload_t& decodedPayload) {
 
-      (void) snrEstimate; // Not used in this mmethod
+      (void) snrEstimate; // Not used in this method
 
       decodedPayload.resize(0); // Resize in all FEC decode methods
 
@@ -37,7 +38,6 @@ namespace ex2 {
 
       return 0;
     }
-
 
   } /* namespace sdr */
 } /* namespace ex2 */

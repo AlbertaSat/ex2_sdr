@@ -23,13 +23,13 @@ namespace ex2 {
 
     MPDUHeader::MPDUHeader(const uint8_t uhfPacketLength,
       const RF_Mode::RF_ModeNumber modulation,
-      const ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme,
+      const ErrorCorrection &errorCorrection,
       const uint8_t codewordFragmentIndex,
       const uint16_t userPacketLength,
       const uint8_t userPacketFragmentIndex) :
         m_uhfPacketLength(uhfPacketLength),
         m_rfModeNumber(modulation),
-        m_errorCorrectionScheme(errorCorrectionScheme),
+        m_errorCorrection(errorCorrection),
         m_codewordFragmentIndex(codewordFragmentIndex),
         m_userPacketLength(userPacketLength),
         m_userPacketFragmentIndex(userPacketFragmentIndex)
@@ -55,8 +55,8 @@ namespace ex2 {
 
         // Any rfMode value is valid, so not worth checking.
 
-        if (m_errorCorrectionScheme != ErrorCorrection::ErrorCorrectionScheme::NO_FEC &&
-            m_errorCorrectionScheme >= ErrorCorrection::ErrorCorrectionScheme::LAST) {
+        if (m_errorCorrection.getErrorCorrectionScheme() != ErrorCorrection::ErrorCorrectionScheme::NO_FEC &&
+            m_errorCorrection.getErrorCorrectionScheme() >= ErrorCorrection::ErrorCorrectionScheme::LAST) {
           // The header is bad
           throw MPDUHeaderException("MPDUHeader: Bad transparent mode packet data; ErrorCorrectionScheme not allowed.");
         }
@@ -77,7 +77,7 @@ namespace ex2 {
     {
       m_uhfPacketLength = header.m_uhfPacketLength;
       m_rfModeNumber = header.m_rfModeNumber;
-      m_errorCorrectionScheme = header.m_errorCorrectionScheme;
+      m_errorCorrection = header.m_errorCorrection;
       m_codewordFragmentIndex = header.m_codewordFragmentIndex;
       m_userPacketLength = header.m_userPacketLength;
       m_userPacketFragmentIndex = header.m_userPacketFragmentIndex;
@@ -146,8 +146,9 @@ namespace ex2 {
       // user packet fragment index
       m_rfModeNumber =
           static_cast<RF_Mode::RF_ModeNumber>((decodedFirst >> 9) & 0x0007); // 3 bits
-      m_errorCorrectionScheme =
+      ErrorCorrection::ErrorCorrectionScheme ecs =
           static_cast<ErrorCorrection::ErrorCorrectionScheme>((decodedFirst >> 3) & 0x003F); // 6 bits
+      m_errorCorrection = ErrorCorrection(ecs);
       m_codewordFragmentIndex = (decodedFirst & 0x0007) << 4;     // top 3 bits
       m_codewordFragmentIndex |= ((decodedSecond >> 8) & 0x000F); // bottom 4 bits
       m_userPacketLength = (decodedSecond & 0x00FF) << 4;         // top 8 bits
@@ -162,7 +163,7 @@ namespace ex2 {
       // Unfortunately, the fields of the header do not line up along 12 bit
       // boudaries, so a bit of bit shifting is needed to get things right.
       uint16_t msgBits = ((uint16_t) m_rfModeNumber << 9) & 0x0E00; // 3 bits
-      msgBits = msgBits | (((uint16_t) m_errorCorrectionScheme << 3) & 0x01F8); // 6 bits
+      msgBits = msgBits | (((uint16_t) m_errorCorrection.getErrorCorrectionScheme() << 3) & 0x01F8); // 6 bits
       msgBits = msgBits | ((m_codewordFragmentIndex >> 4) & 0x0007); // top 3 bits
 
       uint32_t codeword = golay_encode(msgBits);

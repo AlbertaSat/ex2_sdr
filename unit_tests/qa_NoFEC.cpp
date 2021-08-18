@@ -76,9 +76,12 @@ TEST(noFEC, Foo )
       return;
     }
 
-//    printf("size of packet padding = %ld\n", sizeof(packet->padding));
-//    printf("size of packet length = %ld\n", sizeof(packet->length));
-//    printf("size of packet id = %ld\n", sizeof(packet->id));
+#if QA_NOFEC_DEBUG
+    printf("size of packet padding = %ld\n", sizeof(packet->padding));
+    printf("size of packet length = %ld\n", sizeof(packet->length));
+    printf("size of packet id = %ld\n", sizeof(packet->id));
+#endif
+
     int cspPacketHeaderLen = sizeof(packet->padding) + sizeof(packet->length) + sizeof(packet->id);
 
     for (unsigned long i = 0; i < testCSPPacketLength; i++) {
@@ -87,7 +90,9 @@ TEST(noFEC, Foo )
     // CSP forces us to do our own bookkeeping...
     packet->length = testCSPPacketLength;
 
-//    printf("packet length = %d\n", packet->length);
+#if QA_NOFEC_DEBUG
+    printf("packet length = %d\n", packet->length);
+#endif
 
     std::vector<uint8_t> p;
 
@@ -100,10 +105,12 @@ TEST(noFEC, Foo )
       p.push_back(packet->data[i]);
     }
 
-//    // Look at the contents :-)
-//    for (int i = 0; i < p.size(); i++) {
-//      printf("p[%d] = 0x%02x\n", i, p[i]);
-//    }
+#if QA_NOFEC_DEBUG
+    // Look at the contents :-)
+    for (int i = 0; i < p.size(); i++) {
+      printf("p[%d] = 0x%02x\n", i, p[i]);
+    }
+#endif
 
     // @TODO maybe make these std::vector<uint8_t> ???
     PPDU_u8 inputPayload(p);
@@ -130,6 +137,8 @@ TEST(noFEC, Foo )
     ASSERT_TRUE(same) << "decoded payload does not match input payload";
     ASSERT_TRUE(bitErrors == 0) << "Bit error count > 0";
 
+    // Clean up!
+    csp_buffer_free(packet);
   }
 
 }

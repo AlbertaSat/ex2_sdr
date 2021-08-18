@@ -18,6 +18,16 @@
 #include <stdexcept>
 #include <vector>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "csp_types.h"
+
+#ifdef __cplusplus
+}
+#endif
+
 #include "pdu.hpp"
 #include "mpduHeader.hpp"
 
@@ -27,8 +37,8 @@
  *
  * @todo This should be defined someplace more accessible
  */
-#define MPDU_MTU 119 // bytes
-#define MPDU_DATA_FIELD_1_SIZE 1 // byte
+#define MPDU_MTU ( 119 )             // bytes
+#define MPDU_DATA_FIELD_1_SIZE ( 1 ) // byte
 #define MPDU_LENGTH (MPDU_DATA_FIELD_1_SIZE + MPDU_MTU + MPDUHeader::MACHeaderLength()/8)
 
 namespace ex2
@@ -144,10 +154,15 @@ namespace ex2
       /*!
        * @brief Accessor for the MPDU as a byte vector.
        *
-       * @return The MPDU as a byte vector.
+       * @return The MPDU as a byte vector, including the header.
        */
-      const std::vector<uint8_t>& getMPDU() const;
+      const std::vector<uint8_t>& getRawMPDU() const;
 
+      /*!
+       * @brief Accessor for codeword
+       *
+       * @return The codeword
+       */
       const std::vector<uint8_t>& getCodeword() const {
         return m_codeword;
       }
@@ -160,10 +175,21 @@ namespace ex2
         return m_mpduHeader;
       }
 
+      /*!
+       * @brief Return the maximum transmission unit in bytes
+       *
+       * @return The MTU in bytes
+       */
+      static uint32_t maxMTU() {
+        return MPDU_MTU;
+      }
+
+      static uint32_t numberOfMPDUs(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection);
+
     private:
       MPDUHeader *m_mpduHeader;
       std::vector<uint8_t> m_codeword;
-      std::vector<uint8_t> m_payload;
+      std::vector<uint8_t> m_rawMPDU;
     };
 
   } // namespace sdr
