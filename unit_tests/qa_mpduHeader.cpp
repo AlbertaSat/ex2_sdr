@@ -18,13 +18,12 @@
 
 #include <cstdio>
 #include <iostream>
-#include <random>
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include "error_correction.hpp"
-#include "mpduHeader.hpp"
+#include "mpdu.hpp"
 #include "rfMode.hpp"
 
 using namespace std;
@@ -60,7 +59,7 @@ bool headersSame(MPDUHeader *h1, MPDUHeader *h2) {
 }
 
 /*!
- * @brief Test Main Constructors, the one that is parameterized, and the one
+ * @brief Test constructors, the one that is parameterized, and the one
  * that takes the received packet as input
  */
 TEST(mpduHeader, ConstructorParemeterized )
@@ -73,9 +72,8 @@ TEST(mpduHeader, ConstructorParemeterized )
   // We will take a look at the raw header bits to confirm things are correct.
   //
 
-  RF_Mode::RF_ModeNumber modulation = RF_Mode::RF_ModeNumber::RF_MODE_0; // 0b000
-  ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme =
-      ErrorCorrection::ErrorCorrectionScheme::CONVOLUTIONAL_CODING_R_1_2; // 0b000000
+  RF_Mode::RF_ModeNumber modulation;
+  ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme;
   uint8_t codewordFragmentIndex = 0;
   uint16_t userPacketLength = 0;
   uint8_t userPacketFragmentIndex = 0;
@@ -85,43 +83,56 @@ TEST(mpduHeader, ConstructorParemeterized )
   for (uint16_t m = (uint16_t)RF_Mode::RF_ModeNumber::RF_MODE_0; m <= (uint16_t) RF_Mode::RF_ModeNumber::RF_MODE_7; m++) {
     modulation = static_cast<RF_Mode::RF_ModeNumber>(m);
 
-    for (uint16_t e = (uint16_t) ErrorCorrection::ErrorCorrectionScheme::CONVOLUTIONAL_CODING_R_1_2;
+    for (uint16_t e = (uint16_t) ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2;
         e < (uint16_t) ErrorCorrection::ErrorCorrectionScheme::LAST; e++) {
+
+      printf("scheme = %d\n",e);
+
       errorCorrectionScheme = static_cast<ErrorCorrection::ErrorCorrectionScheme>(e);
+      if (ErrorCorrection::isValid(errorCorrectionScheme)) {
 
-      for (codewordFragmentIndex = 0; codewordFragmentIndex < 0x80; codewordFragmentIndex++) {
+        ErrorCorrection errorCorrection(errorCorrectionScheme, MPDU::maxMTU());
 
-        // Really can't iterate over all packet lengths and fragments, so just do some
-        for (userPacketLength = 0; userPacketLength < 0x0100; userPacketLength++ ) {
-          for (userPacketFragmentIndex = 0; userPacketFragmentIndex < 0x04; userPacketFragmentIndex++ ) {
+        for (codewordFragmentIndex = 0; codewordFragmentIndex < 0x80; codewordFragmentIndex++) {
 
-            header1 = new MPDUHeader(UHF_TRANSPARENT_MODE_PACKET_LENGTH,
-              modulation,
-              errorCorrectionScheme,
-              codewordFragmentIndex,
-              userPacketLength,
-              userPacketFragmentIndex);
+          // Really can't iterate over all packet lengths and fragments, so just do some
+          for (userPacketLength = 0; userPacketLength < 0x0100; userPacketLength++ ) {
+            for (userPacketFragmentIndex = 0; userPacketFragmentIndex < 0x04; userPacketFragmentIndex++ ) {
+              //            printf("pre header \n");
 
-            std::vector<uint8_t> payload1 = header1->getHeaderPayload();
+              header1 = new MPDUHeader(UHF_TRANSPARENT_MODE_PACKET_LENGTH,
+                modulation,
+                errorCorrection,
+                codewordFragmentIndex,
+                userPacketLength,
+                userPacketFragmentIndex);
 
-            // Make the payload long enough
-            payload1.resize(UHF_TRANSPARENT_MODE_PACKET_LENGTH + 1);
-            header2 = new MPDUHeader(payload1);
+              ASSERT_TRUE(header1 != NULL) << "MPDUHeader 1 failed to instantiate";
 
-            // Check headers match
-            ASSERT_TRUE(headersSame(header1, header2)) << "Oops, header packets don't match!";
+              std::vector<uint8_t> payload1 = header1->getHeaderPayload();
 
-          } // over all user packet fragment indices
-        } // over all user packet lengths
+              // Make the payload long enough
+              payload1.resize(UHF_TRANSPARENT_MODE_PACKET_LENGTH + 1);
+              header2 = new MPDUHeader(payload1);
 
-      } // over all codeword fragment indices
+              ASSERT_TRUE(header2 != NULL) << "MPDUHeader 2 failed to instantiate";
+
+              // Check headers match
+              ASSERT_TRUE(headersSame(header1, header2)) << "Oops, header packets don't match!";
+
+            } // over all user packet fragment indices
+          } // over all user packet lengths
+
+        } // over all codeword fragment indices
+
+      } // valid error correction scheme?
+
     } // over all error correction schemes
   } // over all modulations
 }
 
 /*!
- * @brief Test Main Constructors, the one that is parameterized, and the one
- * that takes the received packet as input
+ * @brief Test all accessors
  */
 TEST(mpduHeader, Accessors )
 {
