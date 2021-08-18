@@ -19,10 +19,13 @@ extern "C" {
 #endif
 
 #include "viterbi.h"
+#include "sim.c"
 
 #ifdef __cplusplus
 }
 #endif
+
+#define QA_NOISY_TEST 0
 
 
 namespace ex2 {
@@ -59,8 +62,8 @@ namespace ex2 {
     convCode27::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
       PPDU_u8::payload_t& decodedPayload) {
 
-      const uint8_t offset = 127;
-      const uint8_t amp = 1; //
+      double offset = 127.5;
+      uint8_t amp = 32; //
       (void) snrEstimate; // Not used in this method
 
       decodedPayload.resize(0); // Resize in all FEC decode methods
@@ -79,7 +82,16 @@ namespace ex2 {
       /* Decode block */
       uint8_t encodedArr[8*framebits+constraint_length-1];
       for (int i; i<sizeof(encodedArr); i++){
-        encodedArr[i] = offset + amp*((encodedPayload[i/8] >> (i%8)) & 1);//The viterbi decoder makes a decision based on the 127 threshold.
+        #if QA_NOISY_TEST
+        encodedArr[i] = addnoise(((encodedPayload[i/8] >> (i%8)) & 1), 12, amp, offset, 255);
+        #else
+        encodedArr[i] = offset + (((encodedPayload[i/8] >> (i%8)) & 1) ? amp : -amp);//The viterbi decoder makes a decision based on the 127 threshold.
+        #endif
+//#if QA_NOISY_TEST // manually forcing errors but "255-" is not a way to go.
+//        if (i%8 == 0){
+//          encodedArr[i] = 255 - encodedArr[i];
+//        }
+//#endif
       }
       update_viterbi27_blk_port(vp,encodedArr,framebits+constraint_length-1);
       
