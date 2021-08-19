@@ -518,8 +518,36 @@ namespace ex2 {
     MAC::receiveCSPPacket(csp_packet_t * cspPacket) {
       // Lock the error correction scheme so that all of this
       // csp packet is processed using the same FEC scheme
-      std::unique_lock<std::mutex> lck(m_ecSchemeMutex);
+      std::unique_lock<std::mutex> lck(m_ecSchemeMutex); // how to do this for the whole receive process?
 
+      // prepare for chunking up the packet, encoding chunks, and passing them
+      // to a listener for action
+
+      uint32_t numMPDUs = MPDU::numberOfMPDUs(cspPacket, *m_errorCorrection);
+      uint32_t cspPacketLength = ;
+      uint32_t messageLength = m_errorCorrection->getMessageLen();
+      uint32_t cspMessageOffset = 0;
+
+      // invoke chunk iterator, which creates an encoded chunk then signals it's ready
+      getNextCSPMPDU(true); // true means this is the start of a new csp packet
+
+      // Set up so that listener can poll for chunks
+
+      m_cspChunkAvailable = true;
+
+      for (uint32_t m = 0; m < numMPDUs; m++) {
+
+        // new mpdu header with current counts
+
+        // get current csp data
+        std::vector<uint8_t> cspChunk(m_cspChunk(cspPacket, cspPacketLength, cspMessageOffset),);
+
+        // make MPDU
+
+        // Notify listener a packet is ready
+
+        cspMessageOffset += messageLength;
+      }
       return 0;
     }
 

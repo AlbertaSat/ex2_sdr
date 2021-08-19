@@ -1,4 +1,4 @@
-project('ex2_uhf_trx', 'c', 'cpp',
+project('ex2_obc_sdr', 'c', 'cpp',
     license: 'proprietary',
     version: '0.5.0',
     default_options : [
