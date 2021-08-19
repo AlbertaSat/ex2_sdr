@@ -254,12 +254,12 @@ namespace ex2 {
       switch(scheme) {
         // CCSDS convolutional codiing is supported.
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2:
-          isValid = true;
-          break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3:
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4:
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6:
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8:
+          isValid = true;
+          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_1:
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_2:
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_3:
