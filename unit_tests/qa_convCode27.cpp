@@ -63,7 +63,7 @@ TEST(CC27, Foo )
   // Set the length of the test CSP packet so it all fits into a transparent mode payload
   const unsigned long int testCSPPacketLength = 10;
 
-  FEC * CC27 = new convCode27(ErrorCorrection::ErrorCorrectionScheme::CONVOLUTIONAL_CODING_R_1_2);
+  FEC * CC27 = new convCode27(ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2);
 
   ASSERT_TRUE(CC27 != NULL) << "convCode27 failed to instantiate";
 
