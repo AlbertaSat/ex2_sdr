@@ -46,3 +46,13 @@ unit_test_CC27 = executable('unit_test-CC27', 'qa_convCode27.cpp', core_source_f
 test('CC27', unit_test_CC27,
     timeout: 30
     )
+
+unit_test_matrix2d = executable('unit_test-matrix2d', 'qa_matrix2d.cpp',
+    include_directories : incdir,
+    dependencies: [boost_dep, gtest_dep],
+#    link_with: DarkstarTxRxlib
+    )
+    
+test('matrix2d', unit_test_matrix2d,
+    timeout: 30
+    )

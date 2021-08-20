@@ -27,20 +27,20 @@ namespace ex2 {
       // Create a new FEC-based object according to the desired FEC scheme.
       FEC *newFEC;
       switch(ecScheme) {
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_239_INTERLEAVING_1:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_239_INTERLEAVING_2:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_239_INTERLEAVING_3:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_239_INTERLEAVING_4:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_239_INTERLEAVING_5:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_239_INTERLEAVING_8:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_1:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_2:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_3:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_4:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_5:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_8:
           newFEC = NULL; // @TODO change when this is implemented
           break;
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_223_INTERLEAVING_1:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_223_INTERLEAVING_2:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_223_INTERLEAVING_3:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_223_INTERLEAVING_4:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_223_INTERLEAVING_5:
-        case ErrorCorrection::ErrorCorrectionScheme::REED_SOLOMON_255_223_INTERLEAVING_8:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_1:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_2:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_3:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_4:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_5:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_8:
           newFEC = NULL; // @TODO change when this is implemented
           break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_TURBO_1784_R_1_2:
@@ -64,7 +64,7 @@ namespace ex2 {
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_1280:
           newFEC = NULL; // @TODO change when this is implemented
           break;
-        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_1356:
+        case ErrorCorrection::ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_1536:
           newFEC = NULL; // @TODO change when this is implemented
           break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_2048:

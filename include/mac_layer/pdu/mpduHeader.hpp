@@ -42,14 +42,14 @@ namespace ex2 {
        *
        * @param[in] uhfPacketLength The UHF radio packet length (Data Field 1)
        * @param[in] modulation The UHF radio modulation (RF mode)
-       * @param[in] errorCorrectionScheme The error correction scheme
+       * @param[in] errorCorrection The error correction for this MPDU header
        * @param[in] codewordFragmentIndex The index of the codeword fragment
        * @param[in] userPacketLength The length of the original user (CSP) packet
        * @param[in] userPacketFragmentIndex The current fragment of the user (CSP) packet
        */
       MPDUHeader(const uint8_t uhfPacketLength,
         const RF_Mode::RF_ModeNumber modulation,
-        const ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme,
+        const ErrorCorrection &errorCorrection,
         const uint8_t codewordFragmentIndex,
         const uint16_t userPacketLength,
         const uint8_t userPacketFragmentIndex);
@@ -95,16 +95,43 @@ namespace ex2 {
             (uint16_t) k_MACHeaderLength / 0x0008;
       }
 
+      /*!
+       * @brief Return the FEC scheme
+       *
+       * @return The FEC aka Error Correction scheme
+       */
+      ErrorCorrection::ErrorCorrectionScheme
+      getErrorCorrectionScheme() const
+      {
+        return m_errorCorrection.getErrorCorrectionScheme();
+      }
+
       uint8_t
       getCodewordFragmentIndex () const
       {
         return m_codewordFragmentIndex;
       }
 
-      ErrorCorrection::ErrorCorrectionScheme
-      getErrorCorrectionScheme () const
+      /*!
+       * @brief Return the FEC scheme codeword length
+       *
+       * @return FEC scheme codeword length in bits
+       */
+      uint32_t
+      getCodewordLength () const
       {
-        return m_errorCorrectionScheme;
+        return m_errorCorrection.getCodewordLen();
+      }
+
+      /*!
+       * @brief Return the FEC scheme message length
+       *
+       * @return FEC scheme message length in bits
+       */
+      uint32_t
+      getMessageLength () const
+      {
+        return m_errorCorrection.getMessageLen();
       }
 
       const std::vector<uint8_t>&
@@ -166,7 +193,8 @@ namespace ex2 {
 
       uint8_t m_uhfPacketLength;
       RF_Mode::RF_ModeNumber m_rfModeNumber;
-      ErrorCorrection::ErrorCorrectionScheme m_errorCorrectionScheme;
+      ErrorCorrection m_errorCorrection;
+//      ErrorCorrection::ErrorCorrectionScheme m_errorCorrectionScheme;
       uint8_t  m_codewordFragmentIndex;
       uint16_t m_userPacketLength;
       uint16_t m_userPacketFragmentIndex;

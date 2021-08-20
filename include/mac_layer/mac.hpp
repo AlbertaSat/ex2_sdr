@@ -41,9 +41,6 @@ extern "C" {
 // TODO This definition belongs somewhere else
 #define CSP_MTU_LENGTH ( 4096 )
 
-// TODO This definition belongs to the MAC service
-#define MAC_SERVICE_QUEUE_LENGTH ( 5 )
-
 #define MAC_MAX_RX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
 #define MAC_MAX_TX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
 
@@ -52,13 +49,14 @@ namespace ex2
 {
   namespace sdr
   {
-
-    class MACException: public std::runtime_error {
-
-    public:
-      MACException(const std::string& message);
-    };
-
+// @todo really can't have exceptions since it's hard to deal with them in C
+//
+//    class MACException: public std::runtime_error {
+//
+//    public:
+//      MACException(const std::string& message);
+//    };
+//
     /*!
      * @brief This is the media access controller (MAC)
      *
@@ -148,12 +146,12 @@ namespace ex2
        * @details Process each MPDU received (UHF received data in transparent
        * mode) until a full CSP packet is received or there is an error.
        *
-       * @param mpdu
+       * @param uhfPayload
+       * @param payloadLength
        *
-       * @throw MACException out of sequence
-       * @throw MACException CSP complete
+       * @return The status of the process operation.
        */
-      void processUHFPacket(MPDU &mpdu);
+      uint32_t processUHFPacket(const uint8_t *uhfPayload, const uint32_t payloadLength);
 
       /*!
        * @brief Reset the processing of received UHF data.
@@ -188,11 +186,15 @@ namespace ex2
        * corresponding to the current CSP have been created and transimitted.
        *
        * @param cspPacket
+       *
+       * @return status of operation
        */
-      void newCSPPacket(csp_packet_t * cspPacket);
+      uint32_t receiveCSPPacket(csp_packet_t * cspPacket);
 
       /*!
        * @brief A kind of iterator that provides MPDUs corresponding to a CSP packet.
+       *
+       * @todo need this?
        *
        * @details Each invocation of this function returns the next MPDU
        * corresponding to a CSP packet that was passed to @p newCSPPacket.
@@ -286,6 +288,7 @@ namespace ex2
       std::mutex m_ecSchemeMutex;
 
       std::vector<uint8_t> m_receiveUHFBuffer;
+      std::vector<uint8_t> m_codewordBuffer;
       uint32_t m_codewordFragmentCount;
       uint32_t m_userPacketFragementCount;
     };

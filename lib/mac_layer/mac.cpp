@@ -32,9 +32,8 @@ extern "C" {
 namespace ex2 {
   namespace sdr {
 
-    MACException::MACException(const std::string& message) :
-                       runtime_error(message) { }
-
+//    MACException::MACException(const std::string& message) :
+//                       runtime_error(message) { }
 
     MAC* MAC::m_instance = 0;
 
@@ -51,11 +50,12 @@ namespace ex2 {
 
     MAC*
     MAC::instance() {
-      if (m_instance == 0)
+      // @todo Not sure a C program can handle an exception... remove?
+      if (m_instance == 0) {
         throw std::exception();
+      }
       return m_instance;
     }
-
 
     MAC::MAC (RF_Mode::RF_ModeNumber rfModeNumber,
       ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme) :
@@ -70,7 +70,7 @@ namespace ex2 {
       m_FEC = FEC::makeFECCodec(errorCorrectionScheme);
 
       // Calculate how many codeword fragments are needed to send one codeword
-      m_numCodewordFragments = m_errorCorrection->getCodewordLen() / MPDUHeader::MACPayloadLength();
+      m_numCodewordFragments = m_errorCorrection->numCodewordFragments(MPDUHeader::MACPayloadLength());
 
       if (m_errorCorrection->getCodewordLen() % MPDUHeader::MACHeaderLength() != 0)
         m_numCodewordFragments++;
@@ -78,6 +78,7 @@ namespace ex2 {
 
       m_codewordFragmentCount = 0;
       m_userPacketFragementCount = 0;
+      // @TODO, do we need a member var to keep track of the max packet frag count?
     }
 
     MAC::~MAC () {
@@ -290,47 +291,60 @@ namespace ex2 {
     //
     //     } // queueSendTask
 
-    /*!
-     * @brief Process the received UHF data as an MPDU.
-     *
-     * @details Process each MPDU received (UHF received data in transparent
-     * mode) until a full CSP packet is received or there is an error.
-     *
-     * @param mpdu
-     *
-     * @throw MACException out of sequence
-     * @throw MACException CSP complete
-     */
-    void
-    MAC::processUHFPacket(MPDU &mpdu) {
+    uint32_t
+    MAC::processUHFPacket(const uint8_t *uhfPayload, const uint32_t payloadLength) {
 
-      PPDU_u8::payload_t decodedPayload;
+      uint32_t bitErrors = 0;
+
+      // Make an MPDU from the @p uhfPayload
+      std::vector<uint8_t> p;
+      p.assign(uhfPayload, uhfPayload+payloadLength);
+      MPDU mpdu(p);
+
+      // @todo mutex here?
+
+      // Process the MPDU
       if (mpdu.getMpduHeader()->getUserPacketFragmentIndex() == 0 &&
           mpdu.getMpduHeader()->getCodewordFragmentIndex() == 0) {
         // this is the first user packet fragment and the first codeword fragment
         // of that packet fragment, so we are receiving a new CSP packet
 
-        // New CSP packet, so zero out the buffer
+        // New CSP packet, empty the buffer
+        // @todo rename this buffer?
         m_receiveUHFBuffer.resize(0);
+        // New codeword, empty the buffer
+        m_codewordBuffer.resize(0);
 
         // @TODO check that the header matches the FEC we are using?
+        // @TODO check it is long enough to have the CSP info needed
+
+        // append the current uhf payload to the codeword buffer
+        m_codewordBuffer.insert(m_codewordBuffer.end(), p.begin(), p.end());
 
         // @todo get the expected number of codeword and packet fragments
         // Should be a static function in ErrorCorrection
 
-        // Clear the buffer and init fragment counters
-        m_receiveUHFBuffer.resize(0);
-        m_codewordFragmentCount = 0;
+        // Init fragment counters
+        m_codewordFragmentCount = 1;
         m_userPacketFragementCount = 0;
-        uint32_t bitErrors = m_FEC->decode(mpdu.getCodeword(), 100.0, decodedPayload);
-
-        // @TODO check bitErrors and reject/reset if too many?
 
         // @TODO Update counters and check for counters complete.
+        // Do we need only the one packet?
+        if (m_codewordFragmentCount == m_numCodewordFragments) {
+          PPDU_u8::payload_t decodedPayload;
+          bitErrors = m_FEC->decode(mpdu.getCodeword(), 100.0, decodedPayload);
+
+          // @TODO check bitErrors and reject/reset if too many?
+
+        }
+//        m_userPacketFragementCount = 0;
+
       }
       else {
 
       }
+
+      return bitErrors;
       //
       //       // TODO There needs to be a way to safely update the FEC scheme and/or
       //       // the RF mode while this task is running and processing packets. Would
@@ -470,6 +484,9 @@ namespace ex2 {
     bool
     MAC::isCSPPacketReady() {
 
+      // @TODO implement function
+      return false;
+
     }
 
     /*!
@@ -482,6 +499,8 @@ namespace ex2 {
     csp_packet_t *
     MAC::getCSPPacket() {
 
+      // @TODO implement function
+      return NULL;
     }
 
     /*!
@@ -491,14 +510,17 @@ namespace ex2 {
      * should be followed by repeated calls to @p nextMPDU until all MPDUs
      * corresponding to the current CSP have been created and transimitted.
      *
-     * @param cspPacket
+     * @param[in] cspPacket The CSP packet to be transmitted by the UHF radio.
+     *
+     * @return status of the operation
      */
-    void
-    MAC::newCSPPacket(csp_packet_t * cspPacket) {
+    uint32_t
+    MAC::receiveCSPPacket(csp_packet_t * cspPacket) {
       // Lock the error correction scheme so that all of this
       // csp packet is processed using the same FEC scheme
       std::unique_lock<std::mutex> lck(m_ecSchemeMutex);
 
+      return 0;
     }
 
     /*!
@@ -517,6 +539,8 @@ namespace ex2 {
     bool
     MAC::nextMPDU(MPDU &mpdu){
 
+      // @TODO implement function
+      return false;
     }
 
 
@@ -526,7 +550,7 @@ namespace ex2 {
       // First byte should be the Data Field 1, the Data Field 2 length in bytes
       // Thus, the length of packet should be the value of the first byte + 1
 
-      if (packet[0] + 1 == packet.size()) {
+      if ((uint32_t)(packet[0] + 1) == packet.size()) {
         if ((packet[1] == 'E') &&
             (packet[2] == 'S') &&
             (packet[3] == '+')) {
@@ -558,7 +582,7 @@ namespace ex2 {
       // First byte should be the Data Field 1, the Data Field 2 length in bytes
       // Thus, the length of packet should be the value of the first byte + 1
 
-      if (packet[0] + 1 == packet.size()) {
+      if ((uint32_t)(packet[0] + 1) == packet.size()) {
         // The AX.25 frame starts with 9 bytes that have the value 0x7E
         uint8_t i;
         isPacket = true;
