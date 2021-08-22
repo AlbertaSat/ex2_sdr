@@ -84,8 +84,7 @@ namespace ex2
     MPDU::numberOfMPDUs(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection) {
       // Get length of CSP packet in bytes. Make sure we are not fooled by
       // alignment, so add up the struct members
-      uint32_t cspPacketSize = CSP_HEADER_LENGTH + CSP_PADDING_BYTES +
-          sizeof(cspPacket->length) + cspPacket->length;
+      uint32_t cspPacketSize = sizeof(csp_packet_t) + cspPacket->length;
 
 //      printf("MPDU cspPacketSize = %d\n", cspPacketSize);
 
