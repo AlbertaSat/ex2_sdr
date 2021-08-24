@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 #include "viterbi.h"
-#include "sim.c"
+#include "viterbi/sim.c"
 
 #ifdef __cplusplus
 }

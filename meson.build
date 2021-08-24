@@ -100,7 +100,7 @@ incdir = include_directories(
     'include/error_control',
     'include/mac_layer',
     'include/mac_layer/pdu',
-#    'include/math',
+    'include/math',
 #    'include/math/eigen',
     'include/pdu',
     'include/phy_layer',
