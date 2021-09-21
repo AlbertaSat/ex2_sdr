@@ -33,29 +33,7 @@ boost_dep = dependency('boost', modules: [
         ],
     )
 
-#glog_dep = dependency('libglog')
 eigen_dep = dependency('eigen3')
-#csp_dep = dependency('csp')
-
-#liquid_dep = dependency('liquid', required: false)
-
-#if not liquid_dep.found()
-#    foreach incdir: ['/usr/include/liquid', '/usr/local/include/liquid']
-#        if cpp.has_header('liquid.h', args: '-I' + incdir)
-#            liquid_inc = include_directories(incdir)
-#            break
-#        endif
-#    endforeach
-#
-#    liquid_dep = declare_dependency(
-#        dependencies: cpp.find_library('liquid'),
-#        include_directories: liquid_inc,
-#        )
-#endif
-
-#if not liquid_dep.found()
-#    error('unable to find liquid dependency')
-#endif
 
 csp_dep = dependency('csp', required: false)
 
@@ -77,37 +55,6 @@ if not csp_dep.found()
     error('unable to find csp dependency')
 endif
 
-#thread_dep = dependency('threads')
-
-#freertos_incdir = include_directories(
-#    'include',
-#    HOME_DIR / 'Development/FreeRTOS/Source/include',
-#    HOME_DIR / 'Development/FreeRTOS/Source/portable/ThirdParty/GCC/Posix',
-#    HOME_DIR / 'Development/FreeRTOS/Source/portable/ThirdParty/GCC/Posix/utils',
-#    HOME_DIR / 'Development/FreeRTOS/Demo/Common/include',
-#    HOME_DIR / 'Development/FreeRTOS-Plus/Source/FreeRTOS-Plus-Trace/Include'
-#    )
-    
-#local_source = [
-#    'src/console.c',
-#    'src/main_blinky.c',
-#    'src/main.c',
-#    ]
-    
-#freertos_source = [
-#    HOME_DIR / 'Development/FreeRTOS/Source/croutine.c',
-#    HOME_DIR / 'Development/FreeRTOS/Source/event_groups.c',
-#    HOME_DIR / 'Development/FreeRTOS/Source/list.c',
-#    HOME_DIR / 'Development/FreeRTOS/Source/queue.c',
-#    HOME_DIR / 'Development/FreeRTOS/Source/stream_buffer.c',
-#    HOME_DIR / 'Development/FreeRTOS/Source/tasks.c',
-#    HOME_DIR / 'Development/FreeRTOS/Source/timers.c',
-## Memory manager (use malloc() / free() )
-#    HOME_DIR / 'Development/FreeRTOS/Source/portable/MemMang/heap_3.c',
-## posix port
-#    HOME_DIR / 'Development/FreeRTOS/Source/portable/ThirdParty/GCC/Posix/utils/wait_for_event.c',
-#    HOME_DIR / 'Development/FreeRTOS/Source/portable/ThirdParty/GCC/Posix/port.c'
-#]
 
 core_source_files = [
 #    PRJ_DIR / 'lib/app_layer/app.cpp',
@@ -146,12 +93,8 @@ core_source_files = [
 incdir = include_directories(
     '/usr/local/include/csp',
     'include/HAL',
-#    'include/app_layer',
-#    'include/app_layer/pdu',
-#    'include/channel',
-#    'include/configuration',
+    'include/configuration',
     'include/error_control',
-#    'include/error_control/qcldpc',
     'include/mac_layer',
     'include/mac_layer/pdu',
 #    'include/math',
@@ -172,23 +115,6 @@ incdir = include_directories(
 #    install: true,
 #    )
 
-#ExSDRTxRxlib = shared_library('exsdrlib',
-#    sources: core_source_files,
-#    include_directories: [incdir],
-##    dependencies: csp_dep,
-#    version: meson.project_version(),
-#    soversion: 0,
-#    install: true,
-#    )
-
-#ApplyChannellib = library('dstransceiverchannel',
-#    sources: applyChannel_files,
-#    include_directories: incdir,
-#    dependencies: boost_dep,
-#    version: meson.project_version(),
-#    soversion: 0,
-#    install: true,
-#    )
 
 executable('ex2_uhf_trx', 'src/ex2_uhf_trx.cpp', core_source_files,
     include_directories: incdir,
@@ -212,8 +138,6 @@ executable('ex2_uhf_trx', 'src/ex2_uhf_trx.cpp', core_source_files,
 #    link_with: FreeRTOSlib,
 #    install: true,
 #    )
-    
-
 
 #install_subdir('lib/error_control/qcldpc/fec/ldpc/802.11/proto_H/',
 #    install_dir: '/opt/darkstar/fec/ldpc/802.11/'
