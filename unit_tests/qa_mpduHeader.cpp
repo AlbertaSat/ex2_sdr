@@ -24,6 +24,7 @@
 
 #include "error_correction.hpp"
 #include "mpdu.hpp"
+#include "radio.h"
 #include "rfMode.hpp"
 
 using namespace std;
@@ -32,9 +33,6 @@ using namespace ex2::sdr;
 #include "gtest/gtest.h"
 
 #define QA_MPDUHEADER_DEBUG 0 // set to 1 for debugging output
-
-#define UHF_TRANSPARENT_MODE_PACKET_LENGTH 128  // bytes; UHF transparent mode packet is always 128 bytes
-#define UHF_TRANSPARENT_MODE_PACKET_HEADER_LENGTH 72 // bits
 
 bool headersSame(MPDUHeader *h1, MPDUHeader *h2) {
   bool same = true;
