@@ -21,7 +21,8 @@ namespace ex2 {
 
     PPDU_u8
     NoFEC::encode(PPDU_u8 &payload) {
-      return payload;
+      PPDU_u8 encodedPayload(payload.getPayload(),payload.getBps());
+      return encodedPayload;
     }
 
     uint32_t

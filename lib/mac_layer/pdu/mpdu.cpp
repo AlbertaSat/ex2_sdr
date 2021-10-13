@@ -81,7 +81,7 @@ namespace ex2
     }
 
     uint32_t
-    MPDU::numberOfMPDUs(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection) {
+    MPDU::mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection) {
       // Get length of CSP packet in bytes. Make sure we are not fooled by
       // alignment, so add up the struct members
       uint32_t cspPacketSize = sizeof(csp_packet_t) + cspPacket->length;
@@ -116,10 +116,29 @@ namespace ex2
         numMPDUPayloadPerCW++;
       }
 
-//      printf ("numCWsInCSPPacket = %d numMPDUPayloadPerCW = %d\n", numCWsInCSPPacket, numMPDUPayloadPerCW);
+      printf ("numCWsInCSPPacket = %d numMPDUPayloadPerCW = %d\n", numCWsInCSPPacket, numMPDUPayloadPerCW);
 
       return (numMPDUPayloadPerCW * numCWsInCSPPacket);
-    }
+
+    } // mpdusPerCSPPacket
+
+    uint32_t
+    MPDU::mpdusPerCodeword(ErrorCorrection &errorCorrection) {
+
+      // Get the FEC scheme codeword lengths in bytes
+      uint32_t cwLen = errorCorrection.getCodewordLen() / 8;
+      if (errorCorrection.getCodewordLen() % 8 != 0) {
+        cwLen++;
+      }
+
+      uint32_t numMPDUPayloadPerCW = cwLen / MPDU_MTU;
+      if (cwLen % MPDU_MTU != 0) {
+        numMPDUPayloadPerCW++;
+      }
+
+      return numMPDUPayloadPerCW;
+
+    } // mpdusPerCodeword
 
 
   } /* namespace sdr */

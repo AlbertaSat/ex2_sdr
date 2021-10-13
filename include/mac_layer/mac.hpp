@@ -19,6 +19,7 @@
 
 #include <mutex>
 #include <stdexcept>
+#include <queue>
 #include <vector>
 #include <time.h>
 
@@ -170,26 +171,28 @@ namespace ex2
       bool isCSPPacketReady();
 
       /*!
-       * @brief Accessor
+       * @brief Return a CSP packet that has been received from the radio
        *
        * @details After the CSP packet has been retrieved, call @p resetUHFProcessing.
+       * @todo Should we just call resetUHFProcessing? Do we even need to?
        *
        * @return Pointer to the completed CSP packet.
        */
       csp_packet_t * getCSPPacket();
 
       /*!
-       * @brief Receive a new CSP packet.
+       * @brief Receive and encode new CSP packet.
        *
-       * @details Initialize processing of the received CSP packet. This function
+       * @details Processed the received CSP packet to create MPDUs ready for
+       * transmission by the UHF radio in transparent mode. This function
        * should be followed by repeated calls to @p nextMPDU until all MPDUs
        * corresponding to the current CSP have been created and transimitted.
        *
        * @param cspPacket
        *
-       * @return status of operation
+       * @return True if the CSP packet was encoded, false otherwise
        */
-      uint32_t receiveCSPPacket(csp_packet_t * cspPacket);
+      bool receiveCSPPacket(csp_packet_t * cspPacket);
 
       /*!
        * @brief A kind of iterator that provides MPDUs corresponding to a CSP packet.
@@ -209,6 +212,23 @@ namespace ex2
       bool nextMPDU(MPDU &mpdu);
 
       /*!
+        * @brief A kind of iterator that provides MPDUs corresponding to a CSP packet.
+        *
+        * @todo need this?
+        *
+        * @details Each invocation of this function returns the next MPDU
+        * corresponding to a CSP packet that was passed to @p newCSPPacket.
+        *
+        * @param[in out] mpdu The MPDU contents are replaced by the next MPDU
+        * corresponding to the received CSP packet, or zeroed if there are no more.
+        *
+        * @return true if there is at least one more MPDU, in which case the @p
+        * mpdu contains a valid MPDU that should be transmitted. false if there
+        * are no more MPDUs.
+        */
+       bool nextTransparentModePayload();
+
+      /*!
        * @brief Accessor
        *
        * @return The ErrorCorrectionScheme in use
@@ -224,15 +244,8 @@ namespace ex2
        *
        * @param ecScheme The ErrorCorrectionScheme to use
        */
-      void
-      setErrorCorrectionScheme (
-        ErrorCorrection::ErrorCorrectionScheme ecScheme)
-      {
-        // Lock things to ensure that a currently processing packet is incorrectly
-        // encoded or decoded
-        std::unique_lock<std::mutex> lck(m_ecSchemeMutex);
-        m_errorCorrection->setErrorCorrectionScheme(ecScheme);
-      }
+      void setErrorCorrectionScheme (
+        ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
 
       /*!
        * @brief Accessor
@@ -270,6 +283,9 @@ namespace ex2
       MAC (RF_Mode::RF_ModeNumber rfModeNumber,
         ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
 
+      void m_updateErrorCorrection(
+        ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
+
       bool isESTTCPacket(std::vector<uint8_t> &packet);
 
       bool isAX25Packet(std::vector<uint8_t> &packet);
@@ -285,12 +301,15 @@ namespace ex2
 
       // Mutexs to ensure that in progress packet processing is not corrupted
       // by an inadvertant change in FEC parameters
-      std::mutex m_ecSchemeMutex;
+//      std::mutex m_ecSchemeMutex;
 
       std::vector<uint8_t> m_receiveUHFBuffer;
       std::vector<uint8_t> m_codewordBuffer;
-      uint32_t m_codewordFragmentCount;
-      uint32_t m_userPacketFragementCount;
+      std::queue<PPDU_u8::payload_t> m_transparentModePayloadFIFO;
+      void m_clearFIFO(std::queue<PPDU_u8::payload_t> &fifo);
+
+//      uint32_t m_codewordFragmentCount;
+//      uint32_t m_userPacketFragementCount;
     };
 
   } // namespace sdr
