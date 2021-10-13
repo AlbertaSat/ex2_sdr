@@ -160,9 +160,6 @@ TEST(mpdu, NonAccessorMethods)
    * Check the non-accessor methods for objects made with both constructors
    * ---------------------------------------------------------------------
    *
-   * The raw MPDU can be obtained from an object made with the parameterized
-   * constructor. In turn, it can be used as input to the raw constructor.
-   *
    * Check all the non-accessor methods.
    */
 
@@ -190,7 +187,7 @@ TEST(mpdu, NonAccessorMethods)
   // 802.11 QCLDPC since they are what we plan to use at a minimum.
 
   int const numSchemes = 18;
-  uint16_t expectedMPDUs[numSchemes][numCSPPackets] = {
+  uint16_t expectedMPDUsPerPacket[numSchemes][numCSPPackets] = {
     {1,1,3,10,101}, // IEEE_802_11N_QCLDPC_648_R_1_2
     {1,1,3,7,77},   // IEEE_802_11N_QCLDPC_648_R_2_3
     {1,1,2,7,68},   // IEEE_802_11N_QCLDPC_648_R_3_4
@@ -209,6 +206,26 @@ TEST(mpdu, NonAccessorMethods)
     {1,1,2,4,42},   // CCSDS_CONVOLUTIONAL_CODING_R_5_6
     {1,1,2,4,40},   // CCSDS_CONVOLUTIONAL_CODING_R_7_8
     {1,1,1,4,35}    // NO_FEC
+  };
+  uint16_t expectedMPDUsPerCodeword[numSchemes] = {
+    1, // IEEE_802_11N_QCLDPC_648_R_1_2
+    1,   // IEEE_802_11N_QCLDPC_648_R_2_3
+    1,   // IEEE_802_11N_QCLDPC_648_R_3_4
+    1,   // IEEE_802_11N_QCLDPC_648_R_5_6
+    2, // IEEE_802_11N_QCLDPC_1296_R_1_2
+    2,   // IEEE_802_11N_QCLDPC_1296_R_2_3
+    2,   // IEEE_802_11N_QCLDPC_1296_R_3_4
+    2,   // IEEE_802_11N_QCLDPC_1296_R_5_6
+    3, // IEEE_802_11N_QCLDPC_1944_R_1_2
+    3,   // IEEE_802_11N_QCLDPC_1944_R_2_3
+    3,   // IEEE_802_11N_QCLDPC_1944_R_3_4
+    3,   // IEEE_802_11N_QCLDPC_1944_R_5_6
+    1,   // CCSDS_CONVOLUTIONAL_CODING_R_1_2
+    1,   // CCSDS_CONVOLUTIONAL_CODING_R_2_3
+    1,   // CCSDS_CONVOLUTIONAL_CODING_R_3_4
+    1,   // CCSDS_CONVOLUTIONAL_CODING_R_5_6
+    1,   // CCSDS_CONVOLUTIONAL_CODING_R_7_8
+    1    // NO_FEC
   };
 
   ErrorCorrection::ErrorCorrectionScheme ecs;
@@ -281,6 +298,17 @@ TEST(mpdu, NonAccessorMethods)
     // Error Correction object for the current scheme
     errorCorrection = new ErrorCorrection(ecs, (MPDU::maxMTU() * 8));
 
+    // Get how many MPDUs needed for a codeword
+    uint32_t numMPDUsPerCodeword = MPDU::mpdusPerCodeword(*errorCorrection);
+#if QA_MPDU_DEBUG
+    printf("numMPDUsPerCordword = %ld\n",numMPDUsPerCodeword);
+#endif
+
+    // Check the number of MPDUs per packet required matches expectations
+    ASSERT_TRUE(numMPDUsPerCodeword == expectedMPDUsPerCodeword[ecScheme]) << "Incorrect number of MPDUs per codeword " << numMPDUsPerCodeword;
+
+    // Now let's check that the right number of MPDUs are calculated for
+    // a number of different CSP packet lengths
     for (uint16_t currLen = 0; currLen < numCSPPackets; currLen++) {
 
       csp_packet_t * packet = (csp_packet_t *) csp_buffer_get(cspPacketDataLengths[currLen]);
@@ -304,19 +332,19 @@ TEST(mpdu, NonAccessorMethods)
       }
 #endif
 
-      uint32_t numMPDUs = MPDU::numberOfMPDUs(packet, *errorCorrection);
+      uint32_t numMPDUsPerPacket = MPDU::mpdusPerCSPPacket(packet, *errorCorrection);
 
 #if QA_MPDU_DEBUG
       printf("packet length = %d\n", packet->length);
       printf("numMPDUS = %d\n", numMPDUs);
-      printf("expectedMPDUs[%d][%d] = %d\n",ecScheme,currLen,expectedMPDUs[ecScheme][currLen]);
+      printf("expectedMPDUsPerPacket[%d][%d] = %d\n",ecScheme,currLen,expectedMPDUsPerPacket[ecScheme][currLen]);
 #endif
 
       // Clean up!
       csp_buffer_free(packet);
 
-      // Check the number of MPDUs required matches expectations
-      ASSERT_TRUE(numMPDUs == expectedMPDUs[ecScheme][currLen]) << "Incorrect number of MPDUs for CSP Packet " << numMPDUs;
+      // Check the number of MPDUs per packet required matches expectations
+      ASSERT_TRUE(numMPDUsPerPacket == expectedMPDUsPerPacket[ecScheme][currLen]) << "Incorrect number of MPDUs per CSP Packet " << numMPDUsPerPacket;
 
     } // for various CSP packet lengths
 

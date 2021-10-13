@@ -15,6 +15,7 @@
 
 #include "FEC.hpp"
 #include "NoFEC.hpp"
+#include "QCLDPC.hpp"
 #include "convCode27.hpp"
 
 namespace ex2 {
@@ -74,7 +75,7 @@ namespace ex2 {
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3:
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4:
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6:
-          newFEC = NULL; // @TODO change when this is implemented
+          newFEC = new QCLDPC(ecScheme); // @TODO change when this is implemented
           break;
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2:
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3:

@@ -184,7 +184,9 @@ namespace ex2
         return MPDU_MTU;
       }
 
-      static uint32_t numberOfMPDUs(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection);
+      static uint32_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection);
+
+      static uint32_t mpdusPerCodeword(ErrorCorrection &errorCorrection);
 
     private:
       MPDUHeader *m_mpduHeader;

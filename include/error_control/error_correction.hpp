@@ -190,10 +190,7 @@ namespace ex2 {
        */
       void
       setErrorCorrectionScheme (
-        ErrorCorrectionScheme mErrorCorrectionScheme)
-      {
-        m_errorCorrectionScheme = mErrorCorrectionScheme;
-      }
+        ErrorCorrectionScheme errorCorrectionScheme);
 
       /*!
        * @brief Return the rate

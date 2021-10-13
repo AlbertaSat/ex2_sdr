@@ -43,7 +43,7 @@ namespace ex2 {
       // new implemented FEC schemes
       if (!isValid(ecScheme)) {
 #if ERROR_CORRECTION_DEBUG
-        printf("scheme %d\n", (uint16_t) scheme);
+        printf("\nscheme %d\n", (uint16_t) ecScheme);
 #endif
         throw ECException("Invalid FEC Scheme");
       }
@@ -55,9 +55,34 @@ namespace ex2 {
       m_rate = m_codingRateToFractionalRate();
       m_codewordLen = m_codewordLength();
       m_messageLen = m_messageLength();
+//      printf("\nscheme %d\n", (uint16_t) ecScheme);
+//      printf("ErrorCorrction message length %ld\n",m_messageLen);
     }
 
     ErrorCorrection::~ErrorCorrection() {
+    }
+
+    void
+    ErrorCorrection::setErrorCorrectionScheme (
+      ErrorCorrectionScheme errorCorrectionScheme)
+    {
+      m_errorCorrectionScheme = errorCorrectionScheme;
+      if (!isValid(m_errorCorrectionScheme)) {
+#if ERROR_CORRECTION_DEBUG
+        printf("\nscheme %d\n", (uint16_t) errorCorrectionScheme);
+#endif
+        throw ECException("Invalid FEC Scheme");
+      }
+      m_codingRate = m_getCodingRate(m_errorCorrectionScheme);
+      if (m_codingRate == ErrorCorrection::CodingRate::RATE_BAD) {
+        throw ECException("Invalid FEC Scheme; no rate known");
+      }
+
+      m_rate = m_codingRateToFractionalRate();
+      m_codewordLen = m_codewordLength();
+      m_messageLen = m_messageLength();
+//      printf("\nErrorCorrection::setErrorCorrectionScheme scheme %d\n", (uint16_t) m_errorCorrectionScheme);
+//      printf("ErrorCorrction message length %ld\n",m_messageLen);
     }
 
     uint32_t
@@ -543,40 +568,40 @@ namespace ex2 {
           messageLen = 1024; // bits
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2:
-          messageLen = 324; // bits
+          messageLen = 324; // bits 40.5 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3:
-          messageLen = 432; // bits
+          messageLen = 432; // bits 54 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4:
-          messageLen = 486; // bits
+          messageLen = 486; // bits 60.75 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6:
-          messageLen = 540; // bits
+          messageLen = 540; // bits 67.5 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2:
-          messageLen = 648; // bits
+          messageLen = 648; // bits 81 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3:
-          messageLen = 864; // bits
+          messageLen = 864; // bits 108 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4:
-          messageLen = 972; // bits
+          messageLen = 972; // bits 121.5 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6:
-          messageLen = 1080; // bits
+          messageLen = 1080; // bits 135 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2:
-          messageLen = 972; // bits
+          messageLen = 972; // bits 121.5
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3:
-          messageLen = 1296; // bits
+          messageLen = 1296; // bits 162 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4:
-          messageLen = 1458; // bits
+          messageLen = 1458; // bits 182.25 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6:
-          messageLen = 1620; // bits
+          messageLen = 1620; // bits 202.5 bytes
           break;
 
           // For convolutional codeing, set to the max codeword length specified

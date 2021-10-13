@@ -29,6 +29,15 @@ test('mpdu', unit_test_mpdu,
     timeout: 30
     )
     
+unit_test_mac = executable('unit_test-mac', 'qa_mac.cpp', core_source_files,
+    include_directories : incdir,
+    dependencies: [gtest_dep, csp_dep]
+    )
+    
+test('mac', unit_test_mac,
+    timeout: 30
+    )
+    
 unit_test_noFEC = executable('unit_test-noFEC', 'qa_NoFEC.cpp', core_source_files,
     include_directories : incdir,
     dependencies: [gtest_dep, csp_dep]
