@@ -131,7 +131,6 @@ namespace ex2 {
        *   method and rate combined
        * @param[in] continuousMaxCodewordLen For schemes that support continuous
        *   coding (i.e., not block coding) the maximum codeword length in bits.
-       *   The default is set to the MPDU MTU
        */
       ErrorCorrection(ErrorCorrectionScheme ecScheme = ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
         uint32_t continuousMaxCodewordLen = 0);
