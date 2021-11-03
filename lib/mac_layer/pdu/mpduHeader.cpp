@@ -21,13 +21,13 @@ namespace ex2 {
     MPDUHeaderException::MPDUHeaderException(const std::string& message) :
        runtime_error(message) { }
 
-    MPDUHeader::MPDUHeader(const uint8_t uhfPacketLength,
+    MPDUHeader::MPDUHeader(/*const uint8_t uhfPacketLength,*/
       const RF_Mode::RF_ModeNumber modulation,
       const ErrorCorrection &errorCorrection,
       const uint8_t codewordFragmentIndex,
       const uint16_t userPacketLength,
       const uint8_t userPacketFragmentIndex) :
-        m_uhfPacketLength(uhfPacketLength),
+        /*m_uhfPacketLength(uhfPacketLength),*/
         m_rfModeNumber(modulation),
         m_errorCorrection(errorCorrection),
         m_codewordFragmentIndex(codewordFragmentIndex),
@@ -35,20 +35,22 @@ namespace ex2 {
         m_userPacketFragmentIndex(userPacketFragmentIndex)
     {
       // Set and encode the MAC header bytes
-      m_headerPayload.resize(10,0);
+      m_headerPayload.resize(MACHeaderLength(),0);
 
-      m_headerPayload[0] = m_uhfPacketLength;
+//      m_headerPayload[0] = m_uhfPacketLength;
 
       encodeMACHeader();
 
       m_headerValid = true;
     }
 
-    MPDUHeader::MPDUHeader (std::vector<uint8_t> &packet){
+    MPDUHeader::MPDUHeader (std::vector<uint8_t> &rawHeader){
 
-//      m_headerPayload.resize(9,0);
+      if (rawHeader.size() < (k_MACHeaderLength / 8)) {
+        throw MPDUHeaderException("MPDUHeader: Raw header too short");
 
-      if (decodeMACHeader(packet, true)) {
+      }
+      if (decodeMACHeader(rawHeader, true)) {
         // The header may be valid, but if there were more than 4 errors in the
         // Golay codewords, we will have a false positive result. We can check
         // a little more by making sure the FEC scheme is possible
@@ -60,22 +62,16 @@ namespace ex2 {
           // The header is bad
           throw MPDUHeaderException("MPDUHeader: Bad transparent mode packet data; ErrorCorrectionScheme not allowed.");
         }
-
-        // Last thing to check is the size of the packet. The first byte should
-        // be 128 for a transparent mode packet, but since it's not protected,
-        // it may not be 128 and we still have a transparent mode packet. Can
-        // only check the received packet length
-        if (packet.size() != 129) {
-          throw MPDUHeaderException("MPDUHeader: Bad transparent mode packet length; ");
-        }
-
+      }
+      else {
+        throw MPDUHeaderException("MPDUHeader: Too many bit errors.");
       }
 
     }
 
     MPDUHeader::MPDUHeader (MPDUHeader& header)
     {
-      m_uhfPacketLength = header.m_uhfPacketLength;
+      /*m_uhfPacketLength = header.m_uhfPacketLength;*/
       m_rfModeNumber = header.m_rfModeNumber;
       m_errorCorrection = header.m_errorCorrection;
       m_codewordFragmentIndex = header.m_codewordFragmentIndex;
@@ -96,10 +92,6 @@ namespace ex2 {
       // Decode the codewords and if all decode properly, return true
 
       uint16_t headerStart = 0;
-
-      if (dataField1Included) {
-        m_uhfPacketLength = packet[headerStart++];
-      }
 
       // Remember, the first byte is the Data Field 1, the packet length
       // Decode the first 3 bytes (24 bits)
@@ -168,11 +160,11 @@ namespace ex2 {
 
       uint32_t codeword = golay_encode(msgBits);
 
-      m_headerPayload[3] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
       m_headerPayload[2] = (uint8_t)(codeword & 0x000000FF);
       codeword >>= 8;
       m_headerPayload[1] = (uint8_t)(codeword & 0x000000FF);
+      codeword >>= 8;
+      m_headerPayload[0] = (uint8_t)(codeword & 0x000000FF);
 
       msgBits = 0;
       msgBits = (m_codewordFragmentIndex << 8) & 0x00000F00;        // bottom 4 bits
@@ -180,11 +172,11 @@ namespace ex2 {
 
       codeword = golay_encode(msgBits);
 
-      m_headerPayload[6] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
       m_headerPayload[5] = (uint8_t)(codeword & 0x000000FF);
       codeword >>= 8;
       m_headerPayload[4] = (uint8_t)(codeword & 0x000000FF);
+      codeword >>= 8;
+      m_headerPayload[3] = (uint8_t)(codeword & 0x000000FF);
 
       msgBits = 0;
       msgBits = (m_userPacketLength << 8) & 0x00000F00;
@@ -192,11 +184,11 @@ namespace ex2 {
 
       codeword = golay_encode(msgBits);
 
-      m_headerPayload[9] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
       m_headerPayload[8] = (uint8_t)(codeword & 0x000000FF);
       codeword >>= 8;
       m_headerPayload[7] = (uint8_t)(codeword & 0x000000FF);
+      codeword >>= 8;
+      m_headerPayload[6] = (uint8_t)(codeword & 0x000000FF);
     } // encodeMACHeader
 
 

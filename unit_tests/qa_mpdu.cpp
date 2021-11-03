@@ -5,6 +5,8 @@
  *
  * @details Unit test for the MPDU class.
  *
+ * @todo More tests required; test exception generation, ...?
+ *
  * @copyright AlbertaSat 2021
  *
  * @license
@@ -71,11 +73,9 @@ TEST(mpdu, ConstructorsAndAccessors)
   uint16_t userPacketLength = 1234; // 0x04d2
   uint8_t userPacketFragmentIndex = 0xAA;
 
-  ASSERT_TRUE(MPDU_LENGTH == 129) << "The MPDU length should be 129 bytes matching the EnduroSat transparent mode packet max length!";
-
   MPDUHeader *header1;
 
-  header1 = new MPDUHeader(UHF_TRANSPARENT_MODE_PACKET_LENGTH,
+  header1 = new MPDUHeader(/*UHF_TRANSPARENT_MODE_PACKET_LENGTH,*/
     modulation,
     errorCorrection,
     codewordFragmentIndex,
@@ -84,12 +84,12 @@ TEST(mpdu, ConstructorsAndAccessors)
 
   ASSERT_TRUE(header1 != NULL) << "MPDUHeader failed to instantiate";
 
-  uint16_t len = header1->MACHeaderLength()/8; // bytes
+printf("header len = %ld payload %ld\n",header1->MACHeaderLength(), MPDU::maxMTU());
 
   // What the heck, let's make the data random even though we don't touch it
   // for this unit test
-  std::vector<uint8_t> codeword1(UHF_TRANSPARENT_MODE_PACKET_LENGTH - len, 0xAA);
-  for (uint16_t i = 0; i < UHF_TRANSPARENT_MODE_PACKET_LENGTH - len; i++) {
+  std::vector<uint8_t> codeword1(MPDU::maxMTU(), 0xAA);
+  for (uint16_t i = 0; i < MPDU::maxMTU(); i++) {
     codeword1[i] = rand() % 0xFF;
   }
   // Instantiate an object using the parameterized constructor
@@ -100,7 +100,7 @@ TEST(mpdu, ConstructorsAndAccessors)
 
   // Do a simple check
   std::vector<uint8_t> rawMPDU = mpdu1->getRawMPDU();
-  ASSERT_TRUE(rawMPDU.size() == (uint32_t) MPDU_LENGTH) << "MPDU length incorrect!";
+  ASSERT_TRUE(rawMPDU.size() == (uint32_t) UHF_TRANSPARENT_MODE_PACKET_LENGTH) << "MPDU length incorrect!";
 
 #if QA_MPDU_DEBUG
   //  for (uint16_t i = 0; i < rawMPDU.size(); i++) {

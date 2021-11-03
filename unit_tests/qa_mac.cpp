@@ -282,9 +282,9 @@ TEST(mac, receiveCSPPacket)
     myMac1->setErrorCorrectionScheme(ecs);
     printf("qa_mac current ECS = %d\n",myMac1->getErrorCorrectionScheme());
 
-    for (uint16_t currLen = 0; currLen < numCSPPackets; currLen++) {
+    for (uint16_t currentCSPPacket = 0; currentCSPPacket < numCSPPackets; currentCSPPacket++) {
 
-      csp_packet_t * packet = (csp_packet_t *) csp_buffer_get(cspPacketDataLengths[currLen]);
+      csp_packet_t * packet = (csp_packet_t *) csp_buffer_get(cspPacketDataLengths[currentCSPPacket]);
 
       if (packet == NULL) {
         // Could not get buffer element
@@ -293,44 +293,50 @@ TEST(mac, receiveCSPPacket)
       }
 
       // CSP forces us to do our own bookkeeping...
-      packet->length = cspPacketDataLengths[currLen];
+      packet->length = cspPacketDataLengths[currentCSPPacket];
+      // Set the payload to readable ASCII
+      for (unsigned long i = 0; i < cspPacketDataLengths[currentCSPPacket]; i++) {
+        packet->data[i] = (i % 79) + 0x30; // ASCII numbers through to ~
+//        printf("%c",packet->data[i]);
+      }
+//      printf("\n");
 
 #if QA_MPDU_DEBUG
       printf("size of packet padding = %ld\n", sizeof(packet->padding));
       printf("size of packet length = %ld\n", sizeof(packet->length));
       printf("size of packet id = %ld\n", sizeof(packet->id));
       // There is no good reason to set the data, but what the heck
-      for (unsigned long i = 0; i < cspPacketDataLengths[currLen]; i++) {
+      for (unsigned long i = 0; i < cspPacketDataLengths[currentCSPPacket]; i++) {
         packet->data[i] = (i % 10) | 0x30; // ASCII numbers
       }
 #endif
 
       // It's useful to know how many MPDUs will be produced.
       uint32_t numMPDUs = MPDU::mpdusPerCSPPacket(packet, *errorCorrection);
-printf("numMPDUs = %ld\n",numMPDUs);
+//printf("numMPDUs = %ld\n",numMPDUs);
 
       // Process a CSP packet
       bool packetEncoded = myMac1->receiveCSPPacket(packet);
 
       ASSERT_TRUE(packetEncoded) << "Failed to encode CSP Packet ";
 
+      // Check the number of MPDUs required matches expectations
+      ASSERT_TRUE(numMPDUs == expectedMPDUs[ecScheme][currentCSPPacket]) << "Incorrect number of MPDUs for CSP Packet " << numMPDUs;
+
       if (packetEncoded) {
-        while (myMac1->nextMPDU())
+//        while (myMac1->nextMPDU())
       }
 
 #if QA_MPDU_DEBUG
       printf("packet length = %d\n", packet->length);
       printf("numMPDUS = %d\n", numMPDUs);
-      printf("expectedMPDUs[%d][%d] = %d\n",ecScheme,currLen,expectedMPDUs[ecScheme][currLen]);
+      printf("expectedMPDUs[%d][%d] = %d\n",ecScheme,currentCSPPacket,expectedMPDUs[ecScheme][currentCSPPacket]);
 #endif
 
       // Clean up!
       csp_buffer_free(packet);
 
 
-
-      // Check the number of MPDUs required matches expectations
-//      ASSERT_TRUE(numMPDUs == expectedMPDUs[ecScheme][currLen]) << "Incorrect number of MPDUs for CSP Packet " << numMPDUs;
 
     } // for various CSP packet lengths
 

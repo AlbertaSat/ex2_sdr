@@ -36,38 +36,65 @@ namespace ex2
       m_codeword = std::vector<uint8_t>(codeword);
       m_rawMPDU.resize(0);
       std::vector<uint8_t> temp = header.getHeaderPayload();
-      m_rawMPDU.insert(m_rawMPDU.begin(), temp.begin(), temp.end());
+      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
+      m_rawMPDU.insert(m_rawMPDU.end(), temp.begin(), temp.end());
+      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
       m_rawMPDU.insert(m_rawMPDU.end(), codeword.begin(), codeword.end());
+      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
     }
 
     MPDU::MPDU (
       std::vector<uint8_t>& rawMPDU) {
 
+      // There are several possibilities for received @p rawMPDU:
+      //     1. Shorter than expected
+      //     2. As long as expected
+      //     3. Longer than expected
+      //
+      // For 1., as long as there are enough bytes to make an MPDUHeader, it's
+      // worth processing because it might be the first CSP packet fragment. The
+      // MPDUHeader may decode alright and then if it's the first CSP packet
+      // fragment, we can choose to substitute dummy data for the missing,
+      // but expected message. Maybe subsequent payload will be okay...
+      //
+      // For 2., just process to make the MPDU
+      //
+      // For 3., process only the expected number of bytes to make the MPDU
+
       // the @p rawPayload is assumed to contain Data Field 1, the raw header,
-      // and the codeword.
-      if (rawMPDU.size() != (long unsigned int) MPDU_LENGTH) {
-        throw MPDUException("The raw payload length is not 129");
+      // and the codeword. Data Field 1 is not encoded, so we take our chances;
+      // assume that the radio receives only as many Data Field 2 bytes as
+      // indicated by Data Field 1 regardless of how much was actually transmitted
+      // by the other end. Unless Data Field 1 is 129, the raw MPDU is no good
+
+      // @todo Maybe we should allow for Data Field 1 to be bad? For example, as
+      // long as we get enough bytes for the MPDU header and can check it, we
+      // can still have a partial packet. In that case, we check for rawMPDU.size()
+      // >
+
+      try {
+        m_mpduHeader = new MPDUHeader(rawMPDU);
+
+        // Header seems okay, so make codeword based on how many remaining bytes
+        // in rawMPDU
+        m_codeword.resize(0);
+        uint32_t minMPDULength = MPDUHeader::MACHeaderLength() + MPDU::maxMTU();
+        if (rawMPDU.size() >= (minMPDULength)) {
+          m_codeword.insert(m_codeword.begin(), rawMPDU.begin()+MPDUHeader::MACHeaderLength(), rawMPDU.begin()+minMPDULength);
+        }
+        else {
+          // insert what we have and then pad to correct length
+          m_codeword.insert(m_codeword.begin(), rawMPDU.begin()+MPDUHeader::MACHeaderLength(), rawMPDU.end());
+          m_codeword.resize(minMPDULength);
+        }
+      }
+      catch (MPDUHeaderException& e) {
+        // @todo should log this
+        throw MPDUException("MPDU: Bad raw MPDUHeader.");
       }
 
       // Might as well copy the input as the member raw MPDU
       m_rawMPDU = std::vector<uint8_t>(rawMPDU);
-
-      // TODO should do better error checking and handling
-      try {
-        // TODO I think it's best to have the MPDU Header class determine if the
-        // raw packet contains a valid header, and not to "peek" at the data
-        // here. However, right now the MPDU Header class also checks the packet
-        // length for validity; is that better done here, right after the next line?
-        m_mpduHeader = new MPDUHeader(rawMPDU);
-
-        // If we have a valid header, extract the payaload.
-        // @todo replace magic number 10
-        m_codeword.resize(0);
-        m_codeword.insert(m_codeword.begin(), rawMPDU.begin()+10, rawMPDU.end());
-      }
-      catch (MPDUHeaderException &e) {
-        throw MPDUException("Bad header in raw packet");
-      }
     }
 
     MPDU::~MPDU ()
@@ -86,8 +113,6 @@ namespace ex2
       // alignment, so add up the struct members
       uint32_t cspPacketSize = sizeof(csp_packet_t) + cspPacket->length;
 
-//      printf("MPDU cspPacketSize = %d\n", cspPacketSize);
-
       // Get the FEC scheme message and codeword lengths in bytes
       uint32_t msgLen = errorCorrection.getMessageLen() / 8;
       if (errorCorrection.getMessageLen() % 8 != 0) {
@@ -98,10 +123,6 @@ namespace ex2
         cwLen++;
       }
 
-//      printf("msgLen = %db %dB cwLen = %db %dB\n",
-//        errorCorrection.getMessageLen(), msgLen,
-//        errorCorrection.getCodewordLen(), cwLen);
-
       // The CSP packet is split FEC codewords and the number depends on the
       // FEC scheme. Each codeword is split across 1 or more MPDU payloads
       // @TODO update MPDU doc to refer to payloads, not codewords
@@ -111,8 +132,8 @@ namespace ex2
         numCWsInCSPPacket++;
       }
 
-      uint32_t numMPDUPayloadPerCW = cwLen / MPDU_MTU;
-      if (cwLen % MPDU_MTU != 0) {
+      uint32_t numMPDUPayloadPerCW = cwLen / maxMTU();
+      if (cwLen % maxMTU() != 0) {
         numMPDUPayloadPerCW++;
       }
 
@@ -131,8 +152,8 @@ namespace ex2
         cwLen++;
       }
 
-      uint32_t numMPDUPayloadPerCW = cwLen / MPDU_MTU;
-      if (cwLen % MPDU_MTU != 0) {
+      uint32_t numMPDUPayloadPerCW = cwLen / maxMTU();
+      if (cwLen % maxMTU() != 0) {
         numMPDUPayloadPerCW++;
       }
 

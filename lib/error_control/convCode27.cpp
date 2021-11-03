@@ -73,6 +73,8 @@ namespace ex2 {
       int framebits = 8*encodedPayload.size();
       if((vp = create_viterbi27_port(framebits)) == NULL){
         // Init failed.
+        printf("CC27 initialization failed.\n");
+        return UINT32_MAX;
       }
 
       /* Decode it and make sure we get the right answer */
@@ -81,7 +83,7 @@ namespace ex2 {
       
       /* Decode block */
       uint8_t encodedArr[8*framebits+constraint_length-1];
-      for (int i; i<sizeof(encodedArr); i++){
+      for (int i = 0; i<sizeof(encodedArr); i++){
         #if QA_NOISY_TEST
         encodedArr[i] = addnoise(((encodedPayload[i/8] >> (i%8)) & 1), 12, amp, offset, 255);
         #else
@@ -98,12 +100,15 @@ namespace ex2 {
       /* Do Viterbi chainback */
       uint8_t decodedArr[framebits/2];
       chainback_viterbi27_port(vp,decodedArr,framebits,0);
-      for (int i; i<sizeof(decodedArr); i++){
+      printf("chainback_viterbi27_port, sizeof decodedArr %ld\n", sizeof(decodedArr));
+
+      for (int i = 0; i<sizeof(decodedArr); i++){
         unsigned char revertbit = 0;
         for (int j=0; j<8; j++){
           revertbit = revertbit | (((decodedArr[i] >> j) & 1)<<(7-j));
         }
         decodedPayload.push_back(revertbit);
+        printf("decodedPayload.size() = %ld\n",decodedPayload.size());
       }
 
       return 0;
