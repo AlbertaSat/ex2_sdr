@@ -117,6 +117,8 @@ TEST(CC27, Foo )
     std::vector<uint8_t> dPayload;
     uint32_t bitErrors = CC27->decode(encodedPayload.getPayload(), 100.0, dPayload);
 
+    printf("ipayload size %ld dpayload size %ld\n",iPayload.size(),dPayload.size());
+    ASSERT_TRUE(iPayload.size() == dPayload.size()) << "Encoded and decoded payload lengths differ!";
     same = true;
     for (unsigned long i = 0; i < iPayload.size(); i++) {
       same = same & (iPayload[i] == dPayload[i]);

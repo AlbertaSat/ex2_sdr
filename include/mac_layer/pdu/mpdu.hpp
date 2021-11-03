@@ -30,6 +30,7 @@ extern "C" {
 
 #include "pdu.hpp"
 #include "mpduHeader.hpp"
+#include "radio.h"
 
 /*!
  * The Maximum Transmission Unit for the Endurosat UHF radio is 128 bytes.
@@ -37,9 +38,10 @@ extern "C" {
  *
  * @todo This should be defined someplace more accessible
  */
-#define MPDU_MTU ( 119 )             // bytes
-#define MPDU_DATA_FIELD_1_SIZE ( 1 ) // byte
-#define MPDU_LENGTH (MPDU_DATA_FIELD_1_SIZE + MPDU_MTU + MPDUHeader::MACHeaderLength()/8)
+//#define MPDU_MTU ( 119 )             // bytes
+//#define MPDU_DATA_FIELD_1_SIZE ( 1 ) // byte
+//#define
+//#define MPDU_LENGTH (MPDU_DATA_FIELD_1_SIZE + MPDU_MTU + MPDUHeader::MACHeaderLength()/8)
 
 namespace ex2
 {
@@ -141,13 +143,18 @@ namespace ex2
        *
        * @details Used when reconstructing an MPDU based on a received
        * transparent mode packet
-
-       * @param[in] rawMPDU The received transparent mode packet as a byte vector
-       * @note The @p rawMPDU should always be MPDU_LENGTH bytes
+       *
+       * @note The @p rawMPDU can be any length since the UHF radio will "receive"
+       * as many bytes as it thinks are in the Data Field 1, which may be
+       * corrupted since there is no FEC encoding on it. As long as the rawMPDU
+       * is long enough to make an MPDUHeader and that header appears to be
+       * valid, an MPDU will be made. If there is not enough data past the
+       * MPDUHeader in @p rawMPDU, bytes will be added to the codeword
+       *
+       * @param[in] rawMPDU The received transparent mode Data Field 2 as a byte vector
        */
       MPDU (
         std::vector<uint8_t>& rawMPDU);
-
 
       ~MPDU ();
 
@@ -181,7 +188,7 @@ namespace ex2
        * @return The MTU in bytes
        */
       static uint32_t maxMTU() {
-        return MPDU_MTU;
+        return UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH - MPDUHeader::MACHeaderLength();
       }
 
       static uint32_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection);

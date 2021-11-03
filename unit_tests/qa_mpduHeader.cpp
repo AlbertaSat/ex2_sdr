@@ -38,7 +38,7 @@ bool headersSame(MPDUHeader *h1, MPDUHeader *h2) {
   bool same = true;
 
 #if QA_MPDUHEADER_DEBUG
-  printf(" 0x%04x 0x%04x\n",h1->getUhfPacketLength(), h2->getUhfPacketLength());
+  /*printf(" 0x%04x 0x%04x\n",h1->getUhfPacketLength(), h2->getUhfPacketLength());*/
   printf(" 0x%04x 0x%04x\n",h1->getRfModeNumber(), h2->getRfModeNumber());
   printf(" 0x%04x 0x%04x\n",h1->getErrorCorrectionScheme(), h2->getErrorCorrectionScheme());
   printf(" 0x%04x 0x%04x\n",h1->getCodewordFragmentIndex(), h2->getCodewordFragmentIndex());
@@ -46,7 +46,7 @@ bool headersSame(MPDUHeader *h1, MPDUHeader *h2) {
   printf(" 0x%04x 0x%04x\n",h1->getUserPacketFragmentIndex(), h2->getUserPacketFragmentIndex());
 #endif
 
-  same &= (h1->getUhfPacketLength() == h2->getUhfPacketLength());
+  /*same &= (h1->getUhfPacketLength() == h2->getUhfPacketLength());*/
   same &= (h1->getRfModeNumber() == h2->getRfModeNumber());
   same &= (h1->getErrorCorrectionScheme() == h2->getErrorCorrectionScheme());
   same &= (h1->getCodewordFragmentIndex() == h2->getCodewordFragmentIndex());
@@ -84,7 +84,7 @@ TEST(mpduHeader, ConstructorParemeterized )
     for (uint16_t e = (uint16_t) ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2;
         e < (uint16_t) ErrorCorrection::ErrorCorrectionScheme::LAST; e++) {
 
-      printf("scheme = %d\n",e);
+//      printf("scheme = %d\n",e);
 
       errorCorrectionScheme = static_cast<ErrorCorrection::ErrorCorrectionScheme>(e);
       if (ErrorCorrection::isValid(errorCorrectionScheme)) {
@@ -98,7 +98,7 @@ TEST(mpduHeader, ConstructorParemeterized )
             for (userPacketFragmentIndex = 0; userPacketFragmentIndex < 0x04; userPacketFragmentIndex++ ) {
               //            printf("pre header \n");
 
-              header1 = new MPDUHeader(UHF_TRANSPARENT_MODE_PACKET_LENGTH,
+              header1 = new MPDUHeader(/*UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH,*/
                 modulation,
                 errorCorrection,
                 codewordFragmentIndex,
@@ -109,10 +109,16 @@ TEST(mpduHeader, ConstructorParemeterized )
 
               std::vector<uint8_t> payload1 = header1->getHeaderPayload();
 
-              // Make the payload long enough
-              payload1.resize(UHF_TRANSPARENT_MODE_PACKET_LENGTH + 1);
-              header2 = new MPDUHeader(payload1);
+//              printf("payload1 size %ld\n", payload1.size());
 
+              // Make the payload long enough
+//              payload1.resize(UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH);
+              try {
+                header2 = new MPDUHeader(payload1);
+              }
+              catch (MPDUHeaderException &e) {
+                FAIL() << e.what();
+              }
               ASSERT_TRUE(header2 != NULL) << "MPDUHeader 2 failed to instantiate";
 
               // Check headers match
@@ -139,8 +145,7 @@ TEST(mpduHeader, Accessors )
    * ---------------------------------------------------------------------
    */
 
-  std::vector<uint8_t> rawHeader(9,0);
-
+// @todo do this for all supported FEC schemes, maybe in combination with RF modes?
 
   RF_Mode::RF_ModeNumber modulation = RF_Mode::RF_ModeNumber::RF_MODE_3; // 0b011
   ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme =
@@ -152,7 +157,7 @@ TEST(mpduHeader, Accessors )
   MPDUHeader *header1, *header2;
 
 
-  header1 = new MPDUHeader(UHF_TRANSPARENT_MODE_PACKET_LENGTH,
+  header1 = new MPDUHeader(/*UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH,*/
     modulation,
     errorCorrectionScheme,
     codewordFragmentIndex,
@@ -175,13 +180,13 @@ TEST(mpduHeader, Accessors )
   ASSERT_TRUE(userPacketFragmentIndex == uPacketFragIndex) << "user packet fragment indices don't match!";
 
   uint16_t headerLength = header1->MACHeaderLength();
-  ASSERT_TRUE(headerLength == UHF_TRANSPARENT_MODE_PACKET_HEADER_LENGTH) << "Header length is wrong!";
+  ASSERT_TRUE(headerLength == MPDUHeader::MACHeaderLength()) << "Header length is wrong!";
 
 
   std::vector<uint8_t> payload1 = header1->getHeaderPayload();
 
   // Make the payload long enough
-  payload1.resize(UHF_TRANSPARENT_MODE_PACKET_LENGTH + 1);
+  payload1.resize(UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH + 1);
   header2 = new MPDUHeader(payload1);
 
   modulationAccess = header2->getRfModeNumber();
@@ -200,7 +205,7 @@ TEST(mpduHeader, Accessors )
   ASSERT_TRUE(userPacketFragmentIndex == uPacketFragIndex) << "user packet fragment indices don't match!";
 
   headerLength = header2->MACHeaderLength();
-  ASSERT_TRUE(headerLength == UHF_TRANSPARENT_MODE_PACKET_HEADER_LENGTH) << "Header length is wrong!";
+  ASSERT_TRUE(headerLength == MPDUHeader::MACHeaderLength()) << "Header length is wrong!";
 
 }
 

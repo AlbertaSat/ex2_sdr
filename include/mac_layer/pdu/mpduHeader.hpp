@@ -40,14 +40,14 @@ namespace ex2 {
       /*!
        * @brief Constructor
        *
-       * @param[in] uhfPacketLength The UHF radio packet length (Data Field 1)
+       * @param[in] uhfPacketLength The UHF radio packet length (as from Data Field 1) **deprecated
        * @param[in] modulation The UHF radio modulation (RF mode)
        * @param[in] errorCorrection The error correction for this MPDU header
        * @param[in] codewordFragmentIndex The index of the codeword fragment
        * @param[in] userPacketLength The length of the original user (CSP) packet
        * @param[in] userPacketFragmentIndex The current fragment of the user (CSP) packet
        */
-      MPDUHeader(const uint8_t uhfPacketLength,
+      MPDUHeader(/*const uint8_t uhfPacketLength,*/
         const RF_Mode::RF_ModeNumber modulation,
         const ErrorCorrection &errorCorrection,
         const uint8_t codewordFragmentIndex,
@@ -58,12 +58,13 @@ namespace ex2 {
        * @brief Constructor
        *
        * @details Reconstitute a header object from raw (received, we assume)
-       * packet. Check the data for correctness and throw an exepction if bad.
+       * bytes. Check the data for correctness and throw an exepction if bad.
        *
-       * @param[in] rawHeader
+       * @param[in] rawHeader The first @p k_MACHeaderLength / 8 bytes of this
+       * vector are assumed to contain the MACHeader information.
        * @throws MPDUHeaderException
        */
-      MPDUHeader (std::vector<uint8_t> &packet);
+      MPDUHeader (std::vector<uint8_t> &rawHeader);
 
       /*!
        * @brief Copy Constructor
@@ -76,24 +77,24 @@ namespace ex2 {
 
       /*!
        * @brief Accessor
-       * @return MAC header length in bits
+       * @return MAC header length in bytes
        */
       static uint16_t
       MACHeaderLength ()
       {
-        return k_MACHeaderLength;
+        return k_MACHeaderLength / 8;
       }
 
       /*!
        * @brief Accessor
        * @return MAC payload length in bytes
        */
-      static uint16_t
-      MACPayloadLength ()
-      {
-        return (uint16_t) TRANSPARENT_MODE_DATA_FIELD_2_MAX_LEN +
-            (uint16_t) k_MACHeaderLength / 0x0008;
-      }
+//      static uint16_t
+//      MACPayloadLength ()
+//      {
+//        return (uint16_t) TRANSPARENT_MODE_DATA_FIELD_2_MAX_LEN -
+//            (uint16_t) k_MACHeaderLength / 8;
+//      }
 
       /*!
        * @brief Return the FEC scheme
@@ -159,11 +160,11 @@ namespace ex2 {
         return m_userPacketLength;
       }
 
-      uint8_t
-      getUhfPacketLength () const
-      {
-        return m_uhfPacketLength;
-      }
+//      uint8_t
+//      getUhfPacketLength () const
+//      {
+//        return m_uhfPacketLength;
+//      }
 
       bool
       isMHeaderValid () const
@@ -176,6 +177,8 @@ namespace ex2 {
        * @details These constants are a function of the number of bits allocated
        * for their information in the header, not a function of the underlying
        * type size.
+       *
+       * @todo The parity bits should be based on the number of Golay codewords
        */
       static const uint16_t k_modulation              = 3; // bits
       static const uint16_t k_FECScheme               = 6; // bits
@@ -191,10 +194,9 @@ namespace ex2 {
           k_userPacketFragmentIndex +
           k_parityBits;
 
-      uint8_t m_uhfPacketLength;
+      /*uint8_t m_uhfPacketLength;*/
       RF_Mode::RF_ModeNumber m_rfModeNumber;
       ErrorCorrection m_errorCorrection;
-//      ErrorCorrection::ErrorCorrectionScheme m_errorCorrectionScheme;
       uint8_t  m_codewordFragmentIndex;
       uint16_t m_userPacketLength;
       uint16_t m_userPacketFragmentIndex;
