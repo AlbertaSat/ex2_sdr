@@ -19,7 +19,7 @@ namespace ex2
   {
 
     MPDUException::MPDUException(const std::string& message) :
-           runtime_error(message) { }
+               runtime_error(message) { }
 
 
     MPDU::MPDU (
@@ -36,11 +36,11 @@ namespace ex2
       m_codeword = std::vector<uint8_t>(codeword);
       m_rawMPDU.resize(0);
       std::vector<uint8_t> temp = header.getHeaderPayload();
-      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
+      //      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
       m_rawMPDU.insert(m_rawMPDU.end(), temp.begin(), temp.end());
-      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
+      //      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
       m_rawMPDU.insert(m_rawMPDU.end(), codeword.begin(), codeword.end());
-      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
+      //      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
     }
 
     MPDU::MPDU (
@@ -113,33 +113,33 @@ namespace ex2
       // alignment, so add up the struct members
       uint32_t cspPacketSize = sizeof(csp_packet_t) + cspPacket->length;
 
+      // Convolutional coding and NO_FEC are special cases
+      if (errorCorrection.getErrorCorrectionScheme() == ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2) {
+
+      }
+
       // Get the FEC scheme message and codeword lengths in bytes
       uint32_t msgLen = errorCorrection.getMessageLen() / 8;
-      if (errorCorrection.getMessageLen() % 8 != 0) {
-        msgLen++;
-      }
-      uint32_t cwLen = errorCorrection.getCodewordLen() / 8;
-      if (errorCorrection.getCodewordLen() % 8 != 0) {
-        cwLen++;
-      }
-
-      // The CSP packet is split FEC codewords and the number depends on the
-      // FEC scheme. Each codeword is split across 1 or more MPDU payloads
-      // @TODO update MPDU doc to refer to payloads, not codewords
-
-      uint32_t numCWsInCSPPacket = cspPacketSize / msgLen;
+      uint32_t numMsgsPerCSPPacket = cspPacketSize / msgLen;
       if (cspPacketSize % msgLen != 0) {
-        numCWsInCSPPacket++;
+        numMsgsPerCSPPacket++;
+      }
+      if (errorCorrection.getErrorCorrectionScheme() == ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2) {
+        printf("msgLen %ld numMsgsPerCSPPacket %ld\n",msgLen,numMsgsPerCSPPacket);
       }
 
-      uint32_t numMPDUPayloadPerCW = cwLen / maxMTU();
-      if (cwLen % maxMTU() != 0) {
-        numMPDUPayloadPerCW++;
+      uint32_t numCodewordBytesPerCSPPacket = numMsgsPerCSPPacket * errorCorrection.getCodewordLen() / 8;
+
+      uint32_t numMPDUsPerCSPPacket = numCodewordBytesPerCSPPacket / maxMTU();
+      if (numCodewordBytesPerCSPPacket % maxMTU() != 0) {
+        numMPDUsPerCSPPacket++;
       }
 
-      printf ("numCWsInCSPPacket = %d numMPDUPayloadPerCW = %d\n", numCWsInCSPPacket, numMPDUPayloadPerCW);
-
-      return (numMPDUPayloadPerCW * numCWsInCSPPacket);
+      if (errorCorrection.getErrorCorrectionScheme() == ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2) {
+        printf ("numCodewordBytesPerCSPPacket = %ld ", numCodewordBytesPerCSPPacket);
+        printf ("numMPDUsPerCSPPacket = %ld\n", numMPDUsPerCSPPacket);
+      }
+      return numMPDUsPerCSPPacket;
 
     } // mpdusPerCSPPacket
 

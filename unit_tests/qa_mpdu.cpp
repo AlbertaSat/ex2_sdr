@@ -188,24 +188,24 @@ TEST(mpdu, NonAccessorMethods)
 
   int const numSchemes = 18;
   uint16_t expectedMPDUsPerPacket[numSchemes][numCSPPackets] = {
-    {1,1,3,10,101}, // IEEE_802_11N_QCLDPC_648_R_1_2
-    {1,1,3,7,77},   // IEEE_802_11N_QCLDPC_648_R_2_3
-    {1,1,2,7,68},   // IEEE_802_11N_QCLDPC_648_R_3_4
-    {1,1,2,6,61},   // IEEE_802_11N_QCLDPC_648_R_5_6
-    {2,2,4,10,102}, // IEEE_802_11N_QCLDPC_1296_R_1_2
-    {2,2,4,8,78},   // IEEE_802_11N_QCLDPC_1296_R_2_3
-    {2,2,2,8,68},   // IEEE_802_11N_QCLDPC_1296_R_3_4
-    {2,2,2,6,62},   // IEEE_802_11N_QCLDPC_1296_R_5_6
-    {3,3,3,12,102}, // IEEE_802_11N_QCLDPC_1944_R_1_2
-    {3,3,3,9,78},   // IEEE_802_11N_QCLDPC_1944_R_2_3
-    {3,3,3,9,69},   // IEEE_802_11N_QCLDPC_1944_R_3_4
-    {3,3,3,6,63},   // IEEE_802_11N_QCLDPC_1944_R_5_6
-    {1,1,3,7,71},   // CCSDS_CONVOLUTIONAL_CODING_R_1_2
-    {1,1,2,5,53},   // CCSDS_CONVOLUTIONAL_CODING_R_2_3
-    {1,1,2,5,47},   // CCSDS_CONVOLUTIONAL_CODING_R_3_4
-    {1,1,2,4,42},   // CCSDS_CONVOLUTIONAL_CODING_R_5_6
-    {1,1,2,4,40},   // CCSDS_CONVOLUTIONAL_CODING_R_7_8
-    {1,1,1,4,35}    // NO_FEC
+    {1,1,3,7,71}, // IEEE_802_11N_QCLDPC_648_R_1_2, n = 81 m = 40.5 -> 40 bytes
+    {1,1,3,5,53}, // IEEE_802_11N_QCLDPC_648_R_2_3, n = 81 m = 54 bytes
+    {1,1,2,5,47}, // IEEE_802_11N_QCLDPC_648_R_3_4, n = 81 m = 60.75 -> 60 bytes
+    {1,1,2,5,43}, // IEEE_802_11N_QCLDPC_648_R_5_6, n = 81 m = 67.5 -> 67 bytes
+    {2,2,3,7,70}, // IEEE_802_11N_QCLDPC_1296_R_1_2, n = 162 m = 81 bytes
+    {2,2,3,6,54}, // IEEE_802_11N_QCLDPC_1296_R_2_3, n = 162 m = 108 bytes
+    {2,2,2,6,47}, // IEEE_802_11N_QCLDPC_1296_R_3_4, n = 162 m = 121.5 -> 121 bytes
+    {2,2,2,5,43}, // IEEE_802_11N_QCLDPC_1296_R_5_6, n = 162 m = 135 bytes
+    {3,3,3,9,70}, // IEEE_802_11N_QCLDPC_1944_R_1_2, n = 243 m = 121.5 -> 121 bytes
+    {3,3,3,7,54}, // IEEE_802_11N_QCLDPC_1944_R_2_3, n = 243 m = 162 bytes
+    {3,3,3,7,47}, // IEEE_802_11N_QCLDPC_1944_R_3_4, n = 243 m = 182.25 -> 182 bytes
+    {3,3,3,5,43}, // IEEE_802_11N_QCLDPC_1944_R_5_6, n = 243 m = 202.5 -> 202 bytes
+    {1,1,3,7,71}, // CCSDS_CONVOLUTIONAL_CODING_R_1_2, n = 119 m = 58.75 -> 58 bytes
+    {1,1,2,5,53}, // CCSDS_CONVOLUTIONAL_CODING_R_2_3, n = 119 m = 78.5833 -> 78
+    {1,1,2,5,47}, // CCSDS_CONVOLUTIONAL_CODING_R_3_4, n = 119 m = 88.5 -> 88 bytes
+    {1,1,2,4,42}, // CCSDS_CONVOLUTIONAL_CODING_R_5_6, n = 119 m = 98.4167 -> 98 bytes
+    {1,1,2,4,40}, // CCSDS_CONVOLUTIONAL_CODING_R_7_8, n = 119 m = 103.375 -> 103 bytes
+    {1,1,1,4,35}  // NO_FEC, m = n = 119
   };
   uint16_t expectedMPDUsPerCodeword[numSchemes] = {
     1, // IEEE_802_11N_QCLDPC_648_R_1_2

@@ -81,13 +81,13 @@ namespace ex2 {
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3:
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4:
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6:
-          newFEC = NULL; // @TODO change when this is implemented
+          newFEC = new QCLDPC(ecScheme); // @TODO change when this is implemented
           break;
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2:
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3:
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4:
         case ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6:
-          newFEC = NULL; // @TODO change when this is implemented
+          newFEC = new QCLDPC(ecScheme); // @TODO change when this is implemented
           break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2:
           newFEC = new convCode27(ecScheme);

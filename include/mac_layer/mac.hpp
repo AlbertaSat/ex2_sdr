@@ -227,7 +227,7 @@ namespace ex2
       bool receiveCSPPacket(csp_packet_t * cspPacket);
 
       /*!
-       * @brief The length of all MPDU payloads in the MPDU Payload buffer in bytes.
+       * @brief The length of each MPDU payload in the MPDU Payload buffer in bytes.
        *
        * @details The nominal length for a transparent mode payload is 128 bytes.
        * However, this code may be used for radios other than the EnduroSat
@@ -236,7 +236,7 @@ namespace ex2
        * @note This is valid as of the most recent CSP packet processed by
        * @p receiveCSPPacket()
        *
-       * @return Length of all MPDU payloads in the MPDU Payload buffer in bytes.
+       * @return Length of each MPDU payload in the MPDU Payload buffer in bytes.
        */
       const uint32_t mpduPayloadLength();
 
@@ -247,7 +247,14 @@ namespace ex2
        *
        * @return pointer to the MPDU payloads buffer.
        */
-      const uint8_t * mpduPayloadBuffer();
+      const uint8_t * mpduPayloadsBuffer();
+
+      /*!
+       * @breif The number of bytes in the MPDU payloads buffer.
+       *
+       * @return Number of bytes in the MPDU payloads buffer.
+       */
+      const uint32_t mpduPayloadsBufferLength();
 
       /*!
        * @brief An iterator that provides MPDUs corresponding to a CSP packet.

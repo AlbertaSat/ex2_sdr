@@ -89,7 +89,7 @@ TEST(mpduHeader, ConstructorParemeterized )
       errorCorrectionScheme = static_cast<ErrorCorrection::ErrorCorrectionScheme>(e);
       if (ErrorCorrection::isValid(errorCorrectionScheme)) {
 
-        ErrorCorrection errorCorrection(errorCorrectionScheme, MPDU::maxMTU());
+        ErrorCorrection errorCorrection(errorCorrectionScheme, (MPDU::maxMTU() * 8));
 
         for (codewordFragmentIndex = 0; codewordFragmentIndex < 0x80; codewordFragmentIndex++) {
 

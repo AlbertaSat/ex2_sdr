@@ -14,11 +14,18 @@
 #ifndef EX2_SDR_ERROR_CONTROL_QCLDPC_H_
 #define EX2_SDR_ERROR_CONTROL_QCLDPC_H_
 
+#include <stdexcept>
+
 #include "FEC.hpp"
 
 namespace ex2 {
   namespace sdr {
 
+    class QCLDPCException: public std::runtime_error {
+
+    public:
+      QCLDPCException(const std::string& message);
+    };
     /*!
      * @brief Define a forward error correction scheme.
      */

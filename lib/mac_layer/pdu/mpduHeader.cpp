@@ -13,6 +13,7 @@
 
 #include "golay.h"
 #include "mpduHeader.hpp"
+#include "mpdu.hpp"
 #include "rfMode.hpp"
 
 namespace ex2 {
@@ -140,7 +141,7 @@ namespace ex2 {
           static_cast<RF_Mode::RF_ModeNumber>((decodedFirst >> 9) & 0x0007); // 3 bits
       ErrorCorrection::ErrorCorrectionScheme ecs =
           static_cast<ErrorCorrection::ErrorCorrectionScheme>((decodedFirst >> 3) & 0x003F); // 6 bits
-      m_errorCorrection = ErrorCorrection(ecs);
+      m_errorCorrection = ErrorCorrection(ecs, (MPDU::maxMTU() * 8));
       m_codewordFragmentIndex = (decodedFirst & 0x0007) << 4;     // top 3 bits
       m_codewordFragmentIndex |= ((decodedSecond >> 8) & 0x000F); // bottom 4 bits
       m_userPacketLength = (decodedSecond & 0x00FF) << 4;         // top 8 bits

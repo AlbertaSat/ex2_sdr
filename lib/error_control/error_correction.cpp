@@ -518,8 +518,6 @@ namespace ex2 {
     {
       uint32_t messageLen = 0; // @TODO this may cause trouble, but is fine for now
 
-      //      m_messageLen = (uint32_t) ((double) m_codewordLen * m_codingRateToFractionalRate());
-
       // @TODO This is so ugly
       switch(m_errorCorrectionScheme) {
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_1:
@@ -604,7 +602,7 @@ namespace ex2 {
           messageLen = 1620; // bits 202.5 bytes
           break;
 
-          // For convolutional codeing, set to the max codeword length specified
+          // For convolutional coding, set to the max codeword length specified
           // in the constructor, but adjust to account for the polynomial order K.
           //
           // In general, n = (m + (K -1)) / r, so m = n * r - (K - 1)

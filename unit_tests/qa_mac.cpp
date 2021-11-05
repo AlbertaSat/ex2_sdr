@@ -189,98 +189,91 @@ TEST(mac, receiveCSPPacket)
 
   int const numSchemes = 18;
   uint16_t expectedMPDUs[numSchemes][numCSPPackets] = {
-    {1,1,3,10,101}, // IEEE_802_11N_QCLDPC_648_R_1_2
-    {1,1,3,7,77},   // IEEE_802_11N_QCLDPC_648_R_2_3
-    {1,1,2,7,68},   // IEEE_802_11N_QCLDPC_648_R_3_4
-    {1,1,2,6,61},   // IEEE_802_11N_QCLDPC_648_R_5_6
-    {2,2,4,10,102}, // IEEE_802_11N_QCLDPC_1296_R_1_2
-    {2,2,4,8,78},   // IEEE_802_11N_QCLDPC_1296_R_2_3
-    {2,2,2,8,68},   // IEEE_802_11N_QCLDPC_1296_R_3_4
-    {2,2,2,6,62},   // IEEE_802_11N_QCLDPC_1296_R_5_6
-    {3,3,3,12,102}, // IEEE_802_11N_QCLDPC_1944_R_1_2
-    {3,3,3,9,78},   // IEEE_802_11N_QCLDPC_1944_R_2_3
-    {3,3,3,9,69},   // IEEE_802_11N_QCLDPC_1944_R_3_4
-    {3,3,3,6,63},   // IEEE_802_11N_QCLDPC_1944_R_5_6
-    {1,1,3,7,71},   // CCSDS_CONVOLUTIONAL_CODING_R_1_2
-    {1,1,2,5,53},   // CCSDS_CONVOLUTIONAL_CODING_R_2_3
-    {1,1,2,5,47},   // CCSDS_CONVOLUTIONAL_CODING_R_3_4
-    {1,1,2,4,42},   // CCSDS_CONVOLUTIONAL_CODING_R_5_6
-    {1,1,2,4,40},   // CCSDS_CONVOLUTIONAL_CODING_R_7_8
-    {1,1,1,4,35}    // NO_FEC
+    {1,1,1,4,35}, // NO_FEC, m = n = 119
+    {1,1,3,7,71}, // IEEE_802_11N_QCLDPC_648_R_1_2, n = 81 m = 40.5 -> 40 bytes
+    {1,1,3,5,53}, // IEEE_802_11N_QCLDPC_648_R_2_3, n = 81 m = 54 bytes
+    {1,1,2,5,47}, // IEEE_802_11N_QCLDPC_648_R_3_4, n = 81 m = 60.75 -> 60 bytes
+    {1,1,2,5,43}, // IEEE_802_11N_QCLDPC_648_R_5_6, n = 81 m = 67.5 -> 67 bytes
+    {2,2,3,7,70}, // IEEE_802_11N_QCLDPC_1296_R_1_2, n = 162 m = 81 bytes
+    {2,2,3,6,54}, // IEEE_802_11N_QCLDPC_1296_R_2_3, n = 162 m = 108 bytes
+    {2,2,2,6,47}, // IEEE_802_11N_QCLDPC_1296_R_3_4, n = 162 m = 121.5 -> 121 bytes
+    {2,2,2,5,43}, // IEEE_802_11N_QCLDPC_1296_R_5_6, n = 162 m = 135 bytes
+    {3,3,3,9,70}, // IEEE_802_11N_QCLDPC_1944_R_1_2, n = 243 m = 121.5 -> 121 bytes
+    {3,3,3,7,54}, // IEEE_802_11N_QCLDPC_1944_R_2_3, n = 243 m = 162 bytes
+    {3,3,3,7,47}, // IEEE_802_11N_QCLDPC_1944_R_3_4, n = 243 m = 182.25 -> 182 bytes
+    {3,3,3,5,43}, // IEEE_802_11N_QCLDPC_1944_R_5_6, n = 243 m = 202.5 -> 202 bytes
+    {1,1,3,7,71}, // CCSDS_CONVOLUTIONAL_CODING_R_1_2, n = 119 m = 58.75 -> 58 bytes
+    {1,1,2,5,53}, // CCSDS_CONVOLUTIONAL_CODING_R_2_3, n = 119 m = 78.5833 -> 78
+    {1,1,2,5,47}, // CCSDS_CONVOLUTIONAL_CODING_R_3_4, n = 119 m = 88.5 -> 88 bytes
+    {1,1,2,4,42}, // CCSDS_CONVOLUTIONAL_CODING_R_5_6, n = 119 m = 98.4167 -> 98 bytes
+    {1,1,2,4,40}  // CCSDS_CONVOLUTIONAL_CODING_R_7_8, n = 119 m = 103.375 -> 103 bytes
   };
 
   ErrorCorrection::ErrorCorrectionScheme ecs;
-  ErrorCorrection * errorCorrection;
 
-  for (int ecScheme = 0; ecScheme < 1; ecScheme++) {
+  for (int ecScheme = 0; ecScheme < 14; ecScheme++) {
 
     switch(ecScheme) {
       case 0:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
         break;
       case 1:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2;
         break;
       case 2:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3;
         break;
       case 3:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4;
         break;
       case 4:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6;
         break;
       case 5:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2;
         break;
       case 6:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3;
         break;
       case 7:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4;
         break;
       case 8:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6;
         break;
       case 9:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2;
         break;
       case 10:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3;
         break;
       case 11:
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4;
+        break;
+      case 12:
         ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6;
         break;
-
-      case 12:
+      case 13:
         ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2;
         break;
-      case 13:
+      case 14:
         ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3;
         break;
-      case 14:
+      case 15:
         ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4;
         break;
-      case 15:
+      case 16:
         ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6;
         break;
-      case 16:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8;
-        break;
-
       case 17:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8;
         break;
     }
 
     // Make an MPDUs using several FEC schemes and determine the number
     // of MPDUs needed for the current CSP packet.
 
-    // Error Correction object for the current scheme
-    errorCorrection = new ErrorCorrection(ecs, (MPDU::maxMTU() * 8));
-
     myMac1->setErrorCorrectionScheme(ecs);
-    printf("qa_mac current ECS = %d\n",myMac1->getErrorCorrectionScheme());
 
     for (uint16_t currentCSPPacket = 0; currentCSPPacket < numCSPPackets; currentCSPPacket++) {
 
@@ -297,9 +290,7 @@ TEST(mac, receiveCSPPacket)
       // Set the payload to readable ASCII
       for (unsigned long i = 0; i < cspPacketDataLengths[currentCSPPacket]; i++) {
         packet->data[i] = (i % 79) + 0x30; // ASCII numbers through to ~
-//        printf("%c",packet->data[i]);
       }
-//      printf("\n");
 
 #if QA_MPDU_DEBUG
       printf("size of packet padding = %ld\n", sizeof(packet->padding));
@@ -311,36 +302,38 @@ TEST(mac, receiveCSPPacket)
       }
 #endif
 
-      // It's useful to know how many MPDUs will be produced.
-      uint32_t numMPDUs = MPDU::mpdusPerCSPPacket(packet, *errorCorrection);
-//printf("numMPDUs = %ld\n",numMPDUs);
-
       // Process a CSP packet
       bool packetEncoded = myMac1->receiveCSPPacket(packet);
 
       ASSERT_TRUE(packetEncoded) << "Failed to encode CSP Packet ";
 
+      uint32_t totalPayloadsBytes = myMac1->mpduPayloadsBufferLength();
+      uint32_t rawMPDULength = MPDU::rawMPDULength();
+
+      ASSERT_TRUE((totalPayloadsBytes % rawMPDULength) == 0) << "The raw payloads buffer must be an integer multiple of the raw MPDU length.";
+
+      uint32_t numMPDUs = totalPayloadsBytes / rawMPDULength;
+#if QA_MPDU_DEBUG
+      printf("Raw MPDU length = %ld\n", rawMPDULength);
+      printf("totalPayloadsBytes %ld\n",totalPayloadsBytes);
+      printf("numMPDUS = %d\n", numMPDUs);
+      printf("expectedMPDUs[%d][%d] = %d\n",ecScheme,currentCSPPacket,expectedMPDUs[ecScheme][currentCSPPacket]);
+#endif
+
       // Check the number of MPDUs required matches expectations
       ASSERT_TRUE(numMPDUs == expectedMPDUs[ecScheme][currentCSPPacket]) << "Incorrect number of MPDUs for CSP Packet " << numMPDUs;
+
+      // At this point we could get the mpdu buffer and feed it one raw MPDU
+      // at a time into myMac1->processUHFPacket(...)
 
       if (packetEncoded) {
 //        while (myMac1->nextMPDU())
       }
 
-#if QA_MPDU_DEBUG
-      printf("packet length = %d\n", packet->length);
-      printf("numMPDUS = %d\n", numMPDUs);
-      printf("expectedMPDUs[%d][%d] = %d\n",ecScheme,currentCSPPacket,expectedMPDUs[ecScheme][currentCSPPacket]);
-#endif
-
       // Clean up!
       csp_buffer_free(packet);
 
-
-
     } // for various CSP packet lengths
-
-    delete errorCorrection;
 
   } // for a number of Error Correction schemes
 
