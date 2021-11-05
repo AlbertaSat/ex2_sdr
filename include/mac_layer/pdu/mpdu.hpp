@@ -166,6 +166,15 @@ namespace ex2
       const std::vector<uint8_t>& getRawMPDU() const;
 
       /*!
+       * @brief The length of the raw MPDU comprising the header and the payload
+       *
+       * @return Length of the raw MPDU comprising the header and the payload
+       */
+      static uint32_t rawMPDULength() {
+        return UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH;
+      }
+
+      /*!
        * @brief Accessor for codeword
        *
        * @return The codeword

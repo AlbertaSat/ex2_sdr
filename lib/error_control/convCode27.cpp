@@ -36,25 +36,31 @@ namespace ex2 {
 
     PPDU_u8
     convCode27::encode(PPDU_u8 &payload) {
-      
-      PPDU_u8::payload_t PayloadData = payload.getPayload();
-      
-      PPDU_u8::payload_t encodedPayloadData;
-      //encodedPayloadData.resize(2 * sizeof(PayloadData));
-      uint8_t shiftreg = 0;
-      uint8_t sum = 0;
-      for(int i = 0; i<8*payload.payloadLength() + constraint_length - 1; i++){       
-        shiftreg = (shiftreg << 1) | ((PayloadData[i/8] >> (i%8)) & 1);
-        sum = sum | (parity(shiftreg & V27POLYA) << (2 * (i%4)));
-        sum = sum | (parity(shiftreg & V27POLYB) << (2 * (i%4) + 1));
-        if (i%4 == 3){
-            encodedPayloadData.push_back(sum);
-            sum = 0;
-        }
-      }
-      PPDU_u8 encodedPayload(encodedPayloadData);
-      
+      // @todo for now just pass it through
+
+      PPDU_u8::payload_t tempPay = payload.getPayload();
+      tempPay.resize(119,0);
+      PPDU_u8 encodedPayload(tempPay,payload.getBps());
       return encodedPayload;
+      
+//      PPDU_u8::payload_t PayloadData = payload.getPayload();
+//
+//      PPDU_u8::payload_t encodedPayloadData;
+//      //encodedPayloadData.resize(2 * sizeof(PayloadData));
+//      uint8_t shiftreg = 0;
+//      uint8_t sum = 0;
+//      for(int i = 0; i<8*payload.payloadLength() + constraint_length - 1; i++){
+//        shiftreg = (shiftreg << 1) | ((PayloadData[i/8] >> (i%8)) & 1);
+//        sum = sum | (parity(shiftreg & V27POLYA) << (2 * (i%4)));
+//        sum = sum | (parity(shiftreg & V27POLYB) << (2 * (i%4) + 1));
+//        if (i%4 == 3){
+//            encodedPayloadData.push_back(sum);
+//            sum = 0;
+//        }
+//      }
+//      PPDU_u8 encodedPayload(encodedPayloadData);
+//
+//      return encodedPayload;
       
     }
 
