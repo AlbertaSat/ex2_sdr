@@ -18,21 +18,6 @@
 namespace ex2 {
   namespace sdr {
 
-    QCLDPCException::QCLDPCException(const std::string& message) :
-           runtime_error(message) { }
-//    class QCLDPCException: public std::exception {
-//    private:
-//      std::string message_;
-//    public:
-//      explicit QCLDPCException(const std::string& message);
-//      virtual const char* what() const throw() {
-//        return message_.c_str();
-//      }
-//    };
-//
-//    QCLDPCException::QCLDPCException(const std::string& message) : message_(message) {
-//    }
-
     QCLDPC::QCLDPC(ErrorCorrection::ErrorCorrectionScheme ecScheme) : FEC(ecScheme){
       m_errorCorrection = new ErrorCorrection(ecScheme, (MPDU::maxMTU() * 8));
     }
@@ -52,7 +37,7 @@ namespace ex2 {
       // checked next.
       uint32_t messageLenBits = m_errorCorrection->getMessageLen(); // bits
       if (payload.payloadLength() != (messageLenBits / 8))
-        throw QCLDPCException("QCLDPC encode payload wrong length");
+        throw FECException("QCLDPC encode payload wrong length");
 
       // @TODO temp code to fake a codeword. In the actual implementation,
       // we'd repack the payload to 1 bit per byte and, if needed, append zeros

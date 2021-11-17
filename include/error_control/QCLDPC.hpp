@@ -21,11 +21,6 @@
 namespace ex2 {
   namespace sdr {
 
-    class QCLDPCException: public std::runtime_error {
-
-    public:
-      QCLDPCException(const std::string& message);
-    };
     /*!
      * @brief Define a forward error correction scheme.
      */
