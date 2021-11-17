@@ -151,7 +151,7 @@ TEST(mac, receiveCSPPacket)
 
   ErrorCorrection::ErrorCorrectionScheme ecs;
 
-  for (int ecScheme = 14; ecScheme < 15; ecScheme++) {
+  for (int ecScheme = 0; ecScheme < 14; ecScheme++) {
 
     switch(ecScheme) {
       case 0:
