@@ -26,13 +26,13 @@ namespace ex2 {
       const RF_Mode::RF_ModeNumber modulation,
       const ErrorCorrection &errorCorrection,
       const uint8_t codewordFragmentIndex,
-      const uint16_t userPacketLength,
+      const uint16_t userPacketPayloadLength,
       const uint8_t userPacketFragmentIndex) :
         /*m_uhfPacketLength(uhfPacketLength),*/
         m_rfModeNumber(modulation),
         m_errorCorrection(errorCorrection),
         m_codewordFragmentIndex(codewordFragmentIndex),
-        m_userPacketLength(userPacketLength),
+        m_userPacketPayloadLength(userPacketPayloadLength),
         m_userPacketFragmentIndex(userPacketFragmentIndex)
     {
       // Set and encode the MAC header bytes
@@ -76,7 +76,7 @@ namespace ex2 {
       m_rfModeNumber = header.m_rfModeNumber;
       m_errorCorrection = header.m_errorCorrection;
       m_codewordFragmentIndex = header.m_codewordFragmentIndex;
-      m_userPacketLength = header.m_userPacketLength;
+      m_userPacketPayloadLength = header.m_userPacketPayloadLength;
       m_userPacketFragmentIndex = header.m_userPacketFragmentIndex;
       m_headerValid = header.m_headerValid;
       m_headerPayload = header.m_headerPayload;
@@ -144,8 +144,8 @@ namespace ex2 {
       m_errorCorrection = ErrorCorrection(ecs, (MPDU::maxMTU() * 8));
       m_codewordFragmentIndex = (decodedFirst & 0x0007) << 4;     // top 3 bits
       m_codewordFragmentIndex |= ((decodedSecond >> 8) & 0x000F); // bottom 4 bits
-      m_userPacketLength = (decodedSecond & 0x00FF) << 4;         // top 8 bits
-      m_userPacketLength |= ((decodedThird >> 8) & 0x000F);       // bottom 4 bits
+      m_userPacketPayloadLength = (decodedSecond & 0x00FF) << 4;         // top 8 bits
+      m_userPacketPayloadLength |= ((decodedThird >> 8) & 0x000F);       // bottom 4 bits
       m_userPacketFragmentIndex = decodedThird & 0x00FF;
 
       return true;
@@ -169,7 +169,7 @@ namespace ex2 {
 
       msgBits = 0;
       msgBits = (m_codewordFragmentIndex << 8) & 0x00000F00;        // bottom 4 bits
-      msgBits = msgBits | ((m_userPacketLength >> 4) & 0x000000FF); // top 8 bits
+      msgBits = msgBits | ((m_userPacketPayloadLength >> 4) & 0x000000FF); // top 8 bits
 
       codeword = golay_encode(msgBits);
 
@@ -180,7 +180,7 @@ namespace ex2 {
       m_headerPayload[3] = (uint8_t)(codeword & 0x000000FF);
 
       msgBits = 0;
-      msgBits = (m_userPacketLength << 8) & 0x00000F00;
+      msgBits = (m_userPacketPayloadLength << 8) & 0x00000F00;
       msgBits = msgBits | (m_userPacketFragmentIndex & 0x000000FF);
 
       codeword = golay_encode(msgBits);

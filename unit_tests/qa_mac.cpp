@@ -46,66 +46,6 @@ using namespace ex2::sdr;
 
 
 /*!
- * @brief Test Main Constructors, the one that is parameterized, and the one
- * that takes the received packet as input
- */
-//TEST(mpduHeader, ConstructorParemeterized )
-//{
-//  /* ---------------------------------------------------------------------
-//   * Confirm the MAC PDU is constructed and correct
-//   * ---------------------------------------------------------------------
-//   */
-//
-//  // We will take a look at the raw header bits to confirm things are correct.
-//  //
-//
-//  RF_Mode::RF_ModeNumber modulation = RF_Mode::RF_ModeNumber::RF_MODE_0; // 0b000
-//  ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme =
-//      ErrorCorrection::ErrorCorrectionScheme::CONVOLUTIONAL_CODING_R_1_2; // 0b000000
-//  uint8_t codewordFragmentIndex = 0;
-//  uint16_t userPacketLength = 0;
-//  uint8_t userPacketFragmentIndex = 0;
-//
-//  MPDUHeader *header1, *header2;
-//
-//  for (uint16_t m = (uint16_t)RF_Mode::RF_ModeNumber::RF_MODE_0; m <= (uint16_t) RF_Mode::RF_ModeNumber::RF_MODE_7; m++) {
-//    modulation = static_cast<RF_Mode::RF_ModeNumber>(m);
-//
-//    for (uint16_t e = (uint16_t) ErrorCorrection::ErrorCorrectionScheme::CONVOLUTIONAL_CODING_R_1_2;
-//        e < (uint16_t) ErrorCorrection::ErrorCorrectionScheme::LAST; e++) {
-//      errorCorrectionScheme = static_cast<ErrorCorrection::ErrorCorrectionScheme>(e);
-//
-//      for (codewordFragmentIndex = 0; codewordFragmentIndex < 0x80; codewordFragmentIndex++) {
-//
-//        // Really can't iterate over all packet lengths and fragments, so just do some
-//        for (userPacketLength = 0; userPacketLength < 0x0100; userPacketLength++ ) {
-//          for (userPacketFragmentIndex = 0; userPacketFragmentIndex < 0x04; userPacketFragmentIndex++ ) {
-//
-//            header1 = new MPDUHeader(UHF_TRANSPARENT_MODE_PACKET_LENGTH,
-//              modulation,
-//              errorCorrectionScheme,
-//              codewordFragmentIndex,
-//              userPacketLength,
-//              userPacketFragmentIndex);
-//
-//            std::vector<uint8_t> payload1 = header1->getHeaderPayload();
-//
-//            // Make the payload long enough
-//            payload1.resize(UHF_TRANSPARENT_MODE_PACKET_LENGTH + 1);
-//            header2 = new MPDUHeader(payload1);
-//
-//            // Check headers match
-//            ASSERT_TRUE(headersSame(header1, header2)) << "Oops, header packets don't match!";
-//
-//          } // over all user packet fragment indices
-//        } // over all user packet lengths
-//
-//      } // over all codeword fragment indices
-//    } // over all error correction schemes
-//  } // over all modulations
-//}
-
-/*!
  * @brief Test singleton constructor
  */
 TEST(mac, SingletonConstructor)
@@ -180,7 +120,7 @@ TEST(mac, receiveCSPPacket)
   // * a non-zero length a packet needs more than one MPDU
   // * the max size packet
   uint16_t const numCSPPackets = 5;
-  uint16_t cspPacketDataLengths[numCSPPackets] = {0, 10, 103, 358, 4096};
+  uint16_t cspPacketDataLengths[numCSPPackets] = {0, 10, 103, 358, 4095};
 
   // Let's choose a few FEC schemes to test; testing them all would take a long
   // time and really we just want to have a mix of n, k, and r.
@@ -211,7 +151,7 @@ TEST(mac, receiveCSPPacket)
 
   ErrorCorrection::ErrorCorrectionScheme ecs;
 
-  for (int ecScheme = 0; ecScheme < 14; ecScheme++) {
+  for (int ecScheme = 14; ecScheme < 15; ecScheme++) {
 
     switch(ecScheme) {
       case 0:
@@ -287,6 +227,7 @@ TEST(mac, receiveCSPPacket)
 
       // CSP forces us to do our own bookkeeping...
       packet->length = cspPacketDataLengths[currentCSPPacket];
+      packet->id.ext = 0x87654321;
       // Set the payload to readable ASCII
       for (unsigned long i = 0; i < cspPacketDataLengths[currentCSPPacket]; i++) {
         packet->data[i] = (i % 79) + 0x30; // ASCII numbers through to ~
@@ -296,9 +237,12 @@ TEST(mac, receiveCSPPacket)
       printf("size of packet padding = %ld\n", sizeof(packet->padding));
       printf("size of packet length = %ld\n", sizeof(packet->length));
       printf("size of packet id = %ld\n", sizeof(packet->id));
-      // There is no good reason to set the data, but what the heck
-      for (unsigned long i = 0; i < cspPacketDataLengths[currentCSPPacket]; i++) {
-        packet->data[i] = (i % 10) | 0x30; // ASCII numbers
+      printf("size of csp_id_t %ld\n",sizeof(csp_id_t));
+      printf("packet length %d (2 bytes) %02x\n", packet->length, packet->length);
+      printf("packet id (4 bytes) %04x\n", packet->id);
+      printf("Padding\n\t");
+      for (uint8_t p = 0; p < sizeof(packet->padding); p++) {
+        printf("%02x",packet->padding[p]);
       }
 #endif
 
@@ -318,6 +262,10 @@ TEST(mac, receiveCSPPacket)
       printf("totalPayloadsBytes %ld\n",totalPayloadsBytes);
       printf("numMPDUS = %d\n", numMPDUs);
       printf("expectedMPDUs[%d][%d] = %d\n",ecScheme,currentCSPPacket,expectedMPDUs[ecScheme][currentCSPPacket]);
+      const uint8_t *mpdusBuff = myMac1->mpduPayloadsBuffer();
+      for (uint32_t i = 0; i < totalPayloadsBytes; i++) {
+        printf("mpdusBuf[%04d] %02x\n",i,mpdusBuff[i]);
+      }
 #endif
 
       // Check the number of MPDUs required matches expectations
@@ -327,8 +275,49 @@ TEST(mac, receiveCSPPacket)
       // at a time into myMac1->processUHFPacket(...)
 
       if (packetEncoded) {
-//        while (myMac1->nextMPDU())
-      }
+        const uint8_t *mpdusBuffer = myMac1->mpduPayloadsBuffer();
+        if (mpdusBuffer && (myMac1->mpduPayloadsBufferLength() % 128 == 0)) {
+#if QA_MPDU_DEBUG
+          printf("\nprocess raw mpdus\n");
+#endif
+
+          for (uint16_t rawMPDUIndex = 0; rawMPDUIndex < myMac1->mpduPayloadsBufferLength(); rawMPDUIndex += 128) {
+            MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUIndex, 128);
+            switch (status) {
+              case MAC::MAC_UHFPacketProcessingStatus::CSP_PACKET_READY:
+              {
+//                printf("CSP Packet Ready\n");
+                std::vector<uint8_t> rawCSP = myMac1->getRawCspPacket();
+                uint8_t *p = (uint8_t *) packet;
+                uint16_t const cspPacketLength = sizeof(csp_packet_t) + packet->length;
+
+#if QA_MPDU_DEBUG
+                printf("packet length %d (2 bytes) %02x\n", packet->length, packet->length);
+                printf("packet id (4 bytes) %04x\n", packet->id);
+                for (uint16_t i = 0; i < cspPacketLength; i++) {
+                  printf("%04d %02x|%02x\n",i,rawCSP[i],p[i]);
+                }
+                printf("------------\n");
+#endif
+                bool same = true;
+                for (uint16_t i = 0; i < cspPacketLength; i++) {
+                  same = same && (rawCSP[i] == p[i]);
+                }
+                ASSERT_TRUE(same) << "decoded CSP packet does not match original";
+              }
+              break;
+              case MAC::MAC_UHFPacketProcessingStatus::CSP_PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
+                break;
+              case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+//                printf("Ready for next uhf packet\n");
+                break;
+              default:
+                break;
+            } // switch on returned UHF packet process status
+
+          } // for all the raw MPDUs
+        } // check if have an integral number of raw MPDUs
+      } // was the CSP packet successfully encoded
 
       // Clean up!
       csp_buffer_free(packet);

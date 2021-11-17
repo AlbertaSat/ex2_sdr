@@ -25,7 +25,7 @@ namespace ex2 {
     class convCode27 : public FEC {
     public:
 
-      convCode27(ErrorCorrection::ErrorCorrectionScheme ecScheme) : FEC(ecScheme) { }
+      convCode27(ErrorCorrection::ErrorCorrectionScheme ecScheme);
 
       ~convCode27();
 
@@ -35,6 +35,8 @@ namespace ex2 {
         PPDU_u8::payload_t& decodedPayload);
 
     private:
+      ErrorCorrection *m_errorCorrection;
+
       const double rate = 1/2;// can be read from FEC method
       const uint8_t constraint_length = 7; // aka K
       uint8_t adder(uint8_t * payload_sym , std::vector<uint8_t> g);

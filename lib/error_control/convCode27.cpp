@@ -12,7 +12,7 @@
  */
 
 #include "convCode27.hpp"
-#include "pdu.hpp"
+#include "mpdu.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,6 +31,10 @@ extern "C" {
 namespace ex2 {
   namespace sdr {
 
+    convCode27::convCode27(ErrorCorrection::ErrorCorrectionScheme ecScheme) : FEC(ecScheme){
+      m_errorCorrection = new ErrorCorrection(ecScheme, (MPDU::maxMTU() * 8));
+    }
+
     convCode27::~convCode27() {
     }
 
@@ -38,6 +42,7 @@ namespace ex2 {
     convCode27::encode(PPDU_u8 &payload) {
       // @todo for now just pass it through
 
+      printf("convCode27 encoding %ld byte chunk\n", payload.payloadLength());
       PPDU_u8::payload_t tempPay = payload.getPayload();
       tempPay.resize(119,0);
       PPDU_u8 encodedPayload(tempPay,payload.getBps());
@@ -67,6 +72,15 @@ namespace ex2 {
     uint32_t
     convCode27::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
       PPDU_u8::payload_t& decodedPayload) {
+
+      decodedPayload.resize(0); // Resize in all FEC decode methods
+
+      // Here is where we apply the FEC decode algorithm.
+      // For no FEC, just copy the data
+      decodedPayload.insert(decodedPayload.end(),
+        encodedPayload.begin(), encodedPayload.begin() + m_errorCorrection->getMessageLen()/8);
+
+      return 0;
 
       double offset = 127.5;
       uint8_t amp = 32; //

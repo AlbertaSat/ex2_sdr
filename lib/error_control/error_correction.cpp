@@ -16,7 +16,7 @@
 #include <exception>
 #include <string>
 
-#define ERROR_CORRECTION_DEBUG 0 // set to 1 to enable extra debugging info
+#define ERROR_CORRECTION_DEBUG 1 // set to 1 to enable extra debugging info
 
 namespace ex2 {
   namespace sdr {
@@ -69,12 +69,15 @@ namespace ex2 {
       m_errorCorrectionScheme = errorCorrectionScheme;
       if (!isValid(m_errorCorrectionScheme)) {
 #if ERROR_CORRECTION_DEBUG
-        printf("\nscheme %d\n", (uint16_t) errorCorrectionScheme);
+        printf("\ninvalid scheme %d\n", (uint16_t) errorCorrectionScheme);
 #endif
         throw ECException("Invalid FEC Scheme");
       }
       m_codingRate = m_getCodingRate(m_errorCorrectionScheme);
       if (m_codingRate == ErrorCorrection::CodingRate::RATE_BAD) {
+#if ERROR_CORRECTION_DEBUG
+        printf("\nbad rate for scheme %d\n", (uint16_t) errorCorrectionScheme);
+#endif
         throw ECException("Invalid FEC Scheme; no rate known");
       }
 
