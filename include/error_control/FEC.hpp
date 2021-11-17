@@ -18,12 +18,20 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 #include "error_correction.hpp"
 #include "ppdu_u8.hpp"
 
 namespace ex2 {
   namespace sdr {
+
+
+    class FECException: public std::runtime_error {
+
+    public:
+      FECException(const std::string& message);
+    };
 
     /*!
      * @brief Define a forward error correction scheme.

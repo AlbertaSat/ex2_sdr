@@ -21,6 +21,9 @@
 namespace ex2 {
   namespace sdr {
 
+    FECException::FECException(const std::string& message) :
+           runtime_error(message) { }
+
     FEC *
     FEC::makeFECCodec(ErrorCorrection::ErrorCorrectionScheme ecScheme)
     {
