@@ -5,6 +5,8 @@
  *
  * @details
  *
+ * @todo change the user packet fragment index to be a CRC8 field
+ *
  * @copyright AlbertaSat 2021
  *
  * @license
@@ -44,14 +46,14 @@ namespace ex2 {
        * @param[in] modulation The UHF radio modulation (RF mode)
        * @param[in] errorCorrection The error correction for this MPDU header
        * @param[in] codewordFragmentIndex The index of the codeword fragment
-       * @param[in] userPacketLength The length of the original user (CSP) packet
+       * @param[in] userPacketPayloadLength The length of the original user (CSP) packet payload
        * @param[in] userPacketFragmentIndex The current fragment of the user (CSP) packet
        */
       MPDUHeader(/*const uint8_t uhfPacketLength,*/
         const RF_Mode::RF_ModeNumber modulation,
         const ErrorCorrection &errorCorrection,
         const uint8_t codewordFragmentIndex,
-        const uint16_t userPacketLength,
+        const uint16_t userPacketPayloadLength,
         const uint8_t userPacketFragmentIndex);
 
       /*!
@@ -155,9 +157,9 @@ namespace ex2 {
       }
 
       uint16_t
-      getUserPacketLength () const
+      getUserPacketPayloadLength () const
       {
-        return m_userPacketLength;
+        return m_userPacketPayloadLength;
       }
 
 //      uint8_t
@@ -184,13 +186,13 @@ namespace ex2 {
       static const uint16_t k_FECScheme               = 6; // bits
       static const uint16_t k_modulationFECScheme     = k_modulation + k_FECScheme;
       static const uint16_t k_codewordFragmentIndex   = 7; // bits
-      static const uint16_t k_userPacketLength        = 12; // bits
+      static const uint16_t k_userPacketPayloadLength = 12; // bits
       static const uint16_t k_userPacketFragmentIndex = 8; // bits
       static const uint16_t k_parityBits              = 36; // bits
       static const uint16_t k_MACHeaderLength =
           k_modulationFECScheme +
           k_codewordFragmentIndex +
-          k_userPacketLength +
+          k_userPacketPayloadLength +
           k_userPacketFragmentIndex +
           k_parityBits;
 
@@ -198,7 +200,7 @@ namespace ex2 {
       RF_Mode::RF_ModeNumber m_rfModeNumber;
       ErrorCorrection m_errorCorrection;
       uint8_t  m_codewordFragmentIndex;
-      uint16_t m_userPacketLength;
+      uint16_t m_userPacketPayloadLength;
       uint16_t m_userPacketFragmentIndex;
       std::vector<uint8_t> m_headerPayload;
 

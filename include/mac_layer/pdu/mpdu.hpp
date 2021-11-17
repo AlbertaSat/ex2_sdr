@@ -5,6 +5,8 @@
  *
  * @details The MPDU class.
  *
+ * @todo change the user packet fragment index to be a CRC8 field
+ *
  * @copyright University of Alberta, 2021
  *
  * @license
@@ -103,7 +105,7 @@ namespace ex2
      *       <TR>
      *       <TD bgcolor="#ff7777" COLSPAN="3" Align = "Center">Modulation/FEC Scheme (9 bits)</TD>
      *       <TD bgcolor="#ff7777" COLSPAN="4" Align = "Center">Codeword Fragment Index (7 bits)</TD>
-     *       <TD bgcolor="#ff7777" COLSPAN="5" Align = "Center">User Packet Length (12 bits)</TD>
+     *       <TD bgcolor="#ff7777" COLSPAN="5" Align = "Center">User Packet Payload Length (12 bits)</TD>
      *       <TD bgcolor="#ff7777" COLSPAN="6" Align = "Center">User Packet Fragment Index (8 bits)</TD>
      *       <TD bgcolor="#ff7777" COLSPAN="7" Align = "Center">Golay parity bits[Note 1] (36 bits)</TD>
      *       </TR>
@@ -196,13 +198,15 @@ namespace ex2
        *
        * @return The MTU in bytes
        */
-      static uint32_t maxMTU() {
+      static uint16_t maxMTU() {
         return UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH - MPDUHeader::MACHeaderLength();
       }
 
-      static uint32_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection);
+      static uint16_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection);
 
-      static uint32_t mpdusPerCodeword(ErrorCorrection &errorCorrection);
+      static uint16_t mpdusInNBytes(uint32_t byteCount, ErrorCorrection &errorCorrection);
+
+      static uint16_t mpdusPerCodeword(ErrorCorrection &errorCorrection);
 
     private:
       MPDUHeader *m_mpduHeader;

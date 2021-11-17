@@ -36,11 +36,8 @@ namespace ex2
       m_codeword = std::vector<uint8_t>(codeword);
       m_rawMPDU.resize(0);
       std::vector<uint8_t> temp = header.getHeaderPayload();
-      //      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
       m_rawMPDU.insert(m_rawMPDU.end(), temp.begin(), temp.end());
-      //      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
       m_rawMPDU.insert(m_rawMPDU.end(), codeword.begin(), codeword.end());
-      //      printf("m_rawMPDU size %ld\n",m_rawMPDU.size());
     }
 
     MPDU::MPDU (
@@ -107,25 +104,24 @@ namespace ex2
       return m_rawMPDU;
     }
 
-    uint32_t
+    uint16_t
     MPDU::mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection) {
       // Get length of CSP packet in bytes. Make sure we are not fooled by
       // alignment, so add up the struct members
       uint32_t cspPacketSize = sizeof(csp_packet_t) + cspPacket->length;
 
-      // Convolutional coding and NO_FEC are special cases
-      if (errorCorrection.getErrorCorrectionScheme() == ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2) {
+      return mpdusInNBytes(cspPacketSize, errorCorrection);
 
-      }
+    } // mpdusPerCSPPacket
+
+    uint16_t
+    MPDU::mpdusInNBytes(uint32_t byteCount, ErrorCorrection &errorCorrection) {
 
       // Get the FEC scheme message and codeword lengths in bytes
       uint32_t msgLen = errorCorrection.getMessageLen() / 8;
-      uint32_t numMsgsPerCSPPacket = cspPacketSize / msgLen;
-      if (cspPacketSize % msgLen != 0) {
+      uint32_t numMsgsPerCSPPacket = byteCount / msgLen;
+      if (byteCount % msgLen != 0) {
         numMsgsPerCSPPacket++;
-      }
-      if (errorCorrection.getErrorCorrectionScheme() == ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2) {
-        printf("msgLen %ld numMsgsPerCSPPacket %ld\n",msgLen,numMsgsPerCSPPacket);
       }
 
       uint32_t numCodewordBytesPerCSPPacket = numMsgsPerCSPPacket * errorCorrection.getCodewordLen() / 8;
@@ -135,15 +131,10 @@ namespace ex2
         numMPDUsPerCSPPacket++;
       }
 
-      if (errorCorrection.getErrorCorrectionScheme() == ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2) {
-        printf ("numCodewordBytesPerCSPPacket = %ld ", numCodewordBytesPerCSPPacket);
-        printf ("numMPDUsPerCSPPacket = %ld\n", numMPDUsPerCSPPacket);
-      }
       return numMPDUsPerCSPPacket;
+    }
 
-    } // mpdusPerCSPPacket
-
-    uint32_t
+    uint16_t
     MPDU::mpdusPerCodeword(ErrorCorrection &errorCorrection) {
 
       // Get the FEC scheme codeword lengths in bytes

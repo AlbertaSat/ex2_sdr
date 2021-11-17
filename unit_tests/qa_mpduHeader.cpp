@@ -42,7 +42,7 @@ bool headersSame(MPDUHeader *h1, MPDUHeader *h2) {
   printf(" 0x%04x 0x%04x\n",h1->getRfModeNumber(), h2->getRfModeNumber());
   printf(" 0x%04x 0x%04x\n",h1->getErrorCorrectionScheme(), h2->getErrorCorrectionScheme());
   printf(" 0x%04x 0x%04x\n",h1->getCodewordFragmentIndex(), h2->getCodewordFragmentIndex());
-  printf(" 0x%04x 0x%04x\n",h1->getUserPacketLength(), h2->getUserPacketLength());
+  printf(" 0x%04x 0x%04x\n",h1->getUserPacketPayloadLength(), h2->getUserPacketPayloadLength());
   printf(" 0x%04x 0x%04x\n",h1->getUserPacketFragmentIndex(), h2->getUserPacketFragmentIndex());
 #endif
 
@@ -50,7 +50,7 @@ bool headersSame(MPDUHeader *h1, MPDUHeader *h2) {
   same &= (h1->getRfModeNumber() == h2->getRfModeNumber());
   same &= (h1->getErrorCorrectionScheme() == h2->getErrorCorrectionScheme());
   same &= (h1->getCodewordFragmentIndex() == h2->getCodewordFragmentIndex());
-  same &= (h1->getUserPacketLength() == h2->getUserPacketLength());
+  same &= (h1->getUserPacketPayloadLength() == h2->getUserPacketPayloadLength());
   same &= (h1->getUserPacketFragmentIndex() == h2->getUserPacketFragmentIndex());
 
   return same;
@@ -73,7 +73,7 @@ TEST(mpduHeader, ConstructorParemeterized )
   RF_Mode::RF_ModeNumber modulation;
   ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme;
   uint8_t codewordFragmentIndex = 0;
-  uint16_t userPacketLength = 0;
+  uint16_t userPacketPayloadLength = 0;
   uint8_t userPacketFragmentIndex = 0;
 
   MPDUHeader *header1, *header2;
@@ -84,8 +84,6 @@ TEST(mpduHeader, ConstructorParemeterized )
     for (uint16_t e = (uint16_t) ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2;
         e < (uint16_t) ErrorCorrection::ErrorCorrectionScheme::LAST; e++) {
 
-//      printf("scheme = %d\n",e);
-
       errorCorrectionScheme = static_cast<ErrorCorrection::ErrorCorrectionScheme>(e);
       if (ErrorCorrection::isValid(errorCorrectionScheme)) {
 
@@ -94,7 +92,7 @@ TEST(mpduHeader, ConstructorParemeterized )
         for (codewordFragmentIndex = 0; codewordFragmentIndex < 0x80; codewordFragmentIndex++) {
 
           // Really can't iterate over all packet lengths and fragments, so just do some
-          for (userPacketLength = 0; userPacketLength < 0x0100; userPacketLength++ ) {
+          for (userPacketPayloadLength = 0; userPacketPayloadLength < 0x0100; userPacketPayloadLength++ ) {
             for (userPacketFragmentIndex = 0; userPacketFragmentIndex < 0x04; userPacketFragmentIndex++ ) {
               //            printf("pre header \n");
 
@@ -102,7 +100,7 @@ TEST(mpduHeader, ConstructorParemeterized )
                 modulation,
                 errorCorrection,
                 codewordFragmentIndex,
-                userPacketLength,
+                userPacketPayloadLength,
                 userPacketFragmentIndex);
 
               ASSERT_TRUE(header1 != NULL) << "MPDUHeader 1 failed to instantiate";
@@ -151,7 +149,7 @@ TEST(mpduHeader, Accessors )
   ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme =
       ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2; // 0b000000
   uint8_t codewordFragmentIndex = 0x55;
-  uint16_t userPacketLength = 1234; // 0x04d2
+  uint16_t userPacketPayloadLength = 1234; // 0x04d2
   uint8_t userPacketFragmentIndex = 0xAA;
 
   MPDUHeader *header1, *header2;
@@ -161,7 +159,7 @@ TEST(mpduHeader, Accessors )
     modulation,
     errorCorrectionScheme,
     codewordFragmentIndex,
-    userPacketLength,
+    userPacketPayloadLength,
     userPacketFragmentIndex);
 
   RF_Mode::RF_ModeNumber modulationAccess = header1->getRfModeNumber();
@@ -173,8 +171,8 @@ TEST(mpduHeader, Accessors )
   uint8_t cwFragmentIndex = header1->getCodewordFragmentIndex();
   ASSERT_TRUE(codewordFragmentIndex == cwFragmentIndex) << "codeword fragment indices don't match!";
 
-  uint16_t uPacketLen = header1->getUserPacketLength();
-  ASSERT_TRUE(userPacketLength == uPacketLen) << "User packet lenghts don't match!";
+  uint16_t uPacketLen = header1->getUserPacketPayloadLength();
+  ASSERT_TRUE(userPacketPayloadLength == uPacketLen) << "User packet lenghts don't match!";
 
   uint8_t uPacketFragIndex = header1->getUserPacketFragmentIndex();
   ASSERT_TRUE(userPacketFragmentIndex == uPacketFragIndex) << "user packet fragment indices don't match!";
@@ -198,8 +196,8 @@ TEST(mpduHeader, Accessors )
   cwFragmentIndex = header2->getCodewordFragmentIndex();
   ASSERT_TRUE(codewordFragmentIndex == cwFragmentIndex) << "codeword fragment indices don't match!";
 
-  uPacketLen = header2->getUserPacketLength();
-  ASSERT_TRUE(userPacketLength == uPacketLen) << "User packet lenghts don't match!";
+  uPacketLen = header2->getUserPacketPayloadLength();
+  ASSERT_TRUE(userPacketPayloadLength == uPacketLen) << "User packet lenghts don't match!";
 
   uPacketFragIndex = header2->getUserPacketFragmentIndex();
   ASSERT_TRUE(userPacketFragmentIndex == uPacketFragIndex) << "user packet fragment indices don't match!";

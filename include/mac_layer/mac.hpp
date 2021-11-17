@@ -89,53 +89,6 @@ namespace ex2
 
       ~MAC ();
 
-      // @TODO keep this old code for use in the wrapper
-//      /*!
-//       * @brief The task that receives CSP packets via a queue from the CSP
-//       * server.
-//       *
-//       * @details The task monitors the queue and when a CSP packet arrives, it
-//       * processes it into Transparent Mode packets that are sent in sequence
-//       * to the UHF Radio via the UART interface.
-//       *
-//       * @param taskParameters Just a placeholder
-//       */
-//       static void queueSendToUHFTask( void *taskParameters );
-//
-//      /*!
-//       * @brief The task that send CSP packets via a queue to the CSP server.
-//       *
-//       * @details The task monitors the UART interface from the UHF Radio for
-//       * Transparent Mode packets. It processes those received and reconstructs
-//       * the source CSP packet. When a CSP packet is complete, it is sent via a
-//       * queue to the CSP server.
-//       *
-//       * @param taskParameters Just a placeholder
-//       */
-//       static void queueReceiveFromUHFTask( void *taskParameters );
-//
-//      /*!
-//       * @brief Accessor
-//       *
-//       * @return The Send queue handle
-//       */
-//      QueueHandle_t
-//      getSendQueueHandle () const
-//      {
-//        return xSendToUHFQueue;
-//      }
-//
-//      /*!
-//       * @brief Accessor
-//       *
-//       * @return The Receive queue handle
-//       */
-//      QueueHandle_t
-//      getRecvQueueHandle () const
-//      {
-//        return xRecvFromUHFQueue;
-//      }
-
       // @todo is this best or should I make it a plain enum so that the wrapper
       // is more transparent? That is, would it be less to maintain?
       enum class MAC_UHFPacketProcessingStatus : uint16_t {
@@ -166,35 +119,6 @@ namespace ex2
        * @return The status of the process operation.
        */
       MAC_UHFPacketProcessingStatus processUHFPacket(const uint8_t *uhfPayload, const uint32_t payloadLength);
-
-      /*!
-       * @brief Reset the processing of received UHF data.
-       *
-       * @details Some kind of error (dropped packet, bad packet, etc.) has
-       * happened and the current CSP packet cannot be recovered. Reset the
-       * processing.
-       */
-//      void resetUHFProcessing();
-
-      /*!
-       * @brief A complete CSP packet is ready to be sent up to the the CSP Server.
-       *
-       * @return true if there is a CSP packet, false otherwise
-       */
-//      bool isCSPPacketReady();
-
-      /*!
-       * @brief Return a CSP packet that has been received from the radio
-       *
-       * @todo Is this needed; circular buffer to replace?
-       *
-       * @details After the CSP packet has been retrieved, call @p resetUHFProcessing.
-       * @todo Should we just call resetUHFProcessing? Do we even need to?
-       *
-       * @return Pointer to the completed CSP packet.
-       */
-      csp_packet_t * getCSPPacket();
-
 
       /*!
        * @brief Return the number of MPDUs needed to transmit the received
@@ -238,7 +162,7 @@ namespace ex2
        *
        * @return Length of each MPDU payload in the MPDU Payload buffer in bytes.
        */
-      const uint32_t mpduPayloadLength();
+      uint32_t mpduPayloadLength() const;
 
       /*!
        * @brief Pointer to MPDU payloads buffer.
@@ -247,14 +171,14 @@ namespace ex2
        *
        * @return pointer to the MPDU payloads buffer.
        */
-      const uint8_t * mpduPayloadsBuffer();
+      uint8_t * mpduPayloadsBuffer();
 
       /*!
        * @breif The number of bytes in the MPDU payloads buffer.
        *
        * @return Number of bytes in the MPDU payloads buffer.
        */
-      const uint32_t mpduPayloadsBufferLength();
+      uint32_t mpduPayloadsBufferLength() const;
 
       /*!
        * @brief An iterator that provides MPDUs corresponding to a CSP packet.
@@ -332,6 +256,12 @@ namespace ex2
         m_rfModeNumber = rfModeNumber;
       }
 
+      const std::vector<uint8_t>&
+      getRawCspPacket () const
+      {
+        return m_rawCSPPacket;
+      }
+
     private:
 
       static MAC* m_instance;
@@ -348,9 +278,7 @@ namespace ex2
       void m_updateErrorCorrection(
         ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
 
-//      bool isESTTCPacket(std::vector<uint8_t> &packet);
-//
-//      bool isAX25Packet(std::vector<uint8_t> &packet);
+      void m_decodeCSPPacket();
 
       // member vars that define the MAC operation
       ErrorCorrection *m_errorCorrection = 0;
@@ -379,11 +307,15 @@ namespace ex2
 
       // member vars to track received CSP packet fragments
       bool m_firstCSPFragmentReceived;
-      uint16_t m_codewordFragmentCount;
-      bool m_codewordFragmentsGood;
+      uint16_t m_currentCSPPacketLength;
+      uint16_t m_expectedMPDUs;
+      uint16_t m_mpduCount;
+//      bool m_codewordFragmentsGood;
       uint16_t m_userPacketFragementCount;
 
       float m_SNREstimate;
+
+      std::vector<uint8_t> m_rawCSPPacket;
     };
 
   } // namespace sdr

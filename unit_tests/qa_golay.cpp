@@ -26,6 +26,8 @@ using namespace std;
 
 #include "gtest/gtest.h"
 
+#define QA_GLOAY_DEBUG 0 // Set to 1 to turn on logging
+
 /*!
  * @brief Factorial n!
  */
@@ -93,12 +95,14 @@ TEST(golay, CheckManyCorrectableErrors )
       uint32_t recd = codeword ^ pattern;
       // Decode
       int16_t decoded = golay_decode(recd);
+#if QA_GLOAY_DEBUG
       printf("data     0x%08x\n", data);
       printf("codeword 0x%08x\n", codeword);
       printf("pattern  0x%08x\n", pattern);
       printf("recd     0x%08x\n", recd);
       printf("decode 0x%08x\n", decoded);
       printf("-------------------\n");
+#endif
       // Check decoded is same as data
       ASSERT_TRUE(data == decoded) << "Oops, Golay failed!";
     } // num trials
@@ -106,13 +110,13 @@ TEST(golay, CheckManyCorrectableErrors )
 }
 
 /*!
- * @brief Test correction of 3 or fewer errors.
+ * @brief Test correction of 4 or more errors.
  */
 TEST(golay, CheckManyUncorrectableErrors )
 {
   uint16_t numTrials = 100;
   /* ---------------------------------------------------------------------
-   * Confirm Golay codec corrects 1, 2, and 3 errors
+   * Confirm Golay codec can't correct 4 or more errors in 12 bits
    * ---------------------------------------------------------------------
    */
   srandom(time(NULL));
@@ -128,11 +132,16 @@ TEST(golay, CheckManyUncorrectableErrors )
       uint32_t pattern = nBitErrorPattern(numBitErrors);
       // Apply the bit error tothe codeword to get received codeword
       uint32_t recd = codeword ^ pattern;
+#if QA_GLOAY_DEBUG
       printf("pattern 0x%08x codeword 0x%08x recd 0x%08x\n", pattern, codeword, recd);
+#endif
       // Decode
       int16_t decoded = golay_decode(recd);
+#if QA_GLOAY_DEBUG
+      printf(" lots errors decoded = %d\n",decoded);
+#endif
       // Check decoded is same as data
       ASSERT_TRUE(data != decoded) << "Oops, Golay succeeded correcting too many errors!";
     } // num trials
-  } // 1, 2, and 3 bits in error
+  } // > 3 bits in error
 }

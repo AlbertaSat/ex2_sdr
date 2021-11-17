@@ -126,7 +126,7 @@ printf("header len = %ld payload %ld\n",header1->MACHeaderLength(), MPDU::maxMTU
   uint8_t cwFragmentIndex = header2->getCodewordFragmentIndex();
   ASSERT_TRUE(codewordFragmentIndex == cwFragmentIndex) << "codeword fragment indices don't match!";
 
-  uint16_t uPacketLen = header2->getUserPacketLength();
+  uint16_t uPacketLen = header2->getUserPacketPayloadLength();
   ASSERT_TRUE(userPacketLength == uPacketLen) << "User packet lenghts don't match!";
 
   uint8_t uPacketFragIndex = header2->getUserPacketFragmentIndex();
