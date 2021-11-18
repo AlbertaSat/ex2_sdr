@@ -68,24 +68,13 @@ namespace ex2
     public:
 
       /*!
-       * @brief Return a pointer to singleton instance of Configuration.
-       *
-       * @details Provides access to the Configuration.
-       *
-       * @warning This class may not be thread-safe.
-       *
-       * @todo 20211103 Need to make this a regular class, not a singleton
+       * @brief Constructor
        *
        * @param rfModeNumber The UHF radio modulation in use.
        * @param errorCorrectionScheme The FEC scheme in use.
-       * @return pointer to the @p MAC instance
        */
-      static MAC *
-      instance (RF_Mode::RF_ModeNumber rfModeNumber,
-        ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme
-      );
-
-      static MAC * instance();
+      MAC (RF_Mode::RF_ModeNumber rfModeNumber,
+        ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
 
       ~MAC ();
 
@@ -264,17 +253,6 @@ namespace ex2
 
     private:
 
-      static MAC* m_instance;
-
-      /*!
-       * @brief Constructor
-       *
-       * @param rfModeNumber The UHF radio modulation in use.
-       * @param errorCorrectionScheme The FEC scheme in use.
-       */
-      MAC (RF_Mode::RF_ModeNumber rfModeNumber,
-        ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
-
       void m_updateErrorCorrection(
         ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
 
@@ -310,7 +288,6 @@ namespace ex2
       uint16_t m_currentCSPPacketLength;
       uint16_t m_expectedMPDUs;
       uint16_t m_mpduCount;
-//      bool m_codewordFragmentsGood;
       uint16_t m_userPacketFragementCount;
 
       float m_SNREstimate;
