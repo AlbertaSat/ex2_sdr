@@ -51,7 +51,7 @@ using namespace ex2::sdr;
 TEST(mac, SingletonConstructor)
 {
   /* ---------------------------------------------------------------------
-   * Check singleton behaviour, then accessors
+   * Make sure objects can be instantiated, then check accessors
    * ---------------------------------------------------------------------
    */
 
@@ -59,13 +59,13 @@ TEST(mac, SingletonConstructor)
   ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme =
       ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
 
-  MAC *myMac1 = MAC::instance(modulation, errorCorrectionScheme);
+  MAC *myMac1 = new MAC(modulation, errorCorrectionScheme);
 
-  ASSERT_FALSE(myMac1 == NULL) << "Singleton failed to fetch an instance";
+  ASSERT_FALSE(myMac1 == NULL) << "Can't instantiate MAC 1";
 
-  MAC *myMac2 = MAC::instance(modulation, errorCorrectionScheme);
+  MAC *myMac2 = new MAC(modulation, errorCorrectionScheme);
 
-  ASSERT_TRUE(myMac1 == myMac2) << "Singleton creates more than one instance";
+  ASSERT_FALSE(myMac2 == NULL) << "Can't instantiate MAC 2";
 
   //
   // Check accessors
@@ -105,7 +105,7 @@ TEST(mac, receiveCSPPacket)
   ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme =
       ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
 
-  MAC *myMac1 = MAC::instance(modulation, errorCorrectionScheme);
+  MAC *myMac1 = new MAC(modulation, errorCorrectionScheme);
 
   // First do a little CSP config work
   csp_conf_t cspConf;
