@@ -42,7 +42,7 @@ namespace ex2 {
     convCode27::encode(PPDU_u8 &payload) {
       // @todo for now just pass it through
 
-      printf("convCode27 encoding %ld byte chunk\n", payload.payloadLength());
+//      printf("convCode27 encoding %ld byte chunk\n", payload.payloadLength());
       PPDU_u8::payload_t tempPay = payload.getPayload();
       tempPay.resize(119,0);
       PPDU_u8 encodedPayload(tempPay,payload.getBps());
