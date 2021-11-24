@@ -34,17 +34,6 @@ extern "C" {
 #include "mpduHeader.hpp"
 #include "radio.h"
 
-/*!
- * The Maximum Transmission Unit for the Endurosat UHF radio is 128 bytes.
- * After accounting for the MPDU Header, it becomes 119 bytes.
- *
- * @todo This should be defined someplace more accessible
- */
-//#define MPDU_MTU ( 119 )             // bytes
-//#define MPDU_DATA_FIELD_1_SIZE ( 1 ) // byte
-//#define
-//#define MPDU_LENGTH (MPDU_DATA_FIELD_1_SIZE + MPDU_MTU + MPDUHeader::MACHeaderLength()/8)
-
 namespace ex2
 {
   namespace sdr
@@ -202,11 +191,15 @@ namespace ex2
         return UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH - MPDUHeader::MACHeaderLength();
       }
 
-      static uint16_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection);
-
+      /*!
+       * @brief Return the number of MPDUs in N bytes for the given FEC scheme
+       *
+       * @param[in] byteCount The number of bytes we assume need to be turned
+       * into MPDUs
+       *
+       * @return errorCorrection Reference to the current FEC scheme
+       */
       static uint16_t mpdusInNBytes(uint32_t byteCount, ErrorCorrection &errorCorrection);
-
-      static uint16_t mpdusPerCodeword(ErrorCorrection &errorCorrection);
 
     private:
       MPDUHeader *m_mpduHeader;

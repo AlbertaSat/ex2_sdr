@@ -33,6 +33,7 @@ extern "C" {
 #include "mac.hpp"
 #include "mpdu.hpp"
 #include "mpduHeader.hpp"
+#include "MACWrapper.h"
 
 using namespace std;
 using namespace ex2::sdr;
@@ -43,12 +44,10 @@ using namespace ex2::sdr;
 
 #define UHF_TRANSPARENT_MODE_PACKET_LENGTH 128  // UHF transparent mode packet is always 128 bytes
 
-
-
 /*!
  * @brief Test singleton constructor
  */
-TEST(mac, SingletonConstructor)
+TEST(mac, ConstructorAndAccessors)
 {
   /* ---------------------------------------------------------------------
    * Make sure objects can be instantiated, then check accessors
@@ -92,12 +91,13 @@ TEST(mac, SingletonConstructor)
 }
 
 /*!
- * @brief Test singleton constructor
+ * @brief Test receiving a CSP packet and receiving transparent mode packets
  */
-TEST(mac, receiveCSPPacket)
-{
+TEST(mac, CSPPacketLoopback) {
   /* ---------------------------------------------------------------------
-   * Check CSP packet processing
+   * Check CSP packet processing by receiving a CSP packet and then using
+   * the resulting MPDUs to emulate received transparent mode packets.
+   * Compare the reconstituted CSP packet against the original packet
    * ---------------------------------------------------------------------
    */
 
@@ -224,7 +224,6 @@ TEST(mac, receiveCSPPacket)
         csp_log_error("Failed to get CSP buffer");
         FAIL() << "Failed to get CSP buffer";
       }
-
       // CSP forces us to do our own bookkeeping...
       packet->length = cspPacketDataLengths[currentCSPPacket];
       packet->id.ext = 0x87654321;
@@ -287,20 +286,20 @@ TEST(mac, receiveCSPPacket)
               case MAC::MAC_UHFPacketProcessingStatus::CSP_PACKET_READY:
               {
 //                printf("CSP Packet Ready\n");
-                std::vector<uint8_t> rawCSP = myMac1->getRawCspPacket();
+                const uint8_t *rawCSP = myMac1->getRawCspPacketBuffer();
                 uint8_t *p = (uint8_t *) packet;
-                uint16_t const cspPacketLength = sizeof(csp_packet_t) + packet->length;
 
 #if QA_MPDU_DEBUG
+                printf("packet length %d raw CSP packet length %ld cast CSP packet length %ld\n", packet->length, myMac1->getRawCspPacketBufferLength(), myMac1->getRawCspPacketLength());
                 printf("packet length %d (2 bytes) %02x\n", packet->length, packet->length);
                 printf("packet id (4 bytes) %04x\n", packet->id);
-                for (uint16_t i = 0; i < cspPacketLength; i++) {
+                for (uint16_t i = 0; i < myMac1->getRawCspPacketLength(); i++) {
                   printf("%04d %02x|%02x\n",i,rawCSP[i],p[i]);
                 }
                 printf("------------\n");
 #endif
                 bool same = true;
-                for (uint16_t i = 0; i < cspPacketLength; i++) {
+                for (uint16_t i = 0; i < myMac1->getRawCspPacketLength(); i++) {
                   same = same && (rawCSP[i] == p[i]);
                 }
                 ASSERT_TRUE(same) << "decoded CSP packet does not match original";
@@ -326,4 +325,41 @@ TEST(mac, receiveCSPPacket)
 
   } // for a number of Error Correction schemes
 
-}
+} //
+
+//TEST(mac, ConstructorAndAccessors_wrapper) {
+//  /* ---------------------------------------------------------------------
+//   * Same as the ConstructorAndAccessors test, but using the wrapper.
+//   *
+//   * ChMake sure objects can be instantiated, then check accessors
+//   * ---------------------------------------------------------------------
+//   */
+//  mac_t *myMac1 = mac_create(RF_MODE_3, NO_FEC);
+//
+//  ASSERT_FALSE(myMac1 == NULL) << "Can't instantiate MAC 1";
+//
+//  mac_t *myMac2 = mac_create(RF_MODE_3, NO_FEC);
+//
+//  ASSERT_FALSE(myMac2 == NULL) << "Can't instantiate MAC 2";
+//
+//  mac_destroy(myMac1);
+//
+//  ASSERT_TRUE(myMac1 == NULL) << "Can't destroy MAC 1";
+//
+//  mac_destroy(myMac2);
+//
+//  ASSERT_TRUE(myMac2 == NULL) << "Can't destroy MAC 2";
+//}
+//
+//TEST(mac, CSPPacketLoopback_wrapper) {
+//  /* ---------------------------------------------------------------------
+//   * Same as the CSPPacketLoopback test, but using the wrapper.
+//   *
+//   * Check CSP packet processing by receiving a CSP packet and then using
+//   * the resulting MPDUs to emulate received transparent mode packets.
+//   * Compare the reconstituted CSP packet against the original packet
+//   * ---------------------------------------------------------------------
+//   */
+//
+//}
+//

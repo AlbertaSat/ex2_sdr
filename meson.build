@@ -92,6 +92,7 @@ core_source_files = [
     PRJ_DIR / 'lib/phy_layer/pdu/ppdu_u8.cpp',
 ##    PRJ_DIR / 'lib/phy_layer/pdu/ppdu_u32.cpp',
 ##    PRJ_DIR / 'lib/utilities/taskCPP.cpp',
+    PRJ_DIR / 'lib/wrapper/MACWrapper.cpp',
     ]
 
 incdir = include_directories(
@@ -107,6 +108,7 @@ incdir = include_directories(
     'include/phy_layer',
     'include/phy_layer/pdu',
     'include/utilities',
+    'include/wrapper',
     'include',
     )
     

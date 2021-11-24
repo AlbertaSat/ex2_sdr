@@ -42,6 +42,32 @@ using namespace ex2::sdr;
 
 #define UHF_TRANSPARENT_MODE_PACKET_LENGTH 128  // UHF transparent mode packet is always 128 bytes
 
+uint32_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection) {
+  // Get length of CSP packet in bytes. Make sure we are not fooled by
+  // alignment, so add up the struct members
+  uint32_t cspPacketSize = sizeof(csp_packet_t) + cspPacket->length;
+
+  return MPDU::mpdusInNBytes(cspPacketSize, errorCorrection);
+
+} // mpdusPerCSPPacket
+
+    uint16_t mpdusPerCodeword(ErrorCorrection &errorCorrection) {
+
+      // Get the FEC scheme codeword lengths in bytes
+      uint32_t cwLen = errorCorrection.getCodewordLen() / 8;
+      if (errorCorrection.getCodewordLen() % 8 != 0) {
+        cwLen++;
+      }
+
+      uint32_t numMPDUPayloadPerCW = cwLen / MPDU::maxMTU();
+      if (cwLen % MPDU::maxMTU() != 0) {
+        numMPDUPayloadPerCW++;
+      }
+
+      return numMPDUPayloadPerCW;
+
+    } // mpdusPerCodeword
+
 /*!
  * @brief Test Constructors, the one that is parameterized, and the one
  * that takes the received packet as input. Deep compare the two objects to
@@ -299,7 +325,7 @@ TEST(mpdu, NonAccessorMethods)
     errorCorrection = new ErrorCorrection(ecs, (MPDU::maxMTU() * 8));
 
     // Get how many MPDUs needed for a codeword
-    uint32_t numMPDUsPerCodeword = MPDU::mpdusPerCodeword(*errorCorrection);
+    uint32_t numMPDUsPerCodeword = mpdusPerCodeword(*errorCorrection);
 #if QA_MPDU_DEBUG
     printf("numMPDUsPerCordword = %ld\n",numMPDUsPerCodeword);
 #endif
@@ -332,7 +358,7 @@ TEST(mpdu, NonAccessorMethods)
       }
 #endif
 
-      uint32_t numMPDUsPerPacket = MPDU::mpdusPerCSPPacket(packet, *errorCorrection);
+      uint32_t numMPDUsPerPacket = mpdusPerCSPPacket(packet, *errorCorrection);
 
 #if QA_MPDU_DEBUG
       printf("packet length = %d\n", packet->length);

@@ -38,6 +38,15 @@ test('mac', unit_test_mac,
     timeout: 30
     )
     
+unit_test_mac_wrapper = executable('unit_test-mac-wrapper', 'qa_macWrapper.cpp', core_source_files,
+    include_directories : incdir,
+    dependencies: [gtest_dep, csp_dep]
+    )
+    
+test('mac-wrapper', unit_test_mac_wrapper,
+    timeout: 30
+    )
+    
 unit_test_noFEC = executable('unit_test-noFEC', 'qa_NoFEC.cpp', core_source_files,
     include_directories : incdir,
     dependencies: [gtest_dep, csp_dep]

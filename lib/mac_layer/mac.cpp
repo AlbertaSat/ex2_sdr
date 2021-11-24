@@ -12,7 +12,6 @@
  */
 
 #include "mac.hpp"
-
 #include <cmath>
 
 #ifdef __cplusplus
@@ -65,31 +64,16 @@ namespace ex2 {
       // Use the FEC factory to get the current FEC codec
       m_FEC = FEC::makeFECCodec(errorCorrectionScheme);
 
-      // Calculate how many MPDUs needed per codeword
-      m_numMPDUsPerCodeword = MPDU::mpdusPerCodeword(*m_errorCorrection);
-
-      // Calculate how many codeword fragments are needed to send one codeword
-      m_numCodewordFragments = m_errorCorrection->numCodewordFragments(MPDU::maxMTU());
-
-      if (m_errorCorrection->getCodewordLen() % MPDUHeader::MACHeaderLength() != 0)
-        m_numCodewordFragments++;
-      m_messageLength = m_errorCorrection->getMessageLen();
-      //      printf("setErrorCorrectionScheme\nscheme %d\n", (uint16_t) errorCorrectionScheme);
-      //      printf("setErrorCorrectionScheme ErrorCorrction message length %ld\n",m_messageLength);
-
       // Always reset the first CSP fragment received flag if the FEC changes
       m_firstCSPFragmentReceived = false;
 
       m_currentCSPPacketLength = 0;
       m_mpduCount = 0;
-      m_userPacketFragementCount = 0;
       m_expectedMPDUs = 0;
 
       // @todo clear buffers?
       m_codewordBuffer.resize(0);
       m_transparentModePayloads.resize(0);
-      m_receiveCSPBuffer.resize(0);
-
     }
 
     void
@@ -108,10 +92,6 @@ namespace ex2 {
 
     MAC::MAC_UHFPacketProcessingStatus
     MAC::processUHFPacket(const uint8_t *uhfPayload, const uint32_t payloadLength) {
-
-      // @todo Work in Progress...
-
-      uint32_t bitErrors = 0; // TODO member var...
 
       // Make an MPDU from the @p uhfPayload. This causes the recevied MPDUHeader
       // data to be decoded. If that fails, an exception is thrown and we can
@@ -269,37 +249,22 @@ namespace ex2 {
 
     void
     MAC::m_decodeCSPPacket() {
-      uint32_t bitErrors = 0;
+
       m_rawCSPPacket.resize(0);
       std::vector<uint8_t> codeword;
       std::vector<uint8_t> decodedMessage;
       uint32_t cwLen = m_errorCorrection->getCodewordLen()/8;
-//      printf("m_codewordBuffer %ld bytes cwLen %ld\n",m_codewordBuffer.size(),cwLen);
-//      for (uint16_t i = 0; i < m_codewordBuffer.size(); i++) {
-//        printf("codewordBuffer[%04d] %02x\n", i , m_codewordBuffer[i]);
-//      }
       uint32_t cwCount = m_codewordBuffer.size() / cwLen;
       for (uint32_t c = 0; c < cwCount; c++) {
         codeword.resize(0);
         codeword.insert(codeword.end(), m_codewordBuffer.begin()+c*cwLen, m_codewordBuffer.begin()+c*cwLen+cwLen);
-        bitErrors = m_FEC->decode(codeword, 100.0, decodedMessage);
-//        printf("codeword %ld bitErrors = %ld\n", c, bitErrors);
+        __attribute__((unused)) uint32_t bitErrors = m_FEC->decode(codeword, 100.0, decodedMessage);
+        // @todo could log the bit errors
         m_rawCSPPacket.insert(m_rawCSPPacket.end(), decodedMessage.begin(), decodedMessage.end());
       }
       m_rawCSPPacket.resize(m_currentCSPPacketLength);
       m_firstCSPFragmentReceived = false;
       m_mpduCount = 0;
-    }
-
-    /*!
-     * @brief Return the number of MPDUs (aka transparent mode payloads) in the packet.
-     *
-     * @param cspPacket
-     * @return The number of MPDUs (aka transparent mode payloads) in the @p cspPacket.
-     */
-    uint32_t
-    MAC::numMPDUsInCSPPacket(csp_packet_t * cspPacket) {
-      return MPDU::mpdusPerCSPPacket(cspPacket, *m_errorCorrection);
     }
 
     bool
@@ -474,12 +439,6 @@ namespace ex2 {
       return true; // @todo not yet sure when we'd return false. Only if FEC encoding fails, so check that possibility
     }
 
-    uint32_t
-    MAC::mpduPayloadLength() const {
-      return MPDU::maxMTU();
-    }
-
-
     uint8_t *
     MAC::mpduPayloadsBuffer() {
       return &m_transparentModePayloads.front();
@@ -489,72 +448,6 @@ namespace ex2 {
     MAC::mpduPayloadsBufferLength() const {
       return m_transparentModePayloads.size();
     }
-
-
-    //    bool
-    //    MAC::nextMPDU(MPDU &mpdu){
-    //
-    //      // @TODO implement function
-    //      return false;
-    //    }
-
-
-    //    bool
-    //    MAC::isESTTCPacket(std::vector<uint8_t> &packet) {
-    //      bool isPacket = false;
-    //      // First byte should be the Data Field 1, the Data Field 2 length in bytes
-    //      // Thus, the length of packet should be the value of the first byte + 1
-    //
-    //      if ((uint32_t)(packet[0] + 1) == packet.size()) {
-    //        if ((packet[1] == 'E') &&
-    //            (packet[2] == 'S') &&
-    //            (packet[3] == '+')) {
-    //          isPacket = true;
-    //        }
-    //        if ((packet[1] == 'O') &&
-    //            (packet[2] == 'K')) {
-    //          isPacket = true;
-    //        }
-    //        if ((packet[1] == '+') &&
-    //            (packet[2] == 'E') &&
-    //            (packet[3] == 'S')) {
-    //          isPacket = true;
-    //        }
-    //        if ((packet[1] == 'E') &&
-    //            (packet[2] == 'R') &&
-    //            (packet[3] == 'R')) {
-    //          isPacket = true;
-    //        }
-    //      } // packet length is good
-    //
-    //      return isPacket;
-    //
-    //    } // isESTTCPacket
-
-    //    void
-    //    MAC::m_clearFIFO(std::queue<PPDU_u8::payload_t> &fifo) {
-    //      std::queue<PPDU_u8::payload_t> empty;
-    //      std::swap(fifo, empty);
-    //    }
-
-    //    bool
-    //    MAC::isAX25Packet(std::vector<uint8_t> &packet) {
-    //      bool isPacket = false;
-    //      // First byte should be the Data Field 1, the Data Field 2 length in bytes
-    //      // Thus, the length of packet should be the value of the first byte + 1
-    //
-    //      if ((uint32_t)(packet[0] + 1) == packet.size()) {
-    //        // The AX.25 frame starts with 9 bytes that have the value 0x7E
-    //        uint8_t i;
-    //        isPacket = true;
-    //        for (i = 1; i <= 9; i++) {
-    //          isPacket = isPacket & (packet[i] == 0x7E);
-    //        }
-    //      } // packet length is good
-    //
-    //      return isPacket;
-    //
-    //    } // isAX25Packet
 
   } /* namespace sdr */
 } /* namespace ex2 */
