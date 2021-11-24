@@ -78,131 +78,6 @@ namespace ex2
 
       ~MAC ();
 
-      // @todo is this best or should I make it a plain enum so that the wrapper
-      // is more transparent? That is, would it be less to maintain?
-      enum class MAC_UHFPacketProcessingStatus : uint16_t {
-        // All the necessary UHF packets have been received and a CSP packet
-        // was formed and must be removed.
-        CSP_PACKET_READY = 0x0000,
-        // Not all the necessary UHF packets have been received, but there are
-        // no more expected. A CSP packet was formed and must be removed. Then
-        // the last UHF packet must be resubmitted.
-        CSP_PACKET_READY_RESUBMIT_PREVIOUS_PACKET = 0x0001,
-        // Not all the necessary UHF packets have been received, waiting for
-        // the next one.
-        READY_FOR_NEXT_UHF_PACKET = 0x0002
-        // @todo is another value needed to indicate that the first packet of
-        // a CSP packet was not received? Or is READY_FOR_NEXT_UHF_PACKET good
-        // enough
-      };
-
-      /*!
-       * @brief Process the received UHF data as an MPDU.
-       *
-       * @details Process each MPDU received (UHF received data in transparent
-       * mode) until a full CSP packet is received or there is an error.
-       *
-       * @param uhfPayload
-       * @param payloadLength
-       *
-       * @return The status of the process operation.
-       */
-      MAC_UHFPacketProcessingStatus processUHFPacket(const uint8_t *uhfPayload, const uint32_t payloadLength);
-
-      /*!
-       * @brief Return the number of MPDUs needed to transmit the received
-       * CSP packet
-       *
-       * @details This is useful for unit testing.
-       *
-       * @todo Perhaps make this protected and the unit test a friend class?
-       *
-       * @param cspPacket
-       * @return
-       */
-      uint32_t numMPDUsInCSPPacket(csp_packet_t * cspPacket);
-
-      /*!
-       * @brief Receive and encode new CSP packet.
-       *
-       * @details Processed the received CSP packet to create MPDUs ready for
-       * transmission by the UHF radio in transparent mode. This function
-       * should be followed by repeated calls to @p nextMPDU until all MPDUs
-       * corresponding to the current CSP have been created and transimitted.
-       *
-       * @note This is valid as of the most recent CSP packet processed by
-       * @p receiveCSPPacket()
-       *
-       * @param cspPacket
-       *
-       * @return True if the CSP packet was encoded, false otherwise
-       */
-      bool receiveCSPPacket(csp_packet_t * cspPacket);
-
-      /*!
-       * @brief The length of each MPDU payload in the MPDU Payload buffer in bytes.
-       *
-       * @details The nominal length for a transparent mode payload is 128 bytes.
-       * However, this code may be used for radios other than the EnduroSat
-       * UHF Type II, so it's best to have the ability to check.
-       *
-       * @note This is valid as of the most recent CSP packet processed by
-       * @p receiveCSPPacket()
-       *
-       * @return Length of each MPDU payload in the MPDU Payload buffer in bytes.
-       */
-      uint32_t mpduPayloadLength() const;
-
-      /*!
-       * @brief Pointer to MPDU payloads buffer.
-       *
-       * @details This is needed for the C wrapper accessor
-       *
-       * @return pointer to the MPDU payloads buffer.
-       */
-      uint8_t * mpduPayloadsBuffer();
-
-      /*!
-       * @breif The number of bytes in the MPDU payloads buffer.
-       *
-       * @return Number of bytes in the MPDU payloads buffer.
-       */
-      uint32_t mpduPayloadsBufferLength() const;
-
-      /*!
-       * @brief An iterator that provides MPDUs corresponding to a CSP packet.
-       *
-       * @todo need this?
-       *
-       * @details Each invocation of this function returns the next MPDU
-       * corresponding to a CSP packet that was passed to @p newCSPPacket.
-       *
-       * @param[in out] mpdu The MPDU contents are replaced by the next MPDU
-       * corresponding to the received CSP packet, or zeroed if there are no more.
-       *
-       * @return true if there is at least one more MPDU, in which case the @p
-       * mpdu contains a valid MPDU that should be transmitted. false if there
-       * are no more MPDUs.
-       */
-//      bool nextMPDU(MPDU &mpdu);
-
-      /*!
-        * @brief A kind of iterator that provides MPDUs corresponding to a CSP packet.
-        *
-        * @todo need this?
-        *
-        * @details Each invocation of this function returns the next MPDU
-        * corresponding to a CSP packet that was passed to @p newCSPPacket.
-        *
-        * @param[in out] mpdu The MPDU contents are replaced by the next MPDU
-        * corresponding to the received CSP packet, or zeroed if there are no more.
-        *
-        * @return true if there is at least one more MPDU, in which case the @p
-        * mpdu contains a valid MPDU that should be transmitted. false if there
-        * are no more MPDUs.
-        */
-//       bool nextTransparentModePayload();
-
       /*!
        * @brief Accessor
        *
@@ -239,17 +114,115 @@ namespace ex2
        * @param rfModeNumber The UHF Radio RF Mode to use
        */
       void
-      setRFModeNumber (
-        RF_Mode::RF_ModeNumber rfModeNumber)
+      setRFModeNumber (RF_Mode::RF_ModeNumber rfModeNumber)
       {
         m_rfModeNumber = rfModeNumber;
       }
 
-      const std::vector<uint8_t>&
-      getRawCspPacket () const
+      /************************************************************************/
+      /* Receive from PHY (UHF Radio) methods                                 */
+      /************************************************************************/
+
+      enum class MAC_UHFPacketProcessingStatus : uint16_t {
+        // All the necessary UHF packets have been received and a CSP packet
+        // was formed and must be removed.
+        CSP_PACKET_READY = 0x0000,
+        // Not all the necessary UHF packets have been received, but there are
+        // no more expected. A CSP packet was formed and must be removed. Then
+        // the last UHF packet must be resubmitted.
+        CSP_PACKET_READY_RESUBMIT_PREVIOUS_PACKET = 0x0001,
+        // @todo this is not used at this point, eliminate?
+        // Not all the necessary UHF packets have been received, waiting for
+        // the next one.
+        READY_FOR_NEXT_UHF_PACKET = 0x0002
+        // @todo is another value needed to indicate that the first packet of
+        // a CSP packet was not received? Or is READY_FOR_NEXT_UHF_PACKET good
+        // enough? See current logic in mac.cpp
+      };
+
+      /*!
+       * @brief Process the received UHF data as an MPDU.
+       *
+       * @details Process each MPDU received (UHF received data in transparent
+       * mode) until a full CSP packet is received or there is an error.
+       *
+       * @param uhfPayload The transparent mode data received from the UHF radio
+       * @param payloadLength The number of transparent mode data bytes received
+       *
+       * @return The status of the process operation. If @p CSP_PACKET_READY,
+       * a raw CSP packet (i.e., a @p csp_packet_t cast to a uint8_t pointer)
+       * is in the raw buffer.
+       */
+      MAC_UHFPacketProcessingStatus processUHFPacket(const uint8_t *uhfPayload, const uint32_t payloadLength);
+
+      /*!
+       * @brief When ready, the raw CSP Packet buffer can be retrieved.
+       *
+       * @return Pointer to the raw CSP packet buffer
+       */
+      const uint8_t *
+      getRawCspPacketBuffer () const
       {
-        return m_rawCSPPacket;
+        return &*m_rawCSPPacket.begin();
       }
+
+      /*!
+       * @brief When ready, the raw CSP Packet buffer length can be returned.
+       *
+       * @return The raw CSP Packet buffer length in bytes
+       */
+      uint32_t
+      getRawCspPacketBufferLength () const
+      {
+        return m_rawCSPPacket.size();
+      }
+
+      /*!
+       * @brief When ready, the length of the CSP packet data in the raw CSP
+       * Packet buffer can be returned.
+       *
+       * @return The length of the CSP packet data in the raw CSP Packet buffer
+       */
+      uint32_t
+      getRawCspPacketLength () const
+      {
+        csp_packet_t * recvCSPPacket = (csp_packet_t *) &*m_rawCSPPacket.begin();
+        return recvCSPPacket->length;
+      }
+
+      /************************************************************************/
+      /* Send to PHY (UHF Radio) methods                                      */
+      /************************************************************************/
+
+      /*!
+       * @brief Receive and encode new CSP packet.
+       *
+       * @details Processed the received CSP packet to create MPDUs ready for
+       * transmission by the UHF radio in transparent mode. If the method returns
+       * true, then there will be raw MPDUs in the mpdu payloads buffer
+       *
+       * @param cspPacket
+       *
+       * @return True if the CSP packet was encoded, false otherwise
+       */
+      bool receiveCSPPacket(csp_packet_t * cspPacket);
+
+      /*!
+       * @brief Pointer to MPDU payloads buffer.
+       *
+       * @details This is needed for the C wrapper accessor
+       *
+       * @return pointer to the MPDU payloads buffer.
+       */
+      uint8_t * mpduPayloadsBuffer();
+
+      /*!
+       * @breif The number of bytes in the MPDU payloads buffer.
+       *
+       * @return Number of bytes in the MPDU payloads buffer.
+       */
+      uint32_t mpduPayloadsBufferLength() const;
+
 
     private:
 
@@ -265,12 +238,6 @@ namespace ex2
 
       RF_Mode::RF_ModeNumber m_rfModeNumber;
 
-      uint32_t m_numMPDUsPerCodeword;
-
-      // member vars that define the structure of a fragmented CSP packet
-      uint16_t m_numCodewordFragments;
-      uint16_t m_messageLength;
-
       // Mutexs to ensure that in progress packet processing is not corrupted
       // by an inadvertant change in FEC parameters
 //      std::mutex m_ecSchemeMutex;
@@ -278,17 +245,12 @@ namespace ex2
       // buffers needed to fragment a CSP Packet prior to transmission
       std::vector<uint8_t> m_codewordBuffer;
       std::vector<uint8_t> m_transparentModePayloads;
-//      void m_clearFIFO(std::queue<PPDU_u8::payload_t> &fifo);
-
-      // buffers needed to handle received CSP packet fragments
-      std::vector<uint8_t> m_receiveCSPBuffer;
 
       // member vars to track received CSP packet fragments
       bool m_firstCSPFragmentReceived;
       uint16_t m_currentCSPPacketLength;
       uint16_t m_expectedMPDUs;
       uint16_t m_mpduCount;
-      uint16_t m_userPacketFragementCount;
 
       float m_SNREstimate;
 
