@@ -14,25 +14,12 @@
 #include "MACWrapper.h"
 
 #include "mac.hpp"
+#include "mpdu.hpp"
 
-//using namespace ex2::sdr;
 
 struct mac {
   void *obj;
 };
-
-//mac_t *mac_create()
-//{
-//  mac_t *m;
-//  ex2::sdr::MAC *obj;
-//
-//  m      = (typeof(m))malloc(sizeof(*m));
-//  obj    = new ex2::sdr::MAC(1);
-////  obj    = new MAC((RF_Mode::RF_ModeNumber) rfMode, (ErrorCorrection::ErrorCorrectionScheme) fecScheme);
-//  m->obj = obj;
-//
-//  return m;
-//}
 
 mac_t *mac_create(rf_mode_number_t rfMode, error_correction_scheme_t fecScheme)
 {
@@ -48,17 +35,12 @@ mac_t *mac_create(rf_mode_number_t rfMode, error_correction_scheme_t fecScheme)
 
 void mac_destroy(mac_t *m)
 {
-  printf("m %ld\n",m);
-
   if (m == NULL)
     return;
-  printf("m deleting\n");
-  printf("m->obj %ld\n",m->obj);
 
   delete static_cast<ex2::sdr::MAC *>(m->obj);
-  printf("m->obj %ld\n",m->obj);
   free(m);
-  m = __null;
+  m = NULL; // @todo not sure this really does anything that matters
 }
 
 // ErrorCorrection::ErrorCorrectionScheme getErrorCorrectionScheme ();
@@ -109,18 +91,6 @@ bool set_rf_mode_number (mac_t *m, rf_mode_number_t rf_mode_number)
   return true;
 }
 
-
-//void mtest_add(mac_t *m, int val)
-//{
-//  ex2::sdr::MAC *obj;
-//
-//  if (m == NULL)
-//    return;
-//
-//  obj = static_cast<ex2::sdr::MAC *>(m->obj);
-//  obj->add(val);
-//}
-
 uhf_packet_processing_status_t process_uhf_packet(mac_t *m, const uint8_t *uhf_payload, const uint32_t payload_length)
 {
   ex2::sdr::MAC *obj;
@@ -131,3 +101,75 @@ uhf_packet_processing_status_t process_uhf_packet(mac_t *m, const uint8_t *uhf_p
   obj = static_cast<ex2::sdr::MAC *>(m->obj);
   return (uhf_packet_processing_status_t) (obj->processUHFPacket(uhf_payload, payload_length));
 }
+
+const uint8_t * get_raw_csp_packet_buffer(mac_t *m)
+{
+  ex2::sdr::MAC *obj;
+
+  if (m == NULL)
+    return NULL;
+
+  obj = static_cast<ex2::sdr::MAC *>(m->obj);
+  return obj->getRawCspPacketBuffer();
+}
+
+int32_t get_raw_csp_packet_buffer_length(mac_t *m)
+{
+  ex2::sdr::MAC *obj;
+
+  if (m == NULL)
+    return -1;
+
+  obj = static_cast<ex2::sdr::MAC *>(m->obj);
+  return obj->getRawCspPacketBufferLength();
+}
+
+int32_t get_raw_csp_packet_length(mac_t *m)
+{
+  ex2::sdr::MAC *obj;
+
+  if (m == NULL)
+    return 1;
+
+  obj = static_cast<ex2::sdr::MAC *>(m->obj);
+  return obj->getRawCspPacketLength();
+}
+
+bool receive_csp_packet(mac_t *m, csp_packet_t * csp_packet)
+{
+  ex2::sdr::MAC *obj;
+
+  if (m == NULL)
+    return false;
+
+  obj = static_cast<ex2::sdr::MAC *>(m->obj);
+  return obj->receiveCSPPacket(csp_packet);
+}
+
+const uint8_t * mpdu_payloads_buffer(mac_t *m)
+{
+  ex2::sdr::MAC *obj;
+
+  if (m == NULL)
+    return NULL;
+
+  obj = static_cast<ex2::sdr::MAC *>(m->obj);
+  return obj->mpduPayloadsBuffer();
+}
+
+int32_t mpdu_payloads_buffer_length(mac_t *m)
+{
+  ex2::sdr::MAC *obj;
+
+  if (m == NULL)
+    return -1;
+
+  obj = static_cast<ex2::sdr::MAC *>(m->obj);
+  return obj->mpduPayloadsBufferLength();
+}
+
+uint32_t raw_mpdu_length()
+{
+  return ex2::sdr::MPDU::rawMPDULength();
+}
+

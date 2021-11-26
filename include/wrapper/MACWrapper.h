@@ -34,7 +34,6 @@ typedef struct mac mac_t;
  * @return pointer to @p mac_t that can be used to invoke various MAC methods
  */
 mac_t *mac_create(rf_mode_number_t rfMode, error_correction_scheme_t fecScheme);
-//mac_t *mac_create();
 
 /*!
  * @brief C wrapper for MAC object destructor
@@ -43,7 +42,6 @@ mac_t *mac_create(rf_mode_number_t rfMode, error_correction_scheme_t fecScheme);
  */
 void mac_destroy(mac_t *m);
 
-// ErrorCorrection::ErrorCorrectionScheme getErrorCorrectionScheme ();
 /*!
  * @brief Return the current FEC scheme
  *
@@ -93,27 +91,102 @@ typedef enum {
   UHF_PACKET_PROCESSING_BAD_WRAPPER_CONTEXT = 100 // needed for wrapper existance checking
 } uhf_packet_processing_status_t;
 
-// MAC_UHFPacketProcessingStatus processUHFPacket(const uint8_t *uhfPayload, const uint32_t payloadLength);
+/*!
+ * @brief Process the received UHF data as an MPDU.
+ *
+ * @details Process each MPDU received (UHF received data in transparent
+ * mode) until a full CSP packet is received or there is an error.
+ *
+ * @param m Pointer to the MAC object wrapper
+ * @param uhf_payload The transparent mode data received from the UHF radio
+ * @param payload_length The number of transparent mode data bytes received
+ *
+ * @return The status of the process operation. If @p CSP_PACKET_READY,
+ * a raw CSP packet (i.e., a @p csp_packet_t cast to a uint8_t pointer)
+ * is in the raw buffer. If there is a problem, @p UHF_PACKET_PROCESSING_BAD_WRAPPER_CONTEXT
+ * is returned.
+ */
 uhf_packet_processing_status_t process_uhf_packet(mac_t *m, const uint8_t *uhf_payload, const uint32_t payload_length);
 
-// const uint8_t * getRawCspPacketBuffer ()
+/*!
+ * @brief When ready, the raw CSP Packet buffer can be retrieved.
+ *
+ * @param m Pointer to the MAC object wrapper
+ *
+ * @return Pointer to the raw CSP packet buffer. If there is a problem, NULL
+ * is returned
+ */
+const uint8_t * get_raw_csp_packet_buffer(mac_t *m);
 
-// uint32_t getRawCspPacketBufferLength ()
+/*!
+ * @brief When ready, the raw CSP Packet buffer length can be returned.
+ *
+ * @param m Pointer to the MAC object wrapper
+ *
+ * @return The raw CSP Packet buffer length in bytes. If there is a problem
+ * return -1
+ */
+int32_t get_raw_csp_packet_buffer_length(mac_t *m);
 
-// uint32_t getRawCspPacketLength ()
+/*!
+ * @brief When ready, the length of the CSP packet data in the raw CSP
+ * Packet buffer can be returned.
+ *
+ * @param m Pointer to the MAC object wrapper
+ *
+ * @return The length of the CSP packet data in the raw CSP Packet buffer. If
+ * there is a problem return -1
+ */
+int32_t get_raw_csp_packet_length(mac_t *m);
+
 
 /************************************************************************/
 /* Send to PHY (UHF Radio) methods                                      */
 /************************************************************************/
 
-// bool receiveCSPPacket(csp_packet_t * cspPacket);
-//bool receive_CSP_packet(csp_packet_t * csp_packet);
+/*!
+ * @brief Receive and encode new CSP packet.
+ *
+ * @details Processed the received CSP packet to create MPDUs ready for
+ * transmission by the UHF radio in transparent mode. If the method returns
+ * true, then there will be raw MPDUs in the mpdu payloads buffer
+ *
+ * @param m Pointer to the MAC object wrapper
+ * @param cspPacket
+ *
+ * @return True if the CSP packet was encoded, false otherwise
+ */
+bool receive_csp_packet(mac_t *m, csp_packet_t * csp_packet);
 
-// uint8_t * mpduPayloadsBuffer();
+/*!
+ * @brief Pointer to MPDU payloads buffer.
+ *
+ * @details This is needed for the C wrapper accessor
+ *
+ * @param m Pointer to the MAC object wrapper
+ *
+ * @return pointer to the MPDU payloads buffer.
+ */
+const uint8_t * mpdu_payloads_buffer(mac_t *m);
 
-// uint32_t mpduPayloadsBufferLength() const;
+/*!
+ * @breif The number of bytes in the MPDU payloads buffer.
+ *
+ * @param m Pointer to the MAC object wrapper
+ *
+ * @return Number of bytes in the MPDU payloads buffer. If there is a problem
+ * returns -1
+ */
+int32_t mpdu_payloads_buffer_length(mac_t *m);
 
-
+/*!
+ * @brief Return the raw MPDU length
+ *
+ * @details This should be the length of every transparent mode packet
+ *
+ * @return Raw MPDU length
+ */
+uint32_t raw_mpdu_length();
 
 #ifdef __cplusplus
 }

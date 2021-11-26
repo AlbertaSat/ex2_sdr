@@ -40,7 +40,7 @@ using namespace ex2::sdr;
 
 #include "gtest/gtest.h"
 
-#define QA_MPDU_DEBUG 0 // set to 1 for debugging output
+#define QA_MAC_DEBUG 0 // set to 1 for debugging output
 
 #define UHF_TRANSPARENT_MODE_PACKET_LENGTH 128  // UHF transparent mode packet is always 128 bytes
 
@@ -88,7 +88,8 @@ TEST(mac, ConstructorAndAccessors)
   m = myMac1->getRFModeNumber();
 
   ASSERT_TRUE(m == RF_Mode::RF_ModeNumber::RF_MODE_0) << "Failed to set RF mode number aka modulation";
-}
+
+} // ConstructorsAndAccessors
 
 /*!
  * @brief Test receiving a CSP packet and receiving transparent mode packets
@@ -232,7 +233,7 @@ TEST(mac, CSPPacketLoopback) {
         packet->data[i] = (i % 79) + 0x30; // ASCII numbers through to ~
       }
 
-#if QA_MPDU_DEBUG
+#if QA_MAC_DEBUG
       printf("size of packet padding = %ld\n", sizeof(packet->padding));
       printf("size of packet length = %ld\n", sizeof(packet->length));
       printf("size of packet id = %ld\n", sizeof(packet->id));
@@ -256,7 +257,7 @@ TEST(mac, CSPPacketLoopback) {
       ASSERT_TRUE((totalPayloadsBytes % rawMPDULength) == 0) << "The raw payloads buffer must be an integer multiple of the raw MPDU length.";
 
       uint32_t numMPDUs = totalPayloadsBytes / rawMPDULength;
-#if QA_MPDU_DEBUG
+#if QA_MAC_DEBUG
       printf("Raw MPDU length = %ld\n", rawMPDULength);
       printf("totalPayloadsBytes %ld\n",totalPayloadsBytes);
       printf("numMPDUS = %d\n", numMPDUs);
@@ -276,7 +277,7 @@ TEST(mac, CSPPacketLoopback) {
       if (packetEncoded) {
         const uint8_t *mpdusBuffer = myMac1->mpduPayloadsBuffer();
         if (mpdusBuffer && (myMac1->mpduPayloadsBufferLength() % 128 == 0)) {
-#if QA_MPDU_DEBUG
+#if QA_MAC_DEBUG
           printf("\nprocess raw mpdus\n");
 #endif
 
@@ -289,7 +290,7 @@ TEST(mac, CSPPacketLoopback) {
                 const uint8_t *rawCSP = myMac1->getRawCspPacketBuffer();
                 uint8_t *p = (uint8_t *) packet;
 
-#if QA_MPDU_DEBUG
+#if QA_MAC_DEBUG
                 printf("packet length %d raw CSP packet length %ld cast CSP packet length %ld\n", packet->length, myMac1->getRawCspPacketBufferLength(), myMac1->getRawCspPacketLength());
                 printf("packet length %d (2 bytes) %02x\n", packet->length, packet->length);
                 printf("packet id (4 bytes) %04x\n", packet->id);
@@ -325,41 +326,5 @@ TEST(mac, CSPPacketLoopback) {
 
   } // for a number of Error Correction schemes
 
-} //
+} // CSPPacketLoopback
 
-//TEST(mac, ConstructorAndAccessors_wrapper) {
-//  /* ---------------------------------------------------------------------
-//   * Same as the ConstructorAndAccessors test, but using the wrapper.
-//   *
-//   * ChMake sure objects can be instantiated, then check accessors
-//   * ---------------------------------------------------------------------
-//   */
-//  mac_t *myMac1 = mac_create(RF_MODE_3, NO_FEC);
-//
-//  ASSERT_FALSE(myMac1 == NULL) << "Can't instantiate MAC 1";
-//
-//  mac_t *myMac2 = mac_create(RF_MODE_3, NO_FEC);
-//
-//  ASSERT_FALSE(myMac2 == NULL) << "Can't instantiate MAC 2";
-//
-//  mac_destroy(myMac1);
-//
-//  ASSERT_TRUE(myMac1 == NULL) << "Can't destroy MAC 1";
-//
-//  mac_destroy(myMac2);
-//
-//  ASSERT_TRUE(myMac2 == NULL) << "Can't destroy MAC 2";
-//}
-//
-//TEST(mac, CSPPacketLoopback_wrapper) {
-//  /* ---------------------------------------------------------------------
-//   * Same as the CSPPacketLoopback test, but using the wrapper.
-//   *
-//   * Check CSP packet processing by receiving a CSP packet and then using
-//   * the resulting MPDUs to emulate received transparent mode packets.
-//   * Compare the reconstituted CSP packet against the original packet
-//   * ---------------------------------------------------------------------
-//   */
-//
-//}
-//
