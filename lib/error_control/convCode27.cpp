@@ -25,13 +25,15 @@ extern "C" {
 }
 #endif
 
+#define CONVOLUTIONAL_CODE_PASS_THROUGH 0
+#define CONVOLUTIONAL_CODE_DEBUG 1
 #define QA_NOISY_TEST 0
 
 
 namespace ex2 {
   namespace sdr {
 
-    convCode27::convCode27(ErrorCorrection::ErrorCorrectionScheme ecScheme) : FEC(ecScheme){
+    convCode27::convCode27(ErrorCorrection::ErrorCorrectionScheme ecScheme) : FEC(ecScheme) {
       m_errorCorrection = new ErrorCorrection(ecScheme, (MPDU::maxMTU() * 8));
     }
 
@@ -42,31 +44,34 @@ namespace ex2 {
     convCode27::encode(PPDU_u8 &payload) {
       // @todo for now just pass it through
 
-//      printf("convCode27 encoding %ld byte chunk\n", payload.payloadLength());
+#if CONVOLUTIONAL_CODE_PASS_THROUGH
       PPDU_u8::payload_t tempPay = payload.getPayload();
       tempPay.resize(119,0);
       PPDU_u8 encodedPayload(tempPay,payload.getBps());
       return encodedPayload;
-      
-//      PPDU_u8::payload_t PayloadData = payload.getPayload();
-//
-//      PPDU_u8::payload_t encodedPayloadData;
-//      //encodedPayloadData.resize(2 * sizeof(PayloadData));
-//      uint8_t shiftreg = 0;
-//      uint8_t sum = 0;
-//      for(int i = 0; i<8*payload.payloadLength() + constraint_length - 1; i++){
-//        shiftreg = (shiftreg << 1) | ((PayloadData[i/8] >> (i%8)) & 1);
-//        sum = sum | (parity(shiftreg & V27POLYA) << (2 * (i%4)));
-//        sum = sum | (parity(shiftreg & V27POLYB) << (2 * (i%4) + 1));
-//        if (i%4 == 3){
-//            encodedPayloadData.push_back(sum);
-//            sum = 0;
-//        }
-//      }
-//      PPDU_u8 encodedPayload(encodedPayloadData);
-//
-//      return encodedPayload;
-      
+#else
+      PPDU_u8::payload_t inData = payload.getPayload();
+
+      PPDU_u8::payload_t encodedInData;
+      //encodedInData.resize(2 * sizeof(inData));
+      uint8_t shiftreg = 0;
+      uint8_t sum = 0;
+      for(int i = 0; i<8*payload.payloadLength() + constraint_length - 1; i++){
+        shiftreg = (shiftreg << 1) | ((inData[i/8] >> (i%8)) & 1);
+        sum = sum | (parity(shiftreg & V27POLYA) << (2 * (i%4)));
+        sum = sum | (parity(shiftreg & V27POLYB) << (2 * (i%4) + 1));
+        if (i%4 == 3){
+          encodedInData.push_back(sum);
+          sum = 0;
+        }
+      }
+#if CONVOLUTIONAL_CODE_DEBUG
+      printf("encodedInData len %ld\n",encodedInData.size());
+#endif
+      PPDU_u8 encodedPayload(encodedInData);
+
+      return encodedPayload;
+#endif
     }
 
     uint32_t
@@ -75,12 +80,12 @@ namespace ex2 {
 
       decodedPayload.resize(0); // Resize in all FEC decode methods
 
-      // Here is where we apply the FEC decode algorithm.
-      // For no FEC, just copy the data
+#if CONVOLUTIONAL_CODE_PASS_THROUGH
       decodedPayload.insert(decodedPayload.end(),
         encodedPayload.begin(), encodedPayload.begin() + m_errorCorrection->getMessageLen()/8);
 
       return 0;
+#endif
 
       double offset = 127.5;
       uint8_t amp = 32; //
@@ -88,9 +93,10 @@ namespace ex2 {
 
       decodedPayload.resize(0); // Resize in all FEC decode methods
 
-      /* Init Vitrbi */
+      /* Init Viterbi */
       void *vp;
       int framebits = 8*encodedPayload.size();
+      printf("framebits %d\n", framebits);
       if((vp = create_viterbi27_port(framebits)) == NULL){
         // Init failed.
         printf("CC27 initialization failed.\n");
@@ -100,23 +106,24 @@ namespace ex2 {
       /* Decode it and make sure we get the right answer */
       /* Initialize Viterbi decoder */
       init_viterbi27_port(vp,0);
-      
+
       /* Decode block */
       uint8_t encodedArr[8*framebits+constraint_length-1];
+      printf("sizeof(encodedArr) %ld\n",sizeof(encodedArr));
       for (int i = 0; i<sizeof(encodedArr); i++){
-        #if QA_NOISY_TEST
+#if QA_NOISY_TEST
         encodedArr[i] = addnoise(((encodedPayload[i/8] >> (i%8)) & 1), 12, amp, offset, 255);
-        #else
+#else
         encodedArr[i] = offset + (((encodedPayload[i/8] >> (i%8)) & 1) ? amp : -amp);//The viterbi decoder makes a decision based on the 127 threshold.
-        #endif
-//#if QA_NOISY_TEST // manually forcing errors but "255-" is not a way to go.
-//        if (i%8 == 0){
-//          encodedArr[i] = 255 - encodedArr[i];
-//        }
-//#endif
+#endif
+        //#if QA_NOISY_TEST // manually forcing errors but "255-" is not a way to go.
+        //        if (i%8 == 0){
+        //          encodedArr[i] = 255 - encodedArr[i];
+        //        }
+        //#endif
       }
       update_viterbi27_blk_port(vp,encodedArr,framebits+constraint_length-1);
-      
+
       /* Do Viterbi chainback */
       uint8_t decodedArr[framebits/2];
       chainback_viterbi27_port(vp,decodedArr,framebits,0);
