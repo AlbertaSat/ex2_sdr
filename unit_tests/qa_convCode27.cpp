@@ -19,7 +19,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "error_correction.hpp"
 #include "convCode27.hpp"
+#include "FEC.hpp"
+#include "mpdu.hpp"
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,102 +41,193 @@ using namespace ex2::sdr;
 
 #include "gtest/gtest.h"
 
-#define QA_CC27_DEBUG 0 // set to 1 for debugging output
+#define QA_CC27_DEBUG 1 // set to 1 for debugging output
 
-#define UHF_TRANSPARENT_MODE_PACKET_HEADER_LENGTH ( 72/8 ) // bytes
-#define UHF_TRANSPARENT_MODE_PACKET_LENGTH ( 128 )         // bytes; UHF transparent mode packet is always 128 bytes
-#define UHF_TRANSPARENT_MODE_PACKET_PAYLOAD_LENGTH ( UHF_TRANSPARENT_MODE_PACKET_LENGTH - UHF_TRANSPARENT_MODE_PACKET_HEADER_LENGTH )
+//#define UHF_TRANSPARENT_MODE_PACKET_HEADER_LENGTH ( 72/8 ) // bytes
+//#define UHF_TRANSPARENT_MODE_PACKET_LENGTH ( 128 )         // bytes; UHF transparent mode packet is always 128 bytes
+//#define UHF_TRANSPARENT_MODE_PACKET_PAYLOAD_LENGTH ( UHF_TRANSPARENT_MODE_PACKET_LENGTH - UHF_TRANSPARENT_MODE_PACKET_HEADER_LENGTH )
 /*!
  * @brief Test Main Constructors, the one that is parameterized, and the one
  * that takes the received packet as input
  */
-TEST(CC27, Foo )
+TEST(CC27_1_2, EncodeAndDecode )
 {
   /* ---------------------------------------------------------------------
-   * Confirm the CC27 object can be constructed
+   * Confirm the operation of the CCSDS_CONVOLUTIONAL_CODING_R_1_2 FEC
    * ---------------------------------------------------------------------
    */
 
-  // First do a little CSP config work
+  // Set the CSP packet test lengths so that
+  // * a zero length packet is tested
+  // * a non-zero length packet fits well into one MPDU
+  // * a non-zero length a packet just fits into one MPDU
+  // * a non-zero length a packet needs more than one MPDU
+  // * the max size packet
+  uint16_t const numCSPPackets = 5;
+  uint16_t cspPacketDataLengths[numCSPPackets] = {0, 10, 103, 358, 4095};
+
+  ErrorCorrection::ErrorCorrectionScheme ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2;
+  ErrorCorrection * errorCorrection = new ErrorCorrection(ecs, (MPDU::maxMTU() * 8));
+  FEC *CC27_FEC = FEC::makeFECCodec(ecs);
+
+  ASSERT_TRUE(CC27_FEC != NULL) << "CCSDS_CONVOLUTIONAL_CODING_R_1_2 FEC failed to instantiate";
+
+  //
+  // This test does not have to use CSP packets necessarily, but it provides a
+  // little more reassurance if we can see actual CSP data being worked on.
+  //
   csp_conf_t cspConf;
   csp_conf_get_defaults(&cspConf);
   cspConf.buffer_data_size = 4096; // TODO set as CSP_MTU
   csp_init(&cspConf);
 
-  // Set the length of the test CSP packet so it all fits into a transparent mode payload
-  const unsigned long int testCSPPacketLength = 10;
+  for (uint16_t currentCSPPacket = 0; currentCSPPacket < numCSPPackets; currentCSPPacket++) {
 
-  FEC * CC27 = new convCode27(ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2);
 
-  ASSERT_TRUE(CC27 != NULL) << "convCode27 failed to instantiate";
+    csp_packet_t * cspPacket = (csp_packet_t *) csp_buffer_get(cspPacketDataLengths[currentCSPPacket]);
 
-  if (CC27) {
-    csp_packet_t * packet = (csp_packet_t *) csp_buffer_get(testCSPPacketLength);
-
-    if (packet == NULL) {
-      /* Could not get buffer element */
+    if (cspPacket == NULL) {
+      // Could not get buffer element
       csp_log_error("Failed to get CSP buffer");
-      return;
-    }
-
-//    printf("size of packet padding = %ld\n", sizeof(packet->padding));
-//    printf("size of packet length = %ld\n", sizeof(packet->length));
-//    printf("size of packet id = %ld\n", sizeof(packet->id));
-    int cspPacketHeaderLen = sizeof(packet->padding) + sizeof(packet->length) + sizeof(packet->id);
-
-    for (unsigned long i = 0; i < testCSPPacketLength; i++) {
-      packet->data[i] = i | 0x30; // ASCII numbers
+      FAIL() << "Failed to get CSP buffer";
     }
     // CSP forces us to do our own bookkeeping...
-    packet->length = testCSPPacketLength;
-
-//    printf("packet length = %d\n", packet->length);
-
-    std::vector<uint8_t> p;
-
-    uint8_t * pptr = (uint8_t *) packet;
-    for (int i = 0; i < cspPacketHeaderLen; i++) {
-      p.push_back(pptr[i]);
-    }
-    // This is ugly, so maybe we need to rethink using PPDU_xx?
-    for (unsigned long i = 0; i < testCSPPacketLength; i++) {
-      p.push_back(packet->data[i]);
+    cspPacket->length = cspPacketDataLengths[currentCSPPacket];
+    cspPacket->id.ext = 0x87654321;
+    // Set the payload to readable ASCII
+    for (unsigned long i = 0; i < cspPacketDataLengths[currentCSPPacket]; i++) {
+      cspPacket->data[i] = (i % 79) + 0x30; // ASCII numbers through to ~
     }
 
-//    // Look at the contents :-)
-//    for (int i = 0; i < p.size(); i++) {
-//      printf("p[%d] = 0x%02x\n", i, p[i]);
-//    }
-
-    // @TODO maybe make these std::vector<uint8_t> ???
-    PPDU_u8 inputPayload(p);
-    PPDU_u8 encodedPayload = CC27->encode(inputPayload);
-
-    bool same = true;
-    std::vector<uint8_t> iPayload = inputPayload.getPayload();
-    std::vector<uint8_t> ePayload = encodedPayload.getPayload();
-
-    // Noise-free channel to check if the algorithms are working correctly
-    std::vector<uint8_t> dPayload;
-    uint32_t bitErrors = CC27->decode(encodedPayload.getPayload(), 100.0, dPayload);
-
-    printf("ipayload size %ld dpayload size %ld\n",iPayload.size(),dPayload.size());
-    ASSERT_TRUE(iPayload.size() == dPayload.size()) << "Encoded and decoded payload lengths differ!";
-    same = true;
-    for (unsigned long i = 0; i < iPayload.size(); i++) {
-      same = same & (iPayload[i] == dPayload[i]);
-      #if QA_CC27_DEBUG
-      printf("input[%d] = 0x%02x    encoded[%d] = 0x%02x    decoded[%d] = 0x%02x\n", i, iPayload[i], i, ePayload[i], i, dPayload[i]);
-      #endif
+#if QA_CC27_DEBUG
+    printf("size of packet padding = %ld\n", sizeof(cspPacket->padding));
+    printf("size of packet length = %ld\n", sizeof(cspPacket->length));
+    printf("size of packet id = %ld\n", sizeof(cspPacket->id));
+    printf("size of csp_id_t %ld\n",sizeof(csp_id_t));
+    printf("packet length %d (2 bytes) %02x\n", cspPacket->length, cspPacket->length);
+    printf("packet id (4 bytes) %04x\n", cspPacket->id);
+    printf("Padding\n\t");
+    for (uint8_t p = 0; p < sizeof(cspPacket->padding); p++) {
+      printf("%02x",cspPacket->padding[p]);
     }
+    printf("\n");
+#endif
+
+    uint16_t const cspPacketLength = sizeof(csp_packet_t) + cspPacket->length;
+
+    // @note the message length returned by the ErrorCorrection object is
+    // in bits. It may be that it's not a multiple of 8 bits (1 byte), so
+    // we truncate the length and assume the encoder pads the message with
+    // zeros for the missing bits
+    uint32_t const messageLength = errorCorrection->getMessageLen() / 8;
+
+    // Keep track of how much CSP packet data has been encoded
+    uint32_t cspDataOffset = 0;
+    uint32_t cspBytesRemaining = cspPacketLength;
+
+    // Set up the MPDU payload
+    PPDU_u8::payload_t mpduPayload;
+    mpduPayload.resize(0); // ensure it's empty
+    uint32_t mpduPayloadBytesRemaining = MPDU::maxMTU();
+    uint32_t mpduCount = 0;
+
+    PPDU_u8::payload_t message;
+
+    message.resize(0);
+    message.insert(message.end(), cspPacket->padding, cspPacket->padding + CSP_PADDING_BYTES);
+    cspBytesRemaining -= CSP_PADDING_BYTES;
+    message.push_back((uint8_t) (cspPacket->length & 0x00FF));
+    message.push_back((uint8_t) ((cspPacket->length & 0xFF00) >> 8));
+    cspBytesRemaining -= sizeof(uint16_t);
+    message.push_back((uint8_t) (cspPacket->id.ext & 0x000000FF));
+    message.push_back((uint8_t) ((cspPacket->id.ext & 0x0000FF00) >> 8));
+    message.push_back((uint8_t) ((cspPacket->id.ext & 0x00FF0000) >> 16));
+    message.push_back((uint8_t) ((cspPacket->id.ext & 0xFF000000) >> 24));
+    cspBytesRemaining -= sizeof(uint32_t);
 
 
-    ASSERT_TRUE(same) << "decoded payload does not match input payload";
-    ASSERT_TRUE(bitErrors == 0) << "Bit error count > 0";
+    // We know/assume that the CSP header is smaller than the smallest message
+    // size for any FEC scheme we employ, so we need to do at least one
+    // iteration of this loop
+    do {
+      // Fill the rest of the message buffer with CSP data; if not enough CSP data is
+      // available, use what remains and pad
+      if (message.size() < messageLength) {
+        // Check if we can fill the rest of the message
+        if (cspBytesRemaining >= messageLength - message.size()) {
+          //            printf("no padding\n");
+          // More than enough CSP packet data remaining, so fill up the message
+          uint32_t bytesToAppend = messageLength - message.size();
+          message.insert(message.end(),
+            cspPacket->data + cspDataOffset, cspPacket->data + cspDataOffset + messageLength - message.size());
+          cspBytesRemaining -= bytesToAppend;
+          cspDataOffset += bytesToAppend;
+        }
+        else {
+          // Not enough CSP packet data remaining, so put what there is in message
+          message.insert(message.end(),
+            cspPacket->data + cspDataOffset, cspPacket->data + cspDataOffset + cspBytesRemaining);
+          cspDataOffset += cspBytesRemaining; // @todo don't really need to update this
+          cspBytesRemaining -= cspBytesRemaining;
+          // Zero-pad the rest of the message
+          message.resize(messageLength, 0);
+        }
+      }
+
+      // Now apply the FEC encoding
+      PPDU_u8 chunk(message);
+      try {
+        // @todo, the m_FEC should always exist... this code was needed duing dev and test and could be removed
+        if (!CC27_FEC) {
+          printf("CC27_FEC bad\n");
+          FAIL( ) << "CC27_FEC bad";
+        }
+        PPDU_u8 encodedChunk = CC27_FEC->encode(chunk);
+
+        // Add codeword to current mpduPayload
+        PPDU_u8::payload_t codeword = encodedChunk.getPayload();
+
+#if QA_CC27_DEBUG
+        printf("cw.size() %ldb codeword size %ldb\n", codeword.size()*8, errorCorrection->getCodewordLen());
+        printf("cw.size() %ldB codeword size %ldB\n", codeword.size(), errorCorrection->getCodewordLen() / 8);
+        printf("byte message codeword\n");
+        for (uint16_t c = 0; c < codeword.size(); c++) {
+          printf("%04d  %02x     %02x\n", c, message[c], codeword[c]);
+        }
+#endif
+        ASSERT_TRUE(codeword.size() == errorCorrection->getCodewordLen() / 8) << "CC27 codeword size incorrect";
+
+        PPDU_u8::payload_t decodedMessage;
+
+//        __attribute__((unused)) uint32_t bitErrors = CC27_FEC->decode(codeword, 100.0, decodedMessage);
+        uint32_t bitErrors = CC27_FEC->decode(codeword, 100.0, decodedMessage);
+
+#if QA_CC27_DEBUG
+        printf("message %ld decodedMessage %ld\n", message.size(), decodedMessage.size());
+        printf("byte message decodedMessage\n");
+#endif
+
+//        ASSERT_TRUE(message.size() == decodedMessage.size()) << "Decoded message different length than message.";
+
+        bool same = true;
+        for (uint16_t m = 0; m < decodedMessage.size(); m++) {
+          same = same && (message[m] == decodedMessage[m]);
+#if QA_CC27_DEBUG
+        printf("%04d  %02x      %02x\n", m, message[m], decodedMessage[m]);
+#endif
+        }
+
+        // prepare to make another message
+        message.resize(0);
+      }
+      catch (FECException& e) { // @todo need an FEC exception that all subclasses inherit
+      }
+
+    } while (cspBytesRemaining > 0);
+
 
     // TODO: Add noise to the encoded symbols and see how many can decoder correct.
 
-  }
-
-}
+  } // for various CSP packet lengths
+} // CC27_1_2 EncodeAndDecode
 
