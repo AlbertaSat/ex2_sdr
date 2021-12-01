@@ -16,7 +16,7 @@
 #include <exception>
 #include <string>
 
-#define ERROR_CORRECTION_DEBUG 1 // set to 1 to enable extra debugging info
+#define ERROR_CORRECTION_DEBUG 0 // set to 1 to enable extra debugging info
 
 namespace ex2 {
   namespace sdr {
@@ -496,11 +496,44 @@ namespace ex2 {
 
         // Set to the max codeword length specified  in the constructor
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2:
-        case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3:
-        case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4:
-        case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6:
-        case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8:
-          codewordLen = m_continuousMaxCodewordLen;
+        {
+          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+          if (codewordLen % 8 != 0) {
+            codewordLen += (8 - (codewordLen % 8));
+          }
+        }
+          break;
+        case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3: // @todo not confirmed/tested!
+        {
+          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+          if (codewordLen % 8 != 0) {
+            codewordLen += (8 - (codewordLen % 8));
+          }
+        }
+          break;
+        case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4: // @todo not confirmed/tested!
+        {
+          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+          if (codewordLen % 8 != 0) {
+            codewordLen += (8 - (codewordLen % 8));
+          }
+        }
+          break;
+        case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6: // @todo not confirmed/tested!
+        {
+          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+          if (codewordLen % 8 != 0) {
+            codewordLen += (8 - (codewordLen % 8));
+          }
+        }
+          break;
+        case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8: // @todo not confirmed/tested!
+        {
+          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+          if (codewordLen % 8 != 0) {
+            codewordLen += (8 - (codewordLen % 8));
+          }
+        }
           break;
 
         case ErrorCorrectionScheme::NO_FEC:
@@ -617,35 +650,40 @@ namespace ex2 {
           // rate. Then m = n * r - (K - 1). We want a integral number of bytes,
           // so m is adjusted to be m = m - (m % 8).
           {
-            uint32_t cwLen = m_codewordLength();
+//            uint32_t cwLen = m_codewordLength();
+            uint32_t cwLen = m_continuousMaxCodewordLen;
             messageLen = (uint32_t) (cwLen / 2.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
             messageLen -= (messageLen % 8);
           }
           break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3:
           {
-            uint32_t cwLen = m_codewordLength();
+//            uint32_t cwLen = m_codewordLength();
+            uint32_t cwLen = m_continuousMaxCodewordLen;
             messageLen = (uint32_t) (cwLen * 2.0 / 3.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
             messageLen -= (messageLen % 8);
           }
           break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4:
           {
-            uint32_t cwLen = m_codewordLength();
+//            uint32_t cwLen = m_codewordLength();
+            uint32_t cwLen = m_continuousMaxCodewordLen;
             messageLen = (uint32_t) (cwLen * 3.0  / 4.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
             messageLen -= (messageLen % 8);
           }
           break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6:
           {
-            uint32_t cwLen = m_codewordLength();
+//            uint32_t cwLen = m_codewordLength();
+            uint32_t cwLen = m_continuousMaxCodewordLen;
             messageLen = (uint32_t) (cwLen * 5.0 / 6.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
             messageLen -= (messageLen % 8);
           }
           break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8:
           {
-            uint32_t cwLen = m_codewordLength();
+//            uint32_t cwLen = m_codewordLength();
+            uint32_t cwLen = m_continuousMaxCodewordLen;
             messageLen = (uint32_t) (cwLen * 7.0 / 8.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
             messageLen -= (messageLen % 8);
           }
