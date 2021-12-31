@@ -29,10 +29,20 @@ extern "C" {
 #include "QCLDPC.hpp"
 #include "radio.h"
 
-#define MAC_DEBUG 0 // Set to one to turn on debugging messages
+#define MAC_DEBUG 1 // Set to one to turn on debugging messages
 
 namespace ex2 {
   namespace sdr {
+
+#if MAC_DEBUG
+  uint32_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection) {
+  // Get length of CSP packet in bytes. Make sure we are not fooled by
+  // alignment, so add up the struct members
+  uint32_t cspPacketSize = sizeof(csp_packet_t) + cspPacket->length;
+
+  return MPDU::mpdusInNBytes(cspPacketSize, errorCorrection);
+} // mpdusPerCSPPacket
+#endif
 
 
     MAC::MAC (RF_Mode::RF_ModeNumber rfModeNumber,
@@ -295,6 +305,7 @@ namespace ex2 {
       uint32_t const messageLength = m_errorCorrection->getMessageLen() / 8;
 #if MAC_DEBUG
       printf("current ECS = %d\n", (uint16_t) getErrorCorrectionScheme());
+      uint32_t numMPDUsPerPacket = mpdusPerCSPPacket(cspPacket, *m_errorCorrection);
       printf("numMPDUsPerPacket %d cspPacketLength %d messageLength %d\n",numMPDUsPerPacket,cspPacketLength,messageLength);
 #endif
 

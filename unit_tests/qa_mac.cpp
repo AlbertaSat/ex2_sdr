@@ -42,10 +42,8 @@ using namespace ex2::sdr;
 
 #define QA_MAC_DEBUG 0 // set to 1 for debugging output
 
-#define UHF_TRANSPARENT_MODE_PACKET_LENGTH 128  // UHF transparent mode packet is always 128 bytes
-
 /*!
- * @brief Test singleton constructor
+ * @brief Test constructor
  */
 TEST(mac, ConstructorAndAccessors)
 {
@@ -152,7 +150,7 @@ TEST(mac, CSPPacketLoopback) {
 
   ErrorCorrection::ErrorCorrectionScheme ecs;
 
-  for (int ecScheme = 0; ecScheme < 14; ecScheme++) {
+  for (int ecScheme = 13; ecScheme < 14; ecScheme++) {
 
     switch(ecScheme) {
       case 0:

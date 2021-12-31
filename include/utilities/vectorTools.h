@@ -1,24 +1,24 @@
 /*!
  * @file vectorTools
  * @author Steven Knudsen
- * @date Nov. 14, 2019
+ * @date December 14, 2021
  *
- * @details A collection of operations used by Darkstar stuff.
+ * @details A collection of vector tools.
  *
- * @copyright Xiphos Systems Corp. 2019
+ * @copyright AlbertaSat 2021
  *
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
  */
 
-#ifndef UTILITIES_VECTOR_TOOLS_H_
-#define UTILITIES_VECTOR_TOOLS_H_
+#ifndef EX2_SDR_UTILITIES_VECTOR_TOOLS_H_
+#define EX2_SDR_UTILITIES_VECTOR_TOOLS_H_
 
 #include <cstdint>
 #include <vector>
 
-namespace xiphos {
-  namespace darkstar {
+namespace ex2 {
+  namespace sdr {
 
     /*!
      * @brief Manage a version number in the form <major>.<minor>.<patch>
@@ -84,7 +84,7 @@ namespace xiphos {
     private:
     };
 
-  } /* namespace darkstar */
-} /* namespace xiphos */
+  } /* namespace sdr */
+} /* namespace ex2 */
 
-#endif /* UTILITIES_VECTOR_TOOLS_H_ */
+#endif /* EX2_SDR_UTILITIES_VECTOR_TOOLS_H_ */

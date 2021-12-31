@@ -28,7 +28,6 @@ namespace ex2
     {
       // Make a copy
       m_mpduHeader = new MPDUHeader(header);
-
       // TODO Not sure we need to keep the codeword for this constructor since
       // the MPDU object will be used to define a transparent mode payload
       // comprising Data Field 1 and 2, that is, the header and the codeword

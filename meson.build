@@ -63,12 +63,13 @@ core_source_files = [
 #    PRJ_DIR / 'lib/error_control/interleaver.cpp',
 #    PRJ_DIR / 'lib/error_control/scrambler.cpp',
     PRJ_DIR / 'lib/error_control/error_correction.cpp',
+    PRJ_DIR / 'lib/error_control/ConvolutionalCodecHD.cpp',
     PRJ_DIR / 'lib/error_control/FEC.cpp',
     PRJ_DIR / 'lib/error_control/NoFEC.cpp',
     PRJ_DIR / 'lib/error_control/QCLDPC.cpp',
     PRJ_DIR / 'lib/error_control/golay.cpp',
-    PRJ_DIR / 'lib/error_control/convCode27.cpp',
-    PRJ_DIR / 'lib/error_control/viterbi27_port.c',
+#    PRJ_DIR / 'lib/error_control/convCode27.cpp',
+#    PRJ_DIR / 'lib/error_control/viterbi27_port.c',
 #    PRJ_DIR / 'lib/math/gf2poly.cpp',
 #    PRJ_DIR / 'lib/math/galoisLFSR.cpp',
     PRJ_DIR / 'lib/pdu/pdu.cpp',
@@ -79,8 +80,8 @@ core_source_files = [
     PRJ_DIR / 'lib/mac_layer/pdu/mpduHeader.cpp',
 #    PRJ_DIR / 'lib/phy_layer/mls.cpp',
 #    PRJ_DIR / 'lib/utilities/version.cpp',
-#    PRJ_DIR / 'lib/utilities/vectorTools.cpp',
-    PRJ_DIR / 'lib/utilities/partab.c',
+    PRJ_DIR / 'lib/utilities/vectorTools.cpp',
+#    PRJ_DIR / 'lib/utilities/partab.c',
 #    PRJ_DIR / 'lib/error_control/qcldpc/ldpc.cpp',
 #    PRJ_DIR / 'lib/error_control/qcldpc/parity_check.cpp',
 #    PRJ_DIR / 'lib/app_layer/pdu/apdu.cpp',
@@ -88,12 +89,12 @@ core_source_files = [
 ##    PRJ_DIR / 'lib/phy_layer/modulation.cpp',
 ##    PRJ_DIR / 'lib/phy_layer/phy.cpp',
 ##    PRJ_DIR / 'lib/phy_layer/pdu/ppdu_cf.cpp',
-##    PRJ_DIR / 'lib/phy_layer/pdu/ppdu_f.cpp',
+    PRJ_DIR / 'lib/phy_layer/pdu/ppdu_f.cpp',
     PRJ_DIR / 'lib/phy_layer/pdu/ppdu_u8.cpp',
 ##    PRJ_DIR / 'lib/phy_layer/pdu/ppdu_u32.cpp',
 ##    PRJ_DIR / 'lib/utilities/taskCPP.cpp',
     PRJ_DIR / 'lib/wrapper/MACWrapper.cpp',
-    ]
+]
 
 incdir = include_directories(
     '/usr/local/include/csp',
@@ -110,8 +111,17 @@ incdir = include_directories(
     'include/utilities',
     'include/wrapper',
     'include',
-    )
-    
+    'third_party/viterbi'
+)
+
+third_party_source_files = [
+    PRJ_DIR / 'third_party/viterbi/viterbi.cpp'
+]
+
+#third_party_inc_dir = include_directories (
+#    'third_party/viterbi/viterbi.h'
+#)
+
 #FreeRTOSlib = library('freertoslib',
 #    sources: freertos_source,
 #    include_directories: freertos_incdir,
@@ -122,12 +132,12 @@ incdir = include_directories(
 #    )
 
 
-executable('ex2_uhf_trx', 'src/ex2_uhf_trx.cpp', core_source_files,
-    include_directories: incdir,
-    dependencies: [boost_dep, csp_dep],
-#    link_with: ExSDRTxRxlib,
-    install: true,
-    )
+#executable('ex2_uhf_trx', 'src/ex2_uhf_trx.cpp', core_source_files,
+#    include_directories: incdir,
+#    dependencies: [boost_dep, csp_dep],
+##    link_with: ExSDRTxRxlib,
+#    install: true,
+#    )
 
 #freertoslib = library('rtoslib',
 #    sources: freertos_source, demo_source, trace_source,

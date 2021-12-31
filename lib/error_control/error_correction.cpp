@@ -55,8 +55,6 @@ namespace ex2 {
       m_rate = m_codingRateToFractionalRate();
       m_codewordLen = m_codewordLength();
       m_messageLen = m_messageLength();
-//      printf("\nscheme %d\n", (uint16_t) ecScheme);
-//      printf("ErrorCorrction message length %ld\n",m_messageLen);
     }
 
     ErrorCorrection::~ErrorCorrection() {
@@ -84,8 +82,6 @@ namespace ex2 {
       m_rate = m_codingRateToFractionalRate();
       m_codewordLen = m_codewordLength();
       m_messageLen = m_messageLength();
-//      printf("\nErrorCorrection::setErrorCorrectionScheme scheme %d\n", (uint16_t) m_errorCorrectionScheme);
-//      printf("ErrorCorrction message length %ld\n",m_messageLen);
     }
 
     uint32_t
@@ -494,46 +490,15 @@ namespace ex2 {
           codewordLen = 1944; // bits
           break;
 
-        // Set to the max codeword length specified  in the constructor
+        // For convolutional coding, we start with the assumption that the
+        // codeword is always the same length regardless of rate. Then the
+        // message is calculated as described in @p m_messageLength()
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2:
-        {
-          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
-          if (codewordLen % 8 != 0) {
-            codewordLen += (8 - (codewordLen % 8));
-          }
-        }
-          break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3: // @todo not confirmed/tested!
-        {
-          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
-          if (codewordLen % 8 != 0) {
-            codewordLen += (8 - (codewordLen % 8));
-          }
-        }
-          break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4: // @todo not confirmed/tested!
-        {
-          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
-          if (codewordLen % 8 != 0) {
-            codewordLen += (8 - (codewordLen % 8));
-          }
-        }
-          break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6: // @todo not confirmed/tested!
-        {
-          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
-          if (codewordLen % 8 != 0) {
-            codewordLen += (8 - (codewordLen % 8));
-          }
-        }
-          break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8: // @todo not confirmed/tested!
-        {
-          codewordLen = (uint32_t) (m_messageLength() * 2.0 + (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
-          if (codewordLen % 8 != 0) {
-            codewordLen += (8 - (codewordLen % 8));
-          }
-        }
+          codewordLen = m_continuousMaxCodewordLen; // bits
           break;
 
         case ErrorCorrectionScheme::NO_FEC:
@@ -626,7 +591,7 @@ namespace ex2 {
           messageLen = 1080; // bits 135 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2:
-          messageLen = 972; // bits 121.5
+          messageLen = 972; // bits 121.5 bytes
           break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3:
           messageLen = 1296; // bits 162 bytes
@@ -638,53 +603,36 @@ namespace ex2 {
           messageLen = 1620; // bits 202.5 bytes
           break;
 
-          // For convolutional coding, set to the max codeword length specified
-          // in the constructor, but adjust to account for the polynomial order K.
           //
-          // In general, n = (m + (K -1)) / r, so m = n * r - (K - 1)
-
+          // We want a integral number of bytes, so m is adjusted to be m = m - (m % 8).
+          //
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2:
-          // The CCSDS recommendation has K=7, which means that an extra 6 bits
-          // are added to the codeword for a message of length m. Thus,
-          // n = (m + (K - 1)) / r, where n is the codeword length and r is the
-          // rate. Then m = n * r - (K - 1). We want a integral number of bytes,
-          // so m is adjusted to be m = m - (m % 8).
           {
-//            uint32_t cwLen = m_codewordLength();
-            uint32_t cwLen = m_continuousMaxCodewordLen;
-            messageLen = (uint32_t) (cwLen / 2.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+            messageLen = (uint32_t) (m_codewordLength() / 2.0);
             messageLen -= (messageLen % 8);
           }
           break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3:
           {
-//            uint32_t cwLen = m_codewordLength();
-            uint32_t cwLen = m_continuousMaxCodewordLen;
-            messageLen = (uint32_t) (cwLen * 2.0 / 3.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+            messageLen = (uint32_t) (m_codewordLength() * 2.0 / 3.0);
             messageLen -= (messageLen % 8);
           }
           break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4:
           {
-//            uint32_t cwLen = m_codewordLength();
-            uint32_t cwLen = m_continuousMaxCodewordLen;
-            messageLen = (uint32_t) (cwLen * 3.0  / 4.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+            messageLen = (uint32_t) (m_codewordLength() * 3.0  / 4.0);
             messageLen -= (messageLen % 8);
           }
           break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6:
           {
-//            uint32_t cwLen = m_codewordLength();
-            uint32_t cwLen = m_continuousMaxCodewordLen;
-            messageLen = (uint32_t) (cwLen * 5.0 / 6.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+            messageLen = (uint32_t) (m_codewordLength() * 5.0 / 6.0);
             messageLen -= (messageLen % 8);
           }
           break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8:
           {
-//            uint32_t cwLen = m_codewordLength();
-            uint32_t cwLen = m_continuousMaxCodewordLen;
-            messageLen = (uint32_t) (cwLen * 7.0 / 8.0 - (CCSDS_CONVOLUTIONAL_CODING_K - 1.0));
+            messageLen = (uint32_t) (m_codewordLength() * 7.0 / 8.0);
             messageLen -= (messageLen % 8);
           }
           break;

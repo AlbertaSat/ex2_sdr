@@ -16,7 +16,7 @@
 #include "FEC.hpp"
 #include "NoFEC.hpp"
 #include "QCLDPC.hpp"
-#include "convCode27.hpp"
+#include "ConvolutionalCodecHD.hpp"
 
 namespace ex2 {
   namespace sdr {
@@ -93,7 +93,7 @@ namespace ex2 {
           newFEC = new QCLDPC(ecScheme); // @TODO change when this is implemented
           break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2:
-          newFEC = new convCode27(ecScheme);
+          newFEC = new ConvolutionalCodecHD(ecScheme);
           break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3:
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4:

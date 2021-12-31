@@ -11,7 +11,7 @@ test('golay', unit_test_golay,
     timeout: 30
     )
     
-unit_test_mpduHeader = executable('unit_test-mpduHeader', 'qa_mpduHeader.cpp', core_source_files,
+unit_test_mpduHeader = executable('unit_test-mpduHeader', 'qa_mpduHeader.cpp', core_source_files, third_party_source_files,
     include_directories : incdir,
     dependencies: [gtest_dep, csp_dep]
     )
@@ -20,7 +20,7 @@ test('mpduHeader', unit_test_mpduHeader,
     timeout: 30
     )
     
-unit_test_mpdu = executable('unit_test-mpdu', 'qa_mpdu.cpp', core_source_files,
+unit_test_mpdu = executable('unit_test-mpdu', 'qa_mpdu.cpp', core_source_files, third_party_source_files,
     include_directories : incdir,
     dependencies: [gtest_dep, csp_dep]
     )
@@ -29,7 +29,7 @@ test('mpdu', unit_test_mpdu,
     timeout: 30
     )
     
-unit_test_mac = executable('unit_test-mac', 'qa_mac.cpp', core_source_files,
+unit_test_mac = executable('unit_test-mac', 'qa_mac.cpp', core_source_files, third_party_source_files,
     include_directories : incdir,
     dependencies: [gtest_dep, csp_dep]
     )
@@ -38,7 +38,7 @@ test('mac', unit_test_mac,
     timeout: 30
     )
     
-unit_test_mac_wrapper = executable('unit_test-mac-wrapper', 'qa_macWrapper.cpp', core_source_files,
+unit_test_mac_wrapper = executable('unit_test-mac-wrapper', 'qa_macWrapper.cpp', core_source_files, third_party_source_files,
     include_directories : incdir,
     dependencies: [gtest_dep, csp_dep]
     )
@@ -47,21 +47,30 @@ test('mac-wrapper', unit_test_mac_wrapper,
     timeout: 30
     )
     
-unit_test_noFEC = executable('unit_test-noFEC', 'qa_NoFEC.cpp', core_source_files,
+unit_test_no_FEC = executable('unit_test-no_FEC', 'qa_NoFEC.cpp', core_source_files, third_party_source_files,
     include_directories : incdir,
     dependencies: [gtest_dep, csp_dep]
     )
     
-test('noFEC', unit_test_noFEC,
+test('noFEC', unit_test_no_FEC,
     timeout: 30
     )
 
-unit_test_CC27 = executable('unit_test-CC27', 'qa_convCode27.cpp', core_source_files,
+unit_test_viterbi = executable('unit_test-viterbi', 'qa_viterbi.cpp', core_source_files, third_party_source_files,
     include_directories : incdir,
     dependencies: [gtest_dep, csp_dep]
     )
     
-test('CC27', unit_test_CC27,
+test('viterbi', unit_test_viterbi,
+    timeout: 30
+    )
+
+unit_test_cc_hd_FEC = executable('unit_test-cc_hd_FEC', 'qa_ConvolutionalCodecHD.cpp', core_source_files, third_party_source_files,
+    include_directories : incdir,
+    dependencies: [gtest_dep, csp_dep]
+    )
+    
+test('cc_hd_FEC', unit_test_cc_hd_FEC,
     timeout: 30
     )
 
