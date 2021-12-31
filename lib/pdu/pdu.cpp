@@ -11,9 +11,7 @@
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
  */
 
-#include "../../include/pdu/pdu.hpp"
-
-#include <boost/format.hpp>
+#include "pdu.hpp"
 
 namespace ex2
 {

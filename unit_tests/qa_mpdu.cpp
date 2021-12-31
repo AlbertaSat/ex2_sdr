@@ -51,22 +51,22 @@ uint32_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorre
 
 } // mpdusPerCSPPacket
 
-    uint16_t mpdusPerCodeword(ErrorCorrection &errorCorrection) {
+uint16_t mpdusPerCodeword(ErrorCorrection &errorCorrection) {
 
-      // Get the FEC scheme codeword lengths in bytes
-      uint32_t cwLen = errorCorrection.getCodewordLen() / 8;
-      if (errorCorrection.getCodewordLen() % 8 != 0) {
-        cwLen++;
-      }
+  // Get the FEC scheme codeword lengths in bytes
+  uint32_t cwLen = errorCorrection.getCodewordLen() / 8;
+  if (errorCorrection.getCodewordLen() % 8 != 0) {
+    cwLen++;
+  }
 
-      uint32_t numMPDUPayloadPerCW = cwLen / MPDU::maxMTU();
-      if (cwLen % MPDU::maxMTU() != 0) {
-        numMPDUPayloadPerCW++;
-      }
+  uint32_t numMPDUPayloadPerCW = cwLen / MPDU::maxMTU();
+  if (cwLen % MPDU::maxMTU() != 0) {
+    numMPDUPayloadPerCW++;
+  }
 
-      return numMPDUPayloadPerCW;
+  return numMPDUPayloadPerCW;
 
-    } // mpdusPerCodeword
+} // mpdusPerCodeword
 
 /*!
  * @brief Test Constructors, the one that is parameterized, and the one
@@ -92,7 +92,7 @@ TEST(mpdu, ConstructorsAndAccessors)
   RF_Mode::RF_ModeNumber modulation = RF_Mode::RF_ModeNumber::RF_MODE_3; // 0b011
   ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme =
       ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2; // 0b000000
-  ErrorCorrection errorCorrection(errorCorrectionScheme);
+  ErrorCorrection errorCorrection(errorCorrectionScheme, (MPDU::maxMTU() * 8));
 
   // None of these values really make sense, but they don't have to for this test.
   uint8_t codewordFragmentIndex = 0x55;
@@ -101,7 +101,7 @@ TEST(mpdu, ConstructorsAndAccessors)
 
   MPDUHeader *header1;
 
-  header1 = new MPDUHeader(/*UHF_TRANSPARENT_MODE_PACKET_LENGTH,*/
+  header1 = new MPDUHeader(
     modulation,
     errorCorrection,
     codewordFragmentIndex,
@@ -109,8 +109,6 @@ TEST(mpdu, ConstructorsAndAccessors)
     userPacketFragmentIndex);
 
   ASSERT_TRUE(header1 != NULL) << "MPDUHeader failed to instantiate";
-
-printf("header len = %ld payload %ld\n",header1->MACHeaderLength(), MPDU::maxMTU());
 
   // What the heck, let's make the data random even though we don't touch it
   // for this unit test
@@ -121,7 +119,6 @@ printf("header len = %ld payload %ld\n",header1->MACHeaderLength(), MPDU::maxMTU
   // Instantiate an object using the parameterized constructor
   MPDU *mpdu1;
   mpdu1 = new MPDU(*header1, codeword1);
-
   ASSERT_TRUE(mpdu1 != NULL) << "MPDU 1 failed to instantiate";
 
   // Do a simple check
@@ -129,9 +126,9 @@ printf("header len = %ld payload %ld\n",header1->MACHeaderLength(), MPDU::maxMTU
   ASSERT_TRUE(rawMPDU.size() == (uint32_t) UHF_TRANSPARENT_MODE_PACKET_LENGTH) << "MPDU length incorrect!";
 
 #if QA_MPDU_DEBUG
-  //  for (uint16_t i = 0; i < rawMPDU.size(); i++) {
-  //    printf("rawPDU[%d] = 0x%02x\n", i, rawMPDU[i]);
-  //  }
+    for (uint16_t i = 0; i < rawMPDU.size(); i++) {
+      printf("rawPDU[%d] = 0x%02x\n", i, rawMPDU[i]);
+    }
 #endif
 
   // Instantiate a second object using the raw data constructor
@@ -195,7 +192,7 @@ TEST(mpdu, NonAccessorMethods)
   // First do a little CSP config work
   csp_conf_t cspConf;
   csp_conf_get_defaults(&cspConf);
-  cspConf.buffer_data_size = 4096; // TODO set as CSP_MTU
+  cspConf.buffer_data_size = 4095; // TODO set as CSP_MTU
   csp_init(&cspConf);
 
   // Set the CSP packet test lengths so that
@@ -205,7 +202,7 @@ TEST(mpdu, NonAccessorMethods)
   // * a non-zero length a packet needs more than one MPDU
   // * the max size packet
   uint16_t const numCSPPackets = 5;
-  uint16_t cspPacketDataLengths[numCSPPackets] = {0, 10, 103, 358, 4096};
+  uint16_t cspPacketDataLengths[numCSPPackets] = {0, 10, 103, 358, 4095};
 
   // Let's choose a few FEC schemes to test; testing them all would take a long
   // time and really we just want to have a mix of n, k, and r.
@@ -226,7 +223,7 @@ TEST(mpdu, NonAccessorMethods)
     {3,3,3,7,54}, // IEEE_802_11N_QCLDPC_1944_R_2_3, n = 243 m = 162 bytes
     {3,3,3,7,47}, // IEEE_802_11N_QCLDPC_1944_R_3_4, n = 243 m = 182.25 -> 182 bytes
     {3,3,3,5,43}, // IEEE_802_11N_QCLDPC_1944_R_5_6, n = 243 m = 202.5 -> 202 bytes
-    {1,1,3,7,71}, // CCSDS_CONVOLUTIONAL_CODING_R_1_2, n = 119 m = 58.75 -> 58 bytes
+    {1,1,3,7,70}, // CCSDS_CONVOLUTIONAL_CODING_R_1_2, n = 119 m = 58.75 -> 58 bytes
     {1,1,2,5,53}, // CCSDS_CONVOLUTIONAL_CODING_R_2_3, n = 119 m = 78.5833 -> 78
     {1,1,2,5,47}, // CCSDS_CONVOLUTIONAL_CODING_R_3_4, n = 119 m = 88.5 -> 88 bytes
     {1,1,2,4,42}, // CCSDS_CONVOLUTIONAL_CODING_R_5_6, n = 119 m = 98.4167 -> 98 bytes
@@ -257,7 +254,7 @@ TEST(mpdu, NonAccessorMethods)
   ErrorCorrection::ErrorCorrectionScheme ecs;
   ErrorCorrection * errorCorrection;
 
-  for (int ecScheme = 0; ecScheme < 18; ecScheme++) {
+  for (int ecScheme = 11; ecScheme < 18; ecScheme++) {
 
     switch(ecScheme) {
       case 0:
@@ -362,7 +359,7 @@ TEST(mpdu, NonAccessorMethods)
 
 #if QA_MPDU_DEBUG
       printf("packet length = %d\n", packet->length);
-      printf("numMPDUS = %d\n", numMPDUs);
+      printf("numMPDUsPerPacket = %d\n", numMPDUsPerPacket);
       printf("expectedMPDUsPerPacket[%d][%d] = %d\n",ecScheme,currLen,expectedMPDUsPerPacket[ecScheme][currLen]);
 #endif
 

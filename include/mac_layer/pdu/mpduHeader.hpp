@@ -88,17 +88,6 @@ namespace ex2 {
       }
 
       /*!
-       * @brief Accessor
-       * @return MAC payload length in bytes
-       */
-//      static uint16_t
-//      MACPayloadLength ()
-//      {
-//        return (uint16_t) TRANSPARENT_MODE_DATA_FIELD_2_MAX_LEN -
-//            (uint16_t) k_MACHeaderLength / 8;
-//      }
-
-      /*!
        * @brief Return the FEC scheme
        *
        * @return The FEC aka Error Correction scheme
@@ -106,7 +95,7 @@ namespace ex2 {
       ErrorCorrection::ErrorCorrectionScheme
       getErrorCorrectionScheme() const
       {
-        return m_errorCorrection.getErrorCorrectionScheme();
+        return m_errorCorrection->getErrorCorrectionScheme();
       }
 
       uint8_t
@@ -123,7 +112,7 @@ namespace ex2 {
       uint32_t
       getCodewordLength () const
       {
-        return m_errorCorrection.getCodewordLen();
+        return m_errorCorrection->getCodewordLen();
       }
 
       /*!
@@ -134,7 +123,7 @@ namespace ex2 {
       uint32_t
       getMessageLength () const
       {
-        return m_errorCorrection.getMessageLen();
+        return m_errorCorrection->getMessageLen();
       }
 
       const std::vector<uint8_t>&
@@ -161,12 +150,6 @@ namespace ex2 {
       {
         return m_userPacketPayloadLength;
       }
-
-//      uint8_t
-//      getUhfPacketLength () const
-//      {
-//        return m_uhfPacketLength;
-//      }
 
       bool
       isMHeaderValid () const
@@ -198,7 +181,7 @@ namespace ex2 {
 
       /*uint8_t m_uhfPacketLength;*/
       RF_Mode::RF_ModeNumber m_rfModeNumber;
-      ErrorCorrection m_errorCorrection;
+      ErrorCorrection *m_errorCorrection;
       uint8_t  m_codewordFragmentIndex;
       uint16_t m_userPacketPayloadLength;
       uint16_t m_userPacketFragmentIndex;

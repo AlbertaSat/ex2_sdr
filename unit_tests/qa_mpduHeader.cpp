@@ -148,6 +148,7 @@ TEST(mpduHeader, Accessors )
   RF_Mode::RF_ModeNumber modulation = RF_Mode::RF_ModeNumber::RF_MODE_3; // 0b011
   ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme =
       ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2; // 0b000000
+  ErrorCorrection ec(errorCorrectionScheme, MPDU::maxMTU() * 8);
   uint8_t codewordFragmentIndex = 0x55;
   uint16_t userPacketPayloadLength = 1234; // 0x04d2
   uint8_t userPacketFragmentIndex = 0xAA;
@@ -155,9 +156,9 @@ TEST(mpduHeader, Accessors )
   MPDUHeader *header1, *header2;
 
 
-  header1 = new MPDUHeader(/*UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH,*/
+  header1 = new MPDUHeader(
     modulation,
-    errorCorrectionScheme,
+    ec,
     codewordFragmentIndex,
     userPacketPayloadLength,
     userPacketFragmentIndex);

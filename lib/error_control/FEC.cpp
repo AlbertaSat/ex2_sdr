@@ -16,7 +16,7 @@
 #include "FEC.hpp"
 #include "NoFEC.hpp"
 #include "QCLDPC.hpp"
-#include "convCode27.hpp"
+#include "ConvolutionalCodecHD.hpp"
 
 namespace ex2 {
   namespace sdr {

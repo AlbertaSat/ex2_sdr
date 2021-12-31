@@ -70,7 +70,6 @@ TEST(noFEC, Foo )
     if (packet == NULL) {
       /* Could not get buffer element */
       csp_log_error("Failed to get CSP buffer");
-      FAIL() << "Failed to get CSP buffer";
       return;
     }
 

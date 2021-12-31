@@ -284,5 +284,12 @@ namespace ex2
       repack(tempBPS);
     }
 
+    void
+    PPDU_u8::clearPayload()
+    {
+      m_payload.resize(0);
+    }
+
+
   } /* namespace sdr */
 } /* namespace ex2 */
