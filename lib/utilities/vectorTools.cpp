@@ -16,14 +16,6 @@
 namespace ex2 {
   namespace sdr {
 
-
-    VectorTools::VectorTools()
-    {
-    }
-
-    VectorTools::~VectorTools() {
-    }
-
     void
     VectorTools::floatToBytes(float threshold, bool reverseBitOrder, std::vector<float>& in, std::vector<uint8_t>& out)
     {
