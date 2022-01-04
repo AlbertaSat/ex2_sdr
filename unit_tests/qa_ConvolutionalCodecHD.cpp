@@ -47,6 +47,18 @@ using namespace ex2::sdr;
 
 #define QA_CC_HD_DEBUG 0 // set to 1 for debugging output
 
+uint8_t numOnesInByte(uint8_t b) {
+  uint8_t count = (b >> 7) & 0x01;
+  count += (b >> 6) & 0x01;
+  count += (b >> 5) & 0x01;
+  count += (b >> 4) & 0x01;
+  count += (b >> 3) & 0x01;
+  count += (b >> 2) & 0x01;
+  count += (b >> 1) & 0x01;
+  count += b & 0x01;
+
+  return count;
+}
 /*!
  * @brief Check FEC decoding for the scheme provided.
  *
@@ -56,15 +68,19 @@ using namespace ex2::sdr;
  * @param errorCorrectionScheme The error correction scheme.
  * @param snr The signal to noise ratio of the generated data in the range [-20,60]
  * @param ber The target bit-error rate in the range [1e-6,0.1]
+ * @param berExceedExpected If true, the target @p ber is expected to be exceeded
+ * @param berTolerance The percent tolerance to allow for the BER to be exceeded, in the range [0,100]
  */
 void
-check_decoder (
-    ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme,
-    float snr,
-    float ber)
+check_decoder_ber (
+  ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme,
+  double snr,
+  double ber,
+  bool berExceedExpected,
+  double berTolerance)
 {
-  if (ber > 0.1f or ber < 1e-6) {
-    printf("The BER must be in the range [1e-6,0.1]\n");
+  if (ber > 0.1f or ber < 1e-7) {
+    printf("The BER must be in the range [1e-7,0.1]\n");
     throw std::exception();
   }
 
@@ -73,13 +89,19 @@ check_decoder (
     throw std::exception();
   }
 
+  if (berExceedExpected) {
+    if (berTolerance < 0.0f or berTolerance > 100.0f) {
+      printf("The berTolerance must be in the range [0,100]\n");
+      throw std::exception();
+    }
+  }
+
   ConvolutionalCodecHD ccHDCodec(errorCorrectionScheme);
 
   ErrorCorrection ec(errorCorrectionScheme, MPDU::maxMTU()*8);
 
-
   // Get ready for simulating noise at the input SNR
-  float sigma2 = 1.0 / pow (10.0, snr / 10.0); // noise variance
+  float sigma2 = 0.5 / pow (10.0, snr / 10.0); // noise variance
   boost::mt19937 *rng = new boost::mt19937 ();
   rng->seed (time (NULL));
   boost::normal_distribution<> distribution (-sqrt(sigma2), sqrt(sigma2));
@@ -89,39 +111,46 @@ check_decoder (
   // The message length is returned in bits. It's easiest to handle the data as
   // being 1 bit per 8-bit symbol, aka unpacked
   unsigned int payloadBitCount = ec.getMessageLen();
-  printf("payloadBitCount %ld\n", payloadBitCount);
-  PPDU_u8::payload_t unpackedData(payloadBitCount);
+  unsigned int payloadByteCount = payloadBitCount/8;
+  PPDU_u8::payload_t packedMessage(payloadByteCount);
 
-  // Calculate the number of bits needed for the desired BER. Assume at least 5
-  // errors are needed to establish the BER, so double that to be sure.
-  uint32_t numBitsForBER = 2*(5 / ber);
+  // Calculate the number of bits needed for the desired BER. Assume at least
+  // 100 errors are needed to establish the BER.
+  uint32_t numBitsForBER = 100 / ber;
   uint32_t numBits = 0;
   uint32_t numErrors = 0;
 
   std::srand(std::time(0));
-  while (numBits < numBitsForBER)
+
+  while (numBits < numBitsForBER && numErrors < 100)
   {
     // Make a random data payload
-    for (unsigned int i = 0; i < payloadBitCount; i++)
-      unpackedData[i] = (uint8_t) (std::rand () & 0x0001);
-    PPDU_u8 dataPPDU (unpackedData, PPDU_u8::BitsPerSymbol::BPSymb_1);
-    dataPPDU.repack(PPDU_u8::BPSymb_8);
+    for (unsigned int i = 0; i < payloadByteCount; i++) {
+      packedMessage[i] = (uint8_t) (std::rand () & 0x00FF);
+    }
+
+#if QA_CC_HD_DEBUG
+    printf("message  : ");
+    for (int i = 0; i < 10; i++) {
+      printf("0x%02x ", packedMessage[i]);
+    }
+    printf("\n");
+#endif
+    PPDU_u8 dataPPDU (packedMessage, PPDU_u8::BitsPerSymbol::BPSymb_8);
 
     // Encode the packet
     PPDU_u8 encodedPPDU = ccHDCodec.encode (dataPPDU);
     PPDU_u8::payload_t payload = encodedPPDU.getPayload ();
-
 #if QA_CC_HD_DEBUG
-    // Make a reference copy
-    PPDU_u8::payload_t refPayload(payload);
-    for (uint32_t i = 0; i < 30; i++)
-      printf("%d ",refPayload[i]);
+    printf("codeword : ");
+    for (int i = 0; i < 10; i++) {
+      printf("0x%02x ", payload[i]);
+    }
     printf("\n");
 #endif
 
-    VectorTools vc;
     PPDU_f::payload_t payloadFloat;
-    vc.bytesToFloat(payload, false, true, true, 1.0f, payloadFloat);
+    VectorTools::bytesToFloat(payload, true, false, true, 1.0f, payloadFloat);
 
     // Add noise. The bytesToFloat method makes float symbols of mag 1.
 #if QA_CC_HD_DEBUG
@@ -145,30 +174,52 @@ check_decoder (
 #endif
     // We convert back to binary data and impose our own hard decision.
     PPDU_u8::payload_t payloadPlusNoise;
-    float threshold = 0.5;
-    vc.floatToBytes(threshold, false, payloadFloat, payloadPlusNoise);
-
-    // Try to decode the noisy codeword
-    PPDU_u8::payload_t decodedPayload;
-    numErrors += ccHDCodec.decode(payloadPlusNoise, snr, decodedPayload);
+    float threshold = 0.0; // The float payload was NRZ, so in [-1,1]
+    VectorTools::floatToBytes(threshold, false, payloadFloat, payloadPlusNoise);
 
 #if QA_CC_HD_DEBUG
-    if(!decodedOkay) {
-      int32_t diffs = 0;
-      for (uint32_t i = 0; i < refPayload.size(); i++) {
-        if (decodedPayload[i] != refPayload[i]) {
-          printf("diff at index %d\n",i);
-          diffs++;
-        }
-      }
-      printf("num diff payload bits = %d\n",diffs);
+    printf("cw+noise : ");
+    for (unsigned int i = 0; i < 10; i++) {
+      printf("0x%02x ", payloadPlusNoise[i]);
     }
+    printf("\n");
+#endif
+
+    // Try to decode the noisy codeword
+    PPDU_u8::payload_t decodedMessage;
+    ccHDCodec.decode(payloadPlusNoise, snr, decodedMessage);
+#if QA_CC_HD_DEBUG
+    printf("dmessage : ");
+    for (int i = 0; i < 10; i++) {
+      printf("0x%02x ", decodedMessage[i]);
+    }
+#endif
+    // count the bit errors in the decoded message
+    uint8_t diffByte;
+    for (unsigned int i = 0; i < packedMessage.size(); i++) {
+      diffByte = packedMessage[i] ^ decodedMessage[i];
+      numErrors += numOnesInByte(diffByte);
+    }
+#if QA_CC_HD_DEBUG
+    printf("At %g dB SNR, numErrors = %d\n", snr, numErrors);
+    printf("\n--------------------\n");
 #endif
     numBits += payloadBitCount;
   } // while not enough bits for BER
+  printf("@%g dB, numbBits %d numErrors %d\n", snr, numBits, numErrors);
 
   std::string ecn = ec.ErrorCorrectionName(errorCorrectionScheme);
-  ASSERT_TRUE(numErrors < 5) << (boost::format ("Decoding failed for %1% @ %2% dB SNR") % ecn % snr).str();
+  double calcBER = (double) numErrors / (double) numBits;
+  if (berExceedExpected) {
+    if (calcBER < ber) {
+      ASSERT_TRUE(calcBER > (1.0 - berTolerance/100.0)*ber) << (boost::format ("BER too low for %1% @ %2% dB SNR") % ecn % snr).str();
+    }
+  }
+  else {
+    if (calcBER > ber) {
+      ASSERT_TRUE(calcBER > (1.0 + berTolerance/100.0)*ber) << (boost::format ("BER too high for %1% @ %2% dB SNR") % ecn % snr).str();
+    }
+  }
 } // check decoder
 
 
@@ -179,7 +230,7 @@ check_decoder (
 TEST(convolutional_codec_hd, constructor_accessor )
 {
   /* ----------------------------------------------------------------------
-   * Confirm rate 2/3, 3/4, 5/6, and 7/8 CCSDS cannoy be instantiated.
+   * Confirm rate 2/3, 3/4, 5/6, and 7/8 CCSDS cannot be instantiated.
    * Confirm rate 1/2 CCSDS can be instantiated.
    * ----------------------------------------------------------------------
    */
@@ -199,7 +250,7 @@ TEST(convolutional_codec_hd, constructor_accessor )
   }
   try {
     ccHDCodec = new ConvolutionalCodecHD(ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6);
-   FAIL() << "Should not be able to instantiate FEC for CCSDS_CONVOLUTIONAL_CODING_R_5_6.";
+    FAIL() << "Should not be able to instantiate FEC for CCSDS_CONVOLUTIONAL_CODING_R_5_6.";
   }
   catch (FECException *e) {
   }
@@ -222,10 +273,17 @@ TEST(convolutional_codec_hd, constructor_accessor )
   }
 }
 
-TEST(convolutional_codec_hd, simple_encode_decode_no_errs )
+TEST(convolutional_codec_hd, r_1_2_simple_encode_decode_no_errs )
 {
   /* ----------------------------------------------------------------------
    * Create rate 1/2 CCSDS codec and test encode and decode with no errors
+   *
+   * The codec should not care what length of message to encode and decode.
+   * For the UHF radio we have a max payload of 119 bytes, but we should test
+   * it, longer, and shorter messages. Might as well follow the CSP packet
+   * lengths used in MAC testing understanding that this unit test is
+   * independent of the MAC fragmentation into UHF payloads...
+   *
    * ----------------------------------------------------------------------
    */
   ConvolutionalCodecHD *ccHDCodec;
@@ -238,6 +296,7 @@ TEST(convolutional_codec_hd, simple_encode_decode_no_errs )
     csp_conf_get_defaults(&cspConf);
     cspConf.buffer_data_size = 4096; // TODO set as CSP_MTU
     csp_init(&cspConf);
+
 
     // Set the CSP packet test lengths so that
     // * a zero length packet is tested
@@ -267,7 +326,7 @@ TEST(convolutional_codec_hd, simple_encode_decode_no_errs )
         packet->data[i] = (i % 79) + 0x30; // ASCII numbers through to ~
       }
 
-  #if QA_CC_HD_DEBUG
+#if QA_CC_HD_DEBUG
       printf("size of packet padding = %ld\n", sizeof(packet->padding));
       printf("size of packet length = %ld\n", sizeof(packet->length));
       printf("size of packet id = %ld\n", sizeof(packet->id));
@@ -278,51 +337,44 @@ TEST(convolutional_codec_hd, simple_encode_decode_no_errs )
       for (uint8_t p = 0; p < sizeof(packet->padding); p++) {
         printf("%02x",packet->padding[p]);
       }
-  #endif
+#endif
 
-      std::vector<uint8_t> p;
-
+      // The CSP packet needs to be in a PPDU_u8 and passed to the encoder
       uint8_t * pptr = (uint8_t *) packet;
-      for (int i = 0; i < cspPacketHeaderLen; i++) {
-        p.push_back(pptr[i]);
-      }
-      // This is ugly, so maybe we need to rethink using PPDU_xx?
-      for (unsigned long i = 0; i < packet->length; i++) {
-        p.push_back(packet->data[i]);
-      }
-
-  #if QA_CC_HD_DEBUG
-      // Look at the contents :-)
-      for (int i = 0; i < p.size(); i++) {
-        printf("p[%d] = 0x%02x\n", i, p[i]);
-      }
-  #endif
-
-      // @TODO maybe make these std::vector<uint8_t> ???
-      printf("p len %ld\n",p.size());
+      std::vector<uint8_t> p(pptr, pptr + cspPacketHeaderLen + packet->length);
       PPDU_u8 inputPayload(p);
+      // @TODO maybe make the input to the encoder a std::vector<uint8_t> ???
       PPDU_u8 encodedPayload = ccHDCodec->encode(inputPayload);
-      printf("inputPayload len %ld encodedPayload len %ld\n",inputPayload.payloadLength(),encodedPayload.payloadLength());
 
+      // The codeword (encoded payload) is not systematic, so the message and
+      // first k bytes of the codeword should have differences.
       bool same = true;
-      std::vector<uint8_t> iPayload = inputPayload.getPayload();
-      std::vector<uint8_t> ePayload = encodedPayload.getPayload();
-//      for (unsigned long i = 0; i < iPayload.size(); i++) {
-//        same = same & (iPayload[i] == ePayload[i]);
-//      }
-//
-//      ASSERT_FALSE(same) << "encoded payload matches input payload; not encoded!";
+      for (unsigned long i = 0; i < p.size(); i++) {
+        same = same & (p[i] == encodedPayload.getPayload()[i]);
+      }
+      ASSERT_FALSE(same) << "encoded payload matches payload; not possible if codeword is non-systematic";
 
 
+#if QA_CC_HD_DEBUG
+      printf("p len %ld\n",p.size());
+      printf("inputPayload len %ld encodedPayload len %ld\n",inputPayload.payloadLength(),encodedPayload.payloadLength());
+#endif
+
+      // Decode the encoded payload
       PPDU_u8::payload_t dPayload;
       const PPDU_u8 ecopyPayload(encodedPayload);
       uint32_t bitErrors = ccHDCodec->decode(encodedPayload.getPayload(), 100.0, dPayload);
 
+#if QA_CC_HD_DEBUG
       printf("csp packet len %ld packet len %ld encoded len %ld decoded len %ld\n",
         cspPacketDataLengths[currentCSPPacket], iPayload.size(), ePayload.size(), dPayload.size());
+#endif
 
-      ASSERT_TRUE(bitErrors == 0) << "Bit error count > 0";
+      // Convolutional decoding cannot tell how many bit errors there might be
+      ASSERT_TRUE(bitErrors == 0) << "Bit error count > 0; Convolutional coding does not ";
 
+      // Check the decoded and original messages match
+      std::vector<uint8_t> iPayload = inputPayload.getPayload();
       if (bitErrors == 0) {
         same = true;
         for (unsigned long i = 0; i < iPayload.size(); i++) {
@@ -330,14 +382,6 @@ TEST(convolutional_codec_hd, simple_encode_decode_no_errs )
         }
         ASSERT_TRUE(same) << "decoded payload does not match input payload";
       }
-
-
-
-      // confirm encoded length
-
-      // decode packet
-
-      // compare with original
 
     } // for various CSP packet lengths
 
@@ -348,11 +392,63 @@ TEST(convolutional_codec_hd, simple_encode_decode_no_errs )
 
 }
 
-TEST(convolutional_codec_hd, encode_decode_correctable_errs )
+TEST(convolutional_codec_hd, r_1_2_ber_match )
 {
-  check_decoder (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
-      60 /* dB */,
-      0.001);
+  /* ----------------------------------------------------------------------
+   * Check the rate 1/2 CCSDS codec against expected BER performance.
+   *
+   * Refer to chapter 8, Proakis, 4th Ed.
+   *
+   * Generally, confirm that BER of 0.0001 (1e-4) is met at higher SNRs,
+   * and not met at lower. Right around 6dB SNR about 1e-4 should be met.
+   *
+   * Note: To keep the execution time reasonable and not exceed unit testing
+   * time limits, only enough bits are generated to get close to the
+   * expected BER. A better test would run 10x or more bits...
+   * ----------------------------------------------------------------------
+   */
+
+  // Check some SNRs that should easily do better than 1e-4 BER
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    60 /* dB */,
+    0.0001,
+    false,
+    10.0);
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    8 /* dB */,
+    0.0001,
+    false,
+    10.0);
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    7 /* dB */,
+    0.0001,
+    false,
+    10.0);
+  // According to Proakis, 4th ed, Figure 8-2-21, right near 6dB SNR a BER of
+  // 1e-4 is achieved. Check a little above assuming it will do better than 1e-4
+  // and a little below assuming it won't
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    6.3 /* dB */,
+    0.0001,
+    false,
+    10.0);
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    5.7 /* dB */,
+    0.0001,
+    true,
+    10.0);
+  // At 5 dB SNR, 1e-4 BER will always be exceeded
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    5 /* dB */,
+    0.0001,
+    true,
+    10.0);
+  // At 0 dB SNR, 1e-4 BER will be exceeded really quickly -- see the log.
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    5 /* dB */,
+    0.0001,
+    true,
+    10.0);
 
 }
 
