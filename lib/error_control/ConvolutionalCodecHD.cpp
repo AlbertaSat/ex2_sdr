@@ -15,6 +15,7 @@
 #include "ConvolutionalCodecHD.hpp"
 #include "mpdu.hpp"
 
+#define CC_HD_DEBUG 0
 
 // CCSDS polynomials and constraint length; see CCSDS 131.0-B-3
 #define CCSDS_CONVOLUTIONAL_CODE_CONSTRAINT 7
@@ -80,8 +81,9 @@ namespace ex2 {
         ViterbiCodec::bitarr_t bitPayload = payload.getPayload();
         ViterbiCodec::bitarr_t encodedPayload = m_codec->encode(bitPayload);
 
-        printf("encode input length %ld encoded length %ld\n", bitPayload.size(), encodedPayload.size());
-
+#if CC_HD_DEBUG
+       printf("encode input length %ld encoded length %ld\n", bitPayload.size(), encodedPayload.size());
+#endif
         // Convert the codeword to a PPDU_u8 at 8 BPS (packed)
         PPDU_u8 encodedPDU(encodedPayload,PPDU_u8::BPSymb_1);
         encodedPDU.repack(PPDU_u8::BPSymb_8);
