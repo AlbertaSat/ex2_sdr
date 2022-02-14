@@ -490,16 +490,45 @@ namespace ex2 {
           codewordLen = 1944; // bits
           break;
 
-        // For convolutional coding, we start with the assumption that the
-        // codeword is always the same length regardless of rate. Then the
-        // message is calculated as described in @p m_messageLength()
+          // For convolutional coding, we start with the assumption that the
+          // codeword is always the same length regardless of rate. Then the
+          // message is calculated as described in @p m_messageLength()
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2:
+        {
+          uint32_t msgLen = m_continuousMaxCodewordLen / 2;
+          msgLen -= (msgLen % 8);
+          codewordLen = msgLen * 2;
+        }
+        break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3: // @todo not confirmed/tested!
+        {
+          uint32_t msgLen = m_continuousMaxCodewordLen * 2 / 3;
+          msgLen -= (msgLen % 8);
+          codewordLen = msgLen * 3 / 2;
+          codewordLen += (codewordLen % 8);
+        }
+        break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4: // @todo not confirmed/tested!
+        {
+          uint32_t msgLen = m_continuousMaxCodewordLen * 3 / 4;
+          msgLen -= (msgLen % 8);
+          codewordLen = msgLen * 4 / 3;
+        }
+        break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6: // @todo not confirmed/tested!
+        {
+          uint32_t msgLen = m_continuousMaxCodewordLen * 5 / 6;
+          msgLen -= (msgLen % 8);
+          codewordLen = msgLen * 6 / 5;
+        }
+        break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8: // @todo not confirmed/tested!
-          codewordLen = m_continuousMaxCodewordLen; // bits
-          break;
+        {
+          uint32_t msgLen = m_continuousMaxCodewordLen * 7 / 8;
+          msgLen -= (msgLen % 8);
+          codewordLen = msgLen * 8 / 7;
+        }
+        break;
 
         case ErrorCorrectionScheme::NO_FEC:
           // If there is no FEC scheme, the codeword and message are the same.

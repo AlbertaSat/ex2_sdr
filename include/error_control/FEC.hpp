@@ -55,6 +55,10 @@ namespace ex2 {
       /*!
        * @brief A virtual function to decode a payload using the FEC scheme
        *
+       * @todo It may be better to not have @p encodedPayload as const. What if
+       * it needs to be manipulated? After all, there is no contract saying it's
+       * not destroyed afrter decoding
+       *
        * @param[in] encodedPayload The encoded payload
        * @param[in] snrEstimate An estimate of the SNR for FEC schemes that need it.
        * @param[out] decodedPayload The resulting decoded payload

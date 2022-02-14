@@ -53,7 +53,7 @@ int ViterbiCodec::_next_state(int current_state, int input) const
     return (current_state >> 1) | (input << (_constraint - 2));
 }
 
-ViterbiCodec::bitarr_t ViterbiCodec::_curr_output(int current_state, int input) const
+ViterbiCodec::bitarr_t ViterbiCodec::_curr_output(const int current_state, const int input) const
 {
     return _outputs.at(current_state | (input << (_constraint - 1)));
 }

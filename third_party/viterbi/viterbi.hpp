@@ -54,7 +54,7 @@ class ViterbiCodec
 
     void _init_outputs();
     int _next_state(int current_state, int input) const;
-    bitarr_t _curr_output(int current_state, int input) const;
+    bitarr_t _curr_output(const int current_state, const int input) const;
     int _branch_metric(const bitarr_t& bits, int source_state, int target_state) const;
 
     // Given len(_poly) received bits, compute and returns path
@@ -67,7 +67,7 @@ class ViterbiCodec
     void _update_path_metrics(const bitarr_t& bits, std::vector<int>& path_metrics,
                               Trellis& trellis) const;
 
-    const int _constraint;
+    const int _constraint = 0;
     const std::vector<int> _poly;
 
     // The output table.
