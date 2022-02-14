@@ -1,6 +1,7 @@
 build**
 Debug**
 FreeRTOS**
+*.tar
 .vscode**
 .cproject
 .project
