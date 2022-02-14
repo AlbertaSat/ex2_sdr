@@ -137,8 +137,10 @@ void TestViterbiCodecAutomatic(const ViterbiCodec& codec)
             auto message = _gen_message(num_bits);
             auto encoded = codec.encode(message);
             auto decoded = codec.decode(encoded);
+#if QA_VITERBI_DEBUG
             printf("lengths: message %ld encoded %ld decoded %ld\n",
               message.size(), encoded.size(), decoded.size());
+#endif
             ASSERT_EQ(decoded, message);
         }
     }

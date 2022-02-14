@@ -37,7 +37,7 @@ namespace ex2 {
         PPDU_u8::payload_t& decodedPayload);
 
     private:
-      ErrorCorrection *m_errorCorrection;
+      ErrorCorrection *m_errorCorrection = 0;
     };
 
   } /* namespace sdr */

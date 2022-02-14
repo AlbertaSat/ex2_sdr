@@ -29,7 +29,6 @@ namespace ex2 {
       const uint16_t userPacketPayloadLength,
       const uint8_t userPacketFragmentIndex) :
         m_rfModeNumber(modulation),
-//        m_errorCorrection(errorCorrection),
         m_codewordFragmentIndex(codewordFragmentIndex),
         m_userPacketPayloadLength(userPacketPayloadLength),
         m_userPacketFragmentIndex(userPacketFragmentIndex)
@@ -38,8 +37,6 @@ namespace ex2 {
       m_headerPayload.resize(MACHeaderLength(),0);
 
       m_errorCorrection = new ErrorCorrection(errorCorrection.getErrorCorrectionScheme(), MPDU::maxMTU() * 8);
-
-//      m_headerPayload[0] = m_uhfPacketLength;
 
       encodeMACHeader();
 
@@ -73,8 +70,9 @@ namespace ex2 {
 
     MPDUHeader::MPDUHeader (MPDUHeader& header)
     {
+      // Make a copy
       m_rfModeNumber = header.m_rfModeNumber;
-      m_errorCorrection = header.m_errorCorrection;
+      m_errorCorrection = new ErrorCorrection(header.m_errorCorrection->getErrorCorrectionScheme(), MPDU::maxMTU() * 8);
       m_codewordFragmentIndex = header.m_codewordFragmentIndex;
       m_userPacketPayloadLength = header.m_userPacketPayloadLength;
       m_userPacketFragmentIndex = header.m_userPacketFragmentIndex;
@@ -83,9 +81,9 @@ namespace ex2 {
     }
 
     MPDUHeader::~MPDUHeader() {
-//      if (m_errorCorrection != NULL) {
-//        delete m_errorCorrection;
-//      }
+      if (m_errorCorrection != NULL) {
+        delete m_errorCorrection;
+      }
     }
 
     bool

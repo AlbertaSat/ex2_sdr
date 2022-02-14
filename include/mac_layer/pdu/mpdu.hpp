@@ -123,11 +123,11 @@ namespace ex2
        * bytes long.
        *
        * @param[in] header The header corresponding to this MPDU
-       * @param[in] codeword MAC service data unit (aka payload)
+       * @param[in] payload MAC service data unit
        */
       MPDU (
         MPDUHeader& header,
-        const std::vector<uint8_t>& codeword);
+        std::vector<uint8_t>& payload);
 
       /*!
        * @brief Constructor
@@ -166,12 +166,12 @@ namespace ex2
       }
 
       /*!
-       * @brief Accessor for codeword
+       * @brief Accessor for payload
        *
-       * @return The codeword
+       * @return The payload
        */
-      const std::vector<uint8_t>& getCodeword() const {
-        return m_codeword;
+      const std::vector<uint8_t>& getPayload() const {
+        return m_payload;
       }
 
       /*!
@@ -203,7 +203,7 @@ namespace ex2
 
     private:
       MPDUHeader *m_mpduHeader;
-      std::vector<uint8_t> m_codeword;
+      std::vector<uint8_t> m_payload;
       std::vector<uint8_t> m_rawMPDU;
     };
 

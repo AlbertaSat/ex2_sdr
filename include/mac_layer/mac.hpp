@@ -234,7 +234,7 @@ namespace ex2
       // member vars that define the MAC operation
       ErrorCorrection *m_errorCorrection = 0;
 
-      FEC *m_FEC;
+      FEC *m_FEC = 0;
 
       RF_Mode::RF_ModeNumber m_rfModeNumber;
 

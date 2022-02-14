@@ -24,7 +24,7 @@ namespace ex2
 
     MPDU::MPDU (
       MPDUHeader& header,
-      const std::vector<uint8_t>& codeword)
+      std::vector<uint8_t>& codeword)
     {
       // Make a copy
       m_mpduHeader = new MPDUHeader(header);
@@ -32,7 +32,7 @@ namespace ex2
       // the MPDU object will be used to define a transparent mode payload
       // comprising Data Field 1 and 2, that is, the header and the codeword
       // together.
-      m_codeword = std::vector<uint8_t>(codeword);
+      m_payload = std::vector<uint8_t>(codeword);
       m_rawMPDU.resize(0);
       std::vector<uint8_t> temp = header.getHeaderPayload();
       m_rawMPDU.insert(m_rawMPDU.end(), temp.begin(), temp.end());
@@ -73,19 +73,19 @@ namespace ex2
 
         // Header seems okay, so make codeword based on how many remaining bytes
         // in rawMPDU
-        m_codeword.resize(0);
         uint32_t minMPDULength = MPDUHeader::MACHeaderLength() + MPDU::maxMTU();
         if (rawMPDU.size() >= (minMPDULength)) {
-          m_codeword.insert(m_codeword.begin(), rawMPDU.begin()+MPDUHeader::MACHeaderLength(), rawMPDU.begin()+minMPDULength);
+          m_payload.assign(rawMPDU.begin()+MPDUHeader::MACHeaderLength(), rawMPDU.begin()+minMPDULength);
         }
         else {
           // insert what we have and then pad to correct length
-          m_codeword.insert(m_codeword.begin(), rawMPDU.begin()+MPDUHeader::MACHeaderLength(), rawMPDU.end());
-          m_codeword.resize(minMPDULength);
+          m_payload.assign(rawMPDU.begin()+MPDUHeader::MACHeaderLength(), rawMPDU.end());
+          m_payload.resize(minMPDULength);
         }
       }
       catch (MPDUHeaderException& e) {
         // @todo should log this
+        printf("MPDUHeader exception : %s\n", e.what());
         throw MPDUException("MPDU: Bad raw MPDUHeader.");
       }
 
@@ -95,7 +95,9 @@ namespace ex2
 
     MPDU::~MPDU ()
     {
-      delete m_mpduHeader;
+      if (m_mpduHeader != NULL) {
+        delete m_mpduHeader;
+      }
     }
 
     const std::vector<uint8_t>&
@@ -106,15 +108,16 @@ namespace ex2
     uint16_t
     MPDU::mpdusInNBytes(uint32_t byteCount, ErrorCorrection &errorCorrection) {
 
-      // Get the FEC scheme message and codeword lengths in bytes
+      // First find how many messages are needed for @p byteCount bytes
       uint32_t msgLen = errorCorrection.getMessageLen() / 8;
       uint32_t numMsgsPerCSPPacket = byteCount / msgLen;
       if (byteCount % msgLen != 0) {
         numMsgsPerCSPPacket++;
       }
 
+      // Codewords are packed into consecutive MPDUs, so find out how many
+      // are needed, being sure to round up.
       uint32_t numCodewordBytesPerCSPPacket = numMsgsPerCSPPacket * errorCorrection.getCodewordLen() / 8;
-
       uint32_t numMPDUsPerCSPPacket = numCodewordBytesPerCSPPacket / maxMTU();
       if (numCodewordBytesPerCSPPacket % maxMTU() != 0) {
         numMPDUsPerCSPPacket++;

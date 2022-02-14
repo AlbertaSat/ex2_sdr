@@ -22,7 +22,11 @@ namespace ex2 {
       m_errorCorrection = new ErrorCorrection(ecScheme, (MPDU::maxMTU() * 8));
     }
 
-    QCLDPC::~QCLDPC() {  }
+    QCLDPC::~QCLDPC() {
+      if (m_errorCorrection != NULL) {
+        delete m_errorCorrection;
+      }
+    }
 
     PPDU_u8
     QCLDPC::encode(PPDU_u8 &payload) {
