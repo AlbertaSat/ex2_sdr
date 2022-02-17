@@ -42,8 +42,8 @@ using namespace ex2::sdr;
 
 #define QA_MAC_DEBUG 0 // set to 1 for debugging output
 
-// @todo should be 13
-#define NUM_ERROR_CORRECTION_SCHEMES_TO_TEST 13
+// @todo should be 14
+#define NUM_ERROR_CORRECTION_SCHEMES_TO_TEST 14
 
 /*!
  * @brief Test constructor

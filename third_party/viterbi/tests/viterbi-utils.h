@@ -10,7 +10,7 @@
 
 static inline bitarr_t string_to_bits(std::string_view str)
 {
-    const int len = str.size();
+    const size_t len = str.size();
     bitarr_t bits(len);
     for (size_t i = 0; i < len; i++) {
         assert((str[i] == '0') || (str[i] == '1'));
@@ -39,7 +39,7 @@ static inline std::ostream& operator<<(std::ostream& os, const ViterbiCodec& cod
     const std::vector<int>& polynomials = codec.polynomials();
     assert(!polynomials.empty());
     os << polynomials.front();
-    for (int i = 1; i < polynomials.size(); i++) {
+    for (size_t i = 1; i < polynomials.size(); i++) {
         os << ", " << polynomials[i];
     }
     return os << "})";

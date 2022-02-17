@@ -95,7 +95,7 @@ TEST(macWrapper, ConstructorAndAccessors_wrapper) {
 /*!
  * @brief Test receiving a CSP packet and receiving transparent mode packets
  */
-TEST(macWrapper, CSPPacketLoopback_wrapper) {
+TEST(macWrapper, CSPPacketLoopbackNoDroppedPackets) {
   /* ---------------------------------------------------------------------
    * Same as the CSPPacketLoopback test, but using the wrapper.
    *
@@ -328,6 +328,10 @@ TEST(macWrapper, CSPPacketLoopback_wrapper) {
     } // for various CSP packet lengths
 
   } // for a number of Error Correction schemes
+
+  mac_destroy(myMac1);
+
+  csp_free_resources(); // make valgrind happier
 
 } // CSPPacketLoopback_wrapper
 
