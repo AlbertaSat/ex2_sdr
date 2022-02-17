@@ -27,11 +27,9 @@ namespace ex2 {
 
     ConvolutionalCodecHD::ConvolutionalCodecHD(ErrorCorrection::ErrorCorrectionScheme ecScheme)  : FEC(ecScheme) {
 
-      // @TODO does this belong in the FEC constructor?
-      m_errorCorrection = new ErrorCorrection(ecScheme, (MPDU::maxMTU() * 8));
 
       // Only the CCSDS schemes are permitted
-      switch (this->m_errorCorrection->getErrorCorrectionScheme()) {
+      switch (ecScheme) {
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2:
           break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3:
@@ -50,7 +48,9 @@ namespace ex2 {
           throw new FECException("Must be a Convolutional Codec scheme.");
           break;
       }
-//      m_errorCorrection = new ErrorCorrection(ecScheme, (MPDU::maxMTU() * 8));
+
+      // @TODO does this belong in the FEC constructor?
+      m_errorCorrection = new ErrorCorrection(ecScheme, (MPDU::maxMTU() * 8));
       std::vector<int> polynomials{ CCSDS_CONVOLUTIONAL_CODE_POLY_G1, CCSDS_CONVOLUTIONAL_CODE_POLY_G2};
 
       m_codec = new ViterbiCodec(CCSDS_CONVOLUTIONAL_CODE_CONSTRAINT, polynomials);

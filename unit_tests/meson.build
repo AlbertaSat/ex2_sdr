@@ -35,7 +35,7 @@ unit_test_mac = executable('unit_test-mac', 'qa_mac.cpp', core_source_files, thi
     )
     
 test('mac', unit_test_mac,
-    timeout: 30
+    timeout: 100
     )
     
 unit_test_mac_wrapper = executable('unit_test-mac-wrapper', 'qa_macWrapper.cpp', core_source_files, third_party_source_files,
@@ -44,7 +44,7 @@ unit_test_mac_wrapper = executable('unit_test-mac-wrapper', 'qa_macWrapper.cpp',
     )
     
 test('mac-wrapper', unit_test_mac_wrapper,
-    timeout: 30
+    timeout: 100
     )
     
 unit_test_no_FEC = executable('unit_test-no_FEC', 'qa_NoFEC.cpp', core_source_files, third_party_source_files,
@@ -62,7 +62,7 @@ unit_test_viterbi = executable('unit_test-viterbi', 'qa_viterbi.cpp', core_sourc
     )
     
 test('viterbi', unit_test_viterbi,
-    timeout: 30
+    timeout: 100
     )
 
 unit_test_cc_hd_FEC = executable('unit_test-cc_hd_FEC', 'qa_ConvolutionalCodecHD.cpp', core_source_files, third_party_source_files,
@@ -71,7 +71,7 @@ unit_test_cc_hd_FEC = executable('unit_test-cc_hd_FEC', 'qa_ConvolutionalCodecHD
     )
     
 test('cc_hd_FEC', unit_test_cc_hd_FEC,
-    timeout: 30
+    timeout: 60
     )
 
 unit_test_matrix2d = executable('unit_test-matrix2d', 'qa_matrix2d.cpp',

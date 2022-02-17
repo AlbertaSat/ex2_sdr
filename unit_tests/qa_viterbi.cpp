@@ -117,7 +117,7 @@ TEST(Viterbi, Voyager_err)
     auto encoded = codec.encode(message);
 
     // add 5% errors
-    int nerr = encoded.size() * 0.05;
+    unsigned int nerr = encoded.size() * 0.05;
     for (size_t i = 0; i < nerr; i++) {
         int idx = rand() % encoded.size();
         encoded[idx] = (encoded[idx] == 0) ? (1) : (0);

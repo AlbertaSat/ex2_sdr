@@ -236,31 +236,47 @@ TEST(convolutional_codec_hd, constructor_accessor )
    * Confirm rate 1/2 CCSDS can be instantiated.
    * ----------------------------------------------------------------------
    */
-  ConvolutionalCodecHD *ccHDCodec;
+  ConvolutionalCodecHD *ccHDCodec = 0;
 
   try {
     ccHDCodec = new ConvolutionalCodecHD(ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3);
     FAIL() << "Should not be able to instantiate FEC for CCSDS_CONVOLUTIONAL_CODING_R_2_3.";
   }
   catch (FECException *e) {
+    if (ccHDCodec != NULL) {
+      delete ccHDCodec;
+    }
+    delete e;
   }
   try {
     ccHDCodec = new ConvolutionalCodecHD(ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4);
     FAIL() << "Should not be able to instantiate FEC for CCSDS_CONVOLUTIONAL_CODING_R_3_4.";
   }
   catch (FECException *e) {
+    if (ccHDCodec != NULL) {
+      delete ccHDCodec;
+    }
+    delete e;
   }
   try {
     ccHDCodec = new ConvolutionalCodecHD(ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6);
     FAIL() << "Should not be able to instantiate FEC for CCSDS_CONVOLUTIONAL_CODING_R_5_6.";
   }
   catch (FECException *e) {
+    if (ccHDCodec != NULL) {
+      delete ccHDCodec;
+    }
+    delete e;
   }
   try {
     ccHDCodec = new ConvolutionalCodecHD(ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8);
     FAIL() << "Should not be able to instantiate FEC for CCSDS_CONVOLUTIONAL_CODING_R_7_8.";
   }
   catch (FECException *e) {
+    if (ccHDCodec != NULL) {
+      delete ccHDCodec;
+    }
+    delete e;
   }
 
   try {
@@ -268,10 +284,12 @@ TEST(convolutional_codec_hd, constructor_accessor )
   }
   catch (FECException *e) {
     FAIL() << "Should be able to instantiate FEC for CCSDS_CONVOLUTIONAL_CODING_R_1_2.";
+    delete e;
   }
 
-  if (ccHDCodec) {
+  if (ccHDCodec != NULL) {
     // Other than the encode and decode methods, there are no other methods to test.
+    delete ccHDCodec;
   }
 }
 
@@ -296,8 +314,10 @@ TEST(convolutional_codec_hd, r_1_2_simple_encode_decode_no_errs )
     // Do a little CSP config work
     csp_conf_t cspConf;
     csp_conf_get_defaults(&cspConf);
-    cspConf.buffer_data_size = 4096; // TODO set as CSP_MTU
-    csp_init(&cspConf);
+    cspConf.buffer_data_size = 4095; // TODO set as CSP_MTU
+    if (csp_init(&cspConf) != CSP_ERR_NONE) {
+      FAIL() << "CSP init failed";
+    }
 
 
     // Set the CSP packet test lengths to be a superset of what is used in
@@ -339,7 +359,10 @@ TEST(convolutional_codec_hd, r_1_2_simple_encode_decode_no_errs )
 
       // The CSP packet needs to be in a PPDU_u8 and passed to the encoder
       uint8_t * pptr = (uint8_t *) packet;
-      std::vector<uint8_t> p(pptr, pptr + cspPacketHeaderLen + packet->length);
+
+      std::vector<uint8_t> p;
+      p.assign(pptr, pptr + cspPacketHeaderLen + packet->length);
+
       PPDU_u8 inputPayload(p);
       // @TODO maybe make the input to the encoder a std::vector<uint8_t> ???
       PPDU_u8 encodedPayload = ccHDCodec->encode(inputPayload);
@@ -382,6 +405,10 @@ TEST(convolutional_codec_hd, r_1_2_simple_encode_decode_no_errs )
       }
 
     } // for various CSP packet lengths
+
+    delete ccHDCodec;
+
+    csp_free_resources(); // make valgrind happier
 
   }
   catch (FECException *e) {
