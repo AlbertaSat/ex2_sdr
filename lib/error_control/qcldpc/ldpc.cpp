@@ -5,7 +5,7 @@
  *
  * @details LDPC encoding and decoding functions.
  *
- * @copyright Xiphos Systems Corp. 2019
+ * @copyright AlbertaSat 2021
  *
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
@@ -26,9 +26,9 @@
 #define LDPC_DEBUG_VERBOSE 0
 #define LDPC_DEBUG_SAMPLES_TO_PRINT 30
 
-namespace xiphos
+namespace ex2
 {
-  namespace darkstar
+  namespace sdr
   {
 
     class LDPCException: public std::exception {
@@ -887,5 +887,5 @@ namespace xiphos
     }
 
 
-  } /* namespace darkstar */
-} /* namespace xiphos */
+  } /* namespace sdr */
+} /* namespace ex2 */
