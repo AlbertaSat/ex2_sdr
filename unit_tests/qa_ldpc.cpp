@@ -8,7 +8,7 @@
  * This unit test exercises the LDPC encoder and decoder for various codeword lengths and rates
  * using randomly generated multiple messages.
  *
- * @copyright Xiphos Systems Corp. 2019
+ * @copyright AlbertaSat 2021
  *
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
