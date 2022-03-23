@@ -58,7 +58,6 @@ endif
 
 
 core_source_files = [
-#    PRJ_DIR / 'lib/app_layer/app.cpp',
 #    PRJ_DIR / 'lib/configuration/configuration.cpp',
 #    PRJ_DIR / 'lib/error_control/crc.cpp',
 #    PRJ_DIR / 'lib/error_control/interleaver.cpp',
@@ -75,17 +74,12 @@ core_source_files = [
 #    PRJ_DIR / 'lib/math/galoisLFSR.cpp',
     PRJ_DIR / 'lib/pdu/pdu.cpp',
     PRJ_DIR / 'lib/mac_layer/mac.cpp',
-#    PRJ_DIR / 'lib/mac_layer/mac_high.cpp',
-#    PRJ_DIR / 'lib/mac_layer/mac_low.cpp',
     PRJ_DIR / 'lib/mac_layer/pdu/mpdu.cpp',
     PRJ_DIR / 'lib/mac_layer/pdu/mpduHeader.cpp',
-#    PRJ_DIR / 'lib/phy_layer/mls.cpp',
-#    PRJ_DIR / 'lib/utilities/version.cpp',
     PRJ_DIR / 'lib/utilities/vectorTools.cpp',
 #    PRJ_DIR / 'lib/utilities/partab.c',
 #    PRJ_DIR / 'lib/error_control/qcldpc/ldpc.cpp',
 #    PRJ_DIR / 'lib/error_control/qcldpc/parity_check.cpp',
-#    PRJ_DIR / 'lib/app_layer/pdu/apdu.cpp',
 #    PRJ_DIR / 'lib/math/eigen/matrix2d.cpp',
 ##    PRJ_DIR / 'lib/phy_layer/modulation.cpp',
 ##    PRJ_DIR / 'lib/phy_layer/phy.cpp',
@@ -185,4 +179,4 @@ if gtest_dep.found()
     subdir('unit_tests')
 endif
 
-#subdir('Documentation')
+#subdir('doc')
