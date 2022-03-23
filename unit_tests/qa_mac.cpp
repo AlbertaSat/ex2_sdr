@@ -302,6 +302,7 @@ TEST(mac, CSPPacketLoopbackNoDroppedPackets) {
               case MAC::MAC_UHFPacketProcessingStatus::CSP_PACKET_READY:
               {
                 const uint8_t *rawCSP = myMac1->getRawCspPacketBuffer();
+                uint8_t *cspReceived = (uint8_t *) csp_buffer_clone((void *) rawCSP);
                 uint8_t *p = (uint8_t *) packet;
 
 #if QA_MAC_DEBUG
@@ -309,14 +310,15 @@ TEST(mac, CSPPacketLoopbackNoDroppedPackets) {
                 printf("packet length %d (2 bytes) %02x\n", packet->length, packet->length);
                 printf("packet id (4 bytes) %04x\n", packet->id);
                 for (uint16_t i = 0; i < myMac1->getRawCspPacketLength(); i++) {
-                  printf("%04d %02x|%02x\n",i,rawCSP[i],p[i]);
+                  printf("%04d %02x|%02x\n",i,cspReceived[i],p[i]);
                 }
                 printf("------------\n");
 #endif
                 bool same = true;
                 for (uint16_t i = 0; same && (i < myMac1->getRawCspPacketLength()); i++) {
-                  same = same && (rawCSP[i] == p[i]);
+                  same = same && (cspReceived[i] == p[i]);
                 }
+                csp_buffer_free(cspReceived);
                 ASSERT_TRUE(same) << "decoded CSP packet does not match original";
               }
               break;
@@ -522,10 +524,10 @@ TEST(mac, CSPPacketLoopbackDroppedPackets) {
 
       // At this point we get the mpdu buffer and feed it one raw MPDU at a time
       // into myMac1->processUHFPacket(...)
-printf("ecs = %d packet = %d\n",ecs,currentCSPPacket);
+//printf("ecs = %d packet = %d\n",ecs,currentCSPPacket);
 
       if (packetEncoded) {
-printf("test missing first MPDU\n");
+//printf("test missing first MPDU\n");
         const uint8_t *mpdusBuffer = myMac1->mpduPayloadsBuffer();
         if (mpdusBuffer && (myMac1->mpduPayloadsBufferLength() % 128 == 0)) {
 
@@ -552,7 +554,7 @@ printf("test missing first MPDU\n");
           // Test if missing the second MPDU results in a CSP packet. It should,
           // and the result should be the correct length, but not match the
           // original
-printf("test missing second MPDU\n");
+//printf("test missing second MPDU\n");
           for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
             // skip the second MPDU
             if (rawMPDUCount != 1) {
@@ -561,12 +563,14 @@ printf("test missing second MPDU\n");
                 case MAC::MAC_UHFPacketProcessingStatus::CSP_PACKET_READY:
                 {
                   const uint8_t *rawCSP = myMac1->getRawCspPacketBuffer();
+                  uint8_t *cspReceived = (uint8_t *) csp_buffer_clone((void *) rawCSP);
                   uint8_t *p = (uint8_t *) packet;
 
                   bool same = true;
                   for (uint16_t i = 0; i < myMac1->getRawCspPacketLength(); i++) {
-                    same = same && (rawCSP[i] == p[i]);
+                    same = same && (cspReceived[i] == p[i]);
                   }
+                  csp_buffer_free(cspReceived);
                   ASSERT_TRUE(!same) << "decoded CSP packet matches original even though an MPDU was dropped";
                 }
                 break;

@@ -291,6 +291,7 @@ TEST(macWrapper, CSPPacketLoopbackNoDroppedPackets) {
               {
 //                printf("CSP Packet Ready\n");
                 const uint8_t *rawCSP = get_raw_csp_packet_buffer(myMac1);
+                uint8_t *cspReceived = (uint8_t *) csp_buffer_clone((void *) rawCSP);
                 uint8_t *p = (uint8_t *) packet;
 
 #if QA_MAC_WRAPPER_DEBUG
@@ -298,7 +299,7 @@ TEST(macWrapper, CSPPacketLoopbackNoDroppedPackets) {
                 printf("packet length %d (2 bytes) %02x\n", packet->length, packet->length);
                 printf("packet id (4 bytes) %04x\n", packet->id.ext);
                 for (uint16_t i = 0; i < get_raw_csp_packet_length(myMac1); i++) {
-                  printf("%04d %02x|%02x\n",i,rawCSP[i],p[i]);
+                  printf("%04d %02x|%02x\n",i,cspReceived[i],p[i]);
                 }
                 printf("------------\n");
 #endif
@@ -306,6 +307,7 @@ TEST(macWrapper, CSPPacketLoopbackNoDroppedPackets) {
                 for (uint16_t i = 0; i < get_raw_csp_packet_length(myMac1); i++) {
                   same = same && (rawCSP[i] == p[i]);
                 }
+                csp_buffer_free(cspReceived);
                 ASSERT_TRUE(same) << "decoded CSP packet does not match original";
               }
               break;
