@@ -338,13 +338,25 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
       message.resize(0);
       message.insert(message.end(), cspPacket->padding, cspPacket->padding + CSP_PADDING_BYTES);
       cspBytesRemaining -= CSP_PADDING_BYTES;
+#if __linux__
       message.push_back((uint8_t) (cspPacket->length & 0x00FF));
       message.push_back((uint8_t) ((cspPacket->length & 0xFF00) >> 8));
+#else
+      message.push_back((uint8_t) ((cspPacket->length & 0xFF00) >> 8));
+      message.push_back((uint8_t) (cspPacket->length & 0x00FF));
+#endif
       cspBytesRemaining -= sizeof(uint16_t);
+#if __linux__
       message.push_back((uint8_t) (cspPacket->id.ext & 0x000000FF));
       message.push_back((uint8_t) ((cspPacket->id.ext & 0x0000FF00) >> 8));
       message.push_back((uint8_t) ((cspPacket->id.ext & 0x00FF0000) >> 16));
       message.push_back((uint8_t) ((cspPacket->id.ext & 0xFF000000) >> 24));
+#else
+      message.push_back((uint8_t) ((cspPacket->id.ext & 0xFF000000) >> 24));
+      message.push_back((uint8_t) ((cspPacket->id.ext & 0x00FF0000) >> 16));
+      message.push_back((uint8_t) ((cspPacket->id.ext & 0x0000FF00) >> 8));
+      message.push_back((uint8_t) (cspPacket->id.ext & 0x000000FF));
+#endif
       cspBytesRemaining -= sizeof(uint32_t);
 
       // We know/assume that the CSP header is smaller than the smallest message
