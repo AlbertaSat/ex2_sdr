@@ -13,7 +13,6 @@
 #ifndef EX2_SDR_WRAPPER_MAC_H_
 #define EX2_SDR_WRAPPER_MAC_H_
 
-//#include "mac.h"
 #include "error_correctionWrapper.h"
 #include "rfModeWrapper.h"
 
