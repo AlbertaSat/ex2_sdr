@@ -14,6 +14,26 @@
 #include "mac.hpp"
 #include <cmath>
 
+#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN || \
+    defined(__BIG_ENDIAN__) || \
+    defined(__ARMEB__) || \
+    defined(__THUMBEB__) || \
+    defined(__AARCH64EB__) || \
+    defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
+// It's a big-endian target architecture
+#define LITTLE_ENDIAN_ARCH 0
+#elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+    defined(__LITTLE_ENDIAN__) || \
+    defined(__ARMEL__) || \
+    defined(__THUMBEL__) || \
+    defined(__AARCH64EL__) || \
+    defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+// It's a little-endian target architecture
+#define LITTLE_ENDIAN_ARCH 1
+#else
+#error "I don't know what architecture this is!"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -338,7 +358,7 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
       message.resize(0);
       message.insert(message.end(), cspPacket->padding, cspPacket->padding + CSP_PADDING_BYTES);
       cspBytesRemaining -= CSP_PADDING_BYTES;
-#if __linux__
+#if LITTLE_ENDIAN_ARCH
       message.push_back((uint8_t) (cspPacket->length & 0x00FF));
       message.push_back((uint8_t) ((cspPacket->length & 0xFF00) >> 8));
 #else
@@ -346,7 +366,7 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
       message.push_back((uint8_t) (cspPacket->length & 0x00FF));
 #endif
       cspBytesRemaining -= sizeof(uint16_t);
-#if __linux__
+#if LITTLE_ENDIAN_ARCH
       message.push_back((uint8_t) (cspPacket->id.ext & 0x000000FF));
       message.push_back((uint8_t) ((cspPacket->id.ext & 0x0000FF00) >> 8));
       message.push_back((uint8_t) ((cspPacket->id.ext & 0x00FF0000) >> 16));
