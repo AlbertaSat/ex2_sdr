@@ -16,6 +16,27 @@
 #include "mpdu.hpp"
 #include "rfMode.hpp"
 
+#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN || \
+    defined(__BIG_ENDIAN__) || \
+    defined(__ARMEB__) || \
+    defined(__THUMBEB__) || \
+    defined(__AARCH64EB__) || \
+    defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
+// It's a big-endian target architecture
+#define LITTLE_ENDIAN_ARCH 0
+#include <arpa/inet.h>
+#elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
+    defined(__LITTLE_ENDIAN__) || \
+    defined(__ARMEL__) || \
+    defined(__THUMBEL__) || \
+    defined(__AARCH64EL__) || \
+    defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
+// It's a little-endian target architecture
+#define LITTLE_ENDIAN_ARCH 1
+#else
+#error "I don't know what architecture this is!"
+#endif
+
 namespace ex2 {
   namespace sdr {
 
@@ -49,7 +70,7 @@ namespace ex2 {
         throw MPDUHeaderException("MPDUHeader: Raw header too short");
 
       }
-      if (decodeMACHeader(rawHeader, true)) {
+      if (decodeMACHeader(rawHeader)) {
         // The header may be valid, but if there were more than 4 errors in the
         // Golay codewords, we will have a false positive result. We can check
         // a little more by making sure the FEC scheme is possible
@@ -87,8 +108,7 @@ namespace ex2 {
     }
 
     bool
-    MPDUHeader::decodeMACHeader(std::vector<uint8_t> &packet,
-      bool dataField1Included) {
+    MPDUHeader::decodeMACHeader(std::vector<uint8_t> &packet) {
       // The Golay-encoded MAC Header comprises 3, 3-byte codewords.
       // Decode the codewords and if all decode properly, return true
 
@@ -161,11 +181,15 @@ namespace ex2 {
 
       uint32_t codeword = golay_encode(msgBits);
 
+#if LITTLE_ENDIAN_ARCH
       m_headerPayload[2] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
-      m_headerPayload[1] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
-      m_headerPayload[0] = (uint8_t)(codeword & 0x000000FF);
+      m_headerPayload[1] = (uint8_t)((codeword & 0x0000FF00) >> 8);
+      m_headerPayload[0] = (uint8_t)((codeword & 0x00FF0000) >> 16);
+#else
+      m_headerPayload[2] = (uint8_t)((codeword & 0xFF000000) >> 24);
+      m_headerPayload[1] = (uint8_t)((codeword & 0x00FF0000) >> 16);
+      m_headerPayload[0] = (uint8_t)((codeword & 0x0000FF00) >> 8);
+#endif
 
       msgBits = 0;
       msgBits = (m_codewordFragmentIndex << 8) & 0x00000F00;        // bottom 4 bits
@@ -173,11 +197,15 @@ namespace ex2 {
 
       codeword = golay_encode(msgBits);
 
+#if LITTLE_ENDIAN_ARCH
       m_headerPayload[5] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
-      m_headerPayload[4] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
-      m_headerPayload[3] = (uint8_t)(codeword & 0x000000FF);
+      m_headerPayload[4] = (uint8_t)((codeword & 0x0000FF00) >> 8);
+      m_headerPayload[3] = (uint8_t)((codeword & 0x00FF0000) >> 16);
+#else
+      m_headerPayload[5] = (uint8_t)((codeword & 0xFF000000) >> 24);
+      m_headerPayload[4] = (uint8_t)((codeword & 0x00FF0000) >> 16);
+      m_headerPayload[3] = (uint8_t)((codeword & 0x0000FF00) >> 8);
+#endif
 
       msgBits = 0;
       msgBits = (m_userPacketPayloadLength << 8) & 0x00000F00;
@@ -185,11 +213,15 @@ namespace ex2 {
 
       codeword = golay_encode(msgBits);
 
+#if LITTLE_ENDIAN_ARCH
       m_headerPayload[8] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
-      m_headerPayload[7] = (uint8_t)(codeword & 0x000000FF);
-      codeword >>= 8;
-      m_headerPayload[6] = (uint8_t)(codeword & 0x000000FF);
+      m_headerPayload[7] = (uint8_t)((codeword & 0x0000FF00) >> 8);
+      m_headerPayload[6] = (uint8_t)((codeword & 0x00FF0000) >> 16);
+#else
+      m_headerPayload[8] = (uint8_t)((codeword & 0xFF000000) >> 24);
+      m_headerPayload[7] = (uint8_t)((codeword & 0x00FF0000) >> 16);
+      m_headerPayload[6] = (uint8_t)((codeword & 0x0000FF00) >> 8);
+#endif
     } // encodeMACHeader
 
 
