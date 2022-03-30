@@ -193,11 +193,10 @@ namespace ex2 {
        * @brief Used to decode a raw received packet to get the MAC header
        *
        * @param packet The received transparent mode packet
-       * @param dataField1Included True if Data Field 1 is the first byte
        * @return True if header decodes without errors, but could still bad because
        * if there are > 4 errors in a Golay codeword, they will not be detected
        */
-      bool decodeMACHeader(std::vector<uint8_t> &packet, bool dataField1Included = true);
+      bool decodeMACHeader(std::vector<uint8_t> &packet);
 
       void encodeMACHeader();
 
