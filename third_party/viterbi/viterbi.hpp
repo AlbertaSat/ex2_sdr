@@ -9,8 +9,6 @@
 #include <utility>
 #include <vector>
 
-//using bitarr_t = std::vector<bool>;
-
 // This class implements both a Viterbi Decoder and a Convolutional Encoder.
 class ViterbiCodec
 {
@@ -38,6 +36,7 @@ class ViterbiCodec
     // We use 2.
     ViterbiCodec(int constraint, const std::vector<int>& polynomials);
     bitarr_t encode(const bitarr_t& bits) const;
+    std::vector<uint8_t> encodePacked(const std::vector<uint8_t>& bits) const;
     bitarr_t decode(const bitarr_t& bits) const;
     int constraint() const { return _constraint; }
     const std::vector<int>& polynomials() const { return _poly; }
@@ -50,7 +49,7 @@ class ViterbiCodec
     // Then trellis[i][s] is the state in the (i - 1)th iteration which leads to
     // the current state s in the ith iteration.
     // It is used for traceback.
-    using Trellis = std::vector<std::vector<int>>;
+    using Trellis = std::vector<std::vector<uint8_t>>;
 
     void _init_outputs();
     int _next_state(int current_state, int input) const;
@@ -60,11 +59,11 @@ class ViterbiCodec
     // Given len(_poly) received bits, compute and returns path
     // metric and its corresponding previous state.
     std::pair<int, int> _path_metric(const bitarr_t& bits,
-                                     const std::vector<int>& prev_path_metrics, int state) const;
+                                     const std::vector<uint8_t>& prev_path_metrics, int state) const;
 
     // Given len(_poly) received bits, update path metrics of all states
     // in the current iteration, and append new traceback vector to trellis.
-    void _update_path_metrics(const bitarr_t& bits, std::vector<int>& path_metrics,
+    void _update_path_metrics(const bitarr_t& bits, std::vector<uint8_t>& path_metrics,
                               Trellis& trellis) const;
 
     const int _constraint = 0;
@@ -77,6 +76,12 @@ class ViterbiCodec
     // 0b10 (= 2), and the current input is 0b1 (= 1), then the index is 0b110 (=
     // 6).
     std::vector<bitarr_t> _outputs;
+
+//    // TEST
+//    int m_first_max = 0;
+//    int m_first_min = 0;
+//    int m_second_max = 0;
+//    int m_second_min = 0;
 };
 
 int ReverseBits(int num_bits, int input);

@@ -75,23 +75,15 @@ namespace ex2 {
         return notEncoded;
       }
       else {
-        // Don't assume the input has 1 bit per symbol (aka uint8_t)
-        if (payload.getBps() != PPDU_u8::BPSymb_1) {
-          payload.repack(PPDU_u8::BPSymb_1);
-        }
 
-        // Encode the 1 BPS message
-        ViterbiCodec::bitarr_t bitPayload = payload.getPayload();
-        ViterbiCodec::bitarr_t encodedPayload = m_codec->encode(bitPayload);
+        // Encode the 8 BPS message
+        std::vector<uint8_t> encodedPayload = m_codec->encodePacked(payload.getPayload());
 
 #if CC_HD_DEBUG
        printf("encode input length %ld encoded length %ld\n", bitPayload.size(), encodedPayload.size());
 #endif
 
-       // Convert the codeword to a PPDU_u8 at 8 BPS (packed)
-        PPDU_u8 encodedPDU(encodedPayload,PPDU_u8::BPSymb_1);
-        encodedPDU.repack(PPDU_u8::BPSymb_8);
-        payload.repack(PPDU_u8::BPSymb_8);
+        PPDU_u8 encodedPDU(encodedPayload,PPDU_u8::BPSymb_8);
 
         return encodedPDU;
       }
@@ -116,17 +108,6 @@ namespace ex2 {
         ePPDU.repack(PPDU_u8::BPSymb_1);
         PPDU_u8::payload_t ePPDUpayload = ePPDU.getPayload();
 
-//        // @todo generalize this for rates in addition to 1/2
-//        // Check the codeword is the length expected. It may have been zero-
-//        // padded in the encode method
-//        if (m_errorCorrection->getMessageLen()*2 < ePPDUpayload.size()) {
-//          printf("codeword len %ld should be %ld\n",ePPDUpayload.size(),m_errorCorrection->getMessageLen()*2);
-//          printf("resize codeword please\n");
-//          uint32_t newSize = m_errorCorrection->getMessageLen()*2;
-//          ePPDUpayload.resize(newSize);
-//          printf("codeword len %ld should be %ld\n",ePPDUpayload.size(),m_errorCorrection->getMessageLen()*2);
-//        }
-
         // Decode the 1 bit per byte payload.
         ViterbiCodec::bitarr_t dPPDUpayload = m_codec->decode(ePPDUpayload);
 
@@ -134,7 +115,6 @@ namespace ex2 {
         PPDU_u8 dPPDU(dPPDUpayload, PPDU_u8::BPSymb_1);
         dPPDU.repack(PPDU_u8::BPSymb_8);
         dPPDUpayload = dPPDU.getPayload();
-//        printf("decoded payload size %ld\n",dPPDUpayload.size());
         decodedPayload.insert(decodedPayload.end(),dPPDUpayload.begin(),dPPDUpayload.end());
 
         // We have no way to know if there are bit errors, so return zero (0)
