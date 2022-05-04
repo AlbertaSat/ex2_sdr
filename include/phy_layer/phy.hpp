@@ -15,7 +15,6 @@
 #define EX2_SDR_PHY_LAYER_PHY_H_
 
 #include <functional>
-#include <glog/logging.h>
 
 #include "ppdu_f.hpp"
 #include "ppdu_u8.hpp"

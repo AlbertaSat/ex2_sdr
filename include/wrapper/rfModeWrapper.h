@@ -13,8 +13,6 @@
 #ifndef EX2_SDR_WRAPPER_RFMODE_H_
 #define EX2_SDR_WRAPPER_RFMODE_H_
 
-#include "rfMode.hpp"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
