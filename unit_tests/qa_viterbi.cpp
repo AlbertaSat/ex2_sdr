@@ -35,9 +35,12 @@ extern "C" {
 #endif
 
 using namespace std;
-//using namespace ex2::sdr;
 
 #include "gtest/gtest.h"
+
+// Set this to 1 if the trellis column type is uint8_t instead of int.
+// See third_party/viterbi/viterbi.hpp
+#define QA_VITERBI_TRELLIS_COL_8_BIT 1
 
 static ViterbiCodec::bitarr_t _gen_message(int num_bits)
 {
@@ -76,6 +79,9 @@ TEST(Viterbi, Poly_7x6_err)
    */
     ViterbiCodec codec(3, {7, 6});
     ASSERT_EQ(codec.decode("101101010011"_b), "101100"_b);
+
+    // Inject 1 error bit.
+    ASSERT_EQ(codec.decode("101101110011"_b), "101100"_b);
 }
 
 TEST(Viterbi, Poly_6x5_err)
@@ -87,8 +93,13 @@ TEST(Viterbi, Poly_6x5_err)
     ViterbiCodec codec(3, {6, 5});
     ASSERT_EQ(codec.decode("01101101110110"_b), "1001101"_b);
 
+#if QA_VITERBI_TRELLIS_COL_8_BIT
+    // Inject 1 error bits.
+    ASSERT_EQ(codec.decode("01101101110010"_b), "1001101"_b);
+#else
     // Inject 2 error bits.
     ASSERT_EQ(codec.decode("11101101110010"_b), "1001101"_b);
+#endif
 }
 
 TEST(Viterbi, Poly_91x117x121_err)
@@ -199,6 +210,8 @@ TEST(Viterbi, CDMA_2000)
     TestViterbiCodecAutomatic(codec);
 }
 
+#if QA_VITERBI_TRELLIS_COL_8_BIT
+#else
 TEST(Viterbi, Cassini)
 {
     // Cassini / Mars Pathfinder
@@ -210,3 +223,4 @@ TEST(Viterbi, Cassini)
     ViterbiCodec codec(15, {15, 17817, 20133, 23879, 30451, 32439, 26975});
     TestViterbiCodecAutomatic(codec);
 }
+#endif

@@ -50,7 +50,7 @@ namespace ex2 {
        * @param[in] payload The payload to encode
        * @return The encoded payload
        */
-      virtual PPDU_u8 encode(PPDU_u8 &payload) = 0;
+      virtual PPDU_u8::payload_t encode(const PPDU_u8::payload_t &payload) = 0;
 
       /*!
        * @brief A virtual function to decode a payload using the FEC scheme

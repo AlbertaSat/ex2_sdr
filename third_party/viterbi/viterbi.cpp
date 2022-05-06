@@ -47,11 +47,6 @@ ViterbiCodec::ViterbiCodec(int constraint, const std::vector<int>& polynomials)
   }
   _init_outputs();
 
-//  // TEST
-//  m_first_max = 0;
-//  m_first_min = 0;
-//  m_second_max = 0;
-//  m_second_min = 0;
 }
 
 int ViterbiCodec::_next_state(int current_state, int input) const
@@ -182,10 +177,6 @@ void ViterbiCodec::_update_path_metrics(const bitarr_t& bits, std::vector<uint8_
     new_path_metrics[i] = p.first;
     new_trellis_column[i] = p.second;
 //    printf("[%ld] first %ld second %ld\n",i,p.first,p.second);
-//    if (p.first > m_first_max) m_first_max = p.first;
-//    if (p.first < m_first_min) m_first_min = p.first;
-//    if (p.first > m_second_max) m_second_max = p.first;
-//    if (p.first < m_second_min) m_second_min = p.first;
   }
 
   path_metrics = new_path_metrics;

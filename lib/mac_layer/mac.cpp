@@ -409,10 +409,10 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
         // Now apply the FEC encoding
         PPDU_u8 chunk(message);
         try {
-          PPDU_u8 encodedChunk = m_FEC->encode(chunk);
+          PPDU_u8::payload_t cw = m_FEC->encode(message);
 
           // Add codeword to current mpduPayload
-          PPDU_u8::payload_t cw = encodedChunk.getPayload();
+//          PPDU_u8::payload_t cw = encodedChunk.getPayload();
           uint32_t codewordBytesRemaining = cw.size(); // @TODO this is always the same, so could get only somewhere.
 
           // Don't assiume the mpduPayload is empty

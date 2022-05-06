@@ -33,7 +33,7 @@ namespace ex2 {
 
       ~ConvolutionalCodecHD();
 
-      PPDU_u8 encode(PPDU_u8 &payload);
+      PPDU_u8::payload_t encode(const PPDU_u8::payload_t &payload);
 
       uint32_t decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
         PPDU_u8::payload_t& decodedPayload);

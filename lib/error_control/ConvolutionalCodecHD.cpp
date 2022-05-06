@@ -65,28 +65,13 @@ namespace ex2 {
       }
     }
 
-    PPDU_u8
-    ConvolutionalCodecHD::encode(PPDU_u8 &payload) {
+    PPDU_u8::payload_t
+    ConvolutionalCodecHD::encode(const PPDU_u8::payload_t &payload)
+    {
+      // Encode the 8 BPS message
+      std::vector<uint8_t> encodedPayload = m_codec->encodePacked(payload);
 
-      if (!m_codec) {
-        PPDU_u8 notEncoded(PPDU_u8::BPSymb_8);
-        notEncoded.clearPayload();
-
-        return notEncoded;
-      }
-      else {
-
-        // Encode the 8 BPS message
-        std::vector<uint8_t> encodedPayload = m_codec->encodePacked(payload.getPayload());
-
-#if CC_HD_DEBUG
-       printf("encode input length %ld encoded length %ld\n", bitPayload.size(), encodedPayload.size());
-#endif
-
-        PPDU_u8 encodedPDU(encodedPayload,PPDU_u8::BPSymb_8);
-
-        return encodedPDU;
-      }
+      return encodedPayload;
     }
 
     uint32_t

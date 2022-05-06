@@ -111,25 +111,29 @@ TEST(noFEC, Foo )
 #endif
 
     // @TODO maybe make these std::vector<uint8_t> ???
-    PPDU_u8 inputPayload(p);
-    PPDU_u8 encodedPayload = noFEC->encode(inputPayload);
+//    PPDU_u8 inputPayload(p);
+    PPDU_u8::payload_t encodedPayload = noFEC->encode(p);
 
     bool same = true;
-    std::vector<uint8_t> iPayload = inputPayload.getPayload();
-    std::vector<uint8_t> ePayload = encodedPayload.getPayload();
-    for (unsigned long i = 0; i < iPayload.size(); i++) {
-      same = same & (iPayload[i] == ePayload[i]);
+//    std::vector<uint8_t> iPayload = inputPayload.getPayload();
+//    std::vector<uint8_t> ePayload = encodedPayload.getPayload();
+//    for (unsigned long i = 0; i < iPayload.size(); i++) {
+//      same = same & (iPayload[i] == ePayload[i]);
+//    }
+    for (unsigned long i = 0; i < p.size(); i++) {
+      same = same & (p[i] == encodedPayload[i]);
     }
 
     ASSERT_TRUE(same) << "encoded payload does not match input payload";
 
     PPDU_u8::payload_t dPayload;
     const PPDU_u8 ecopyPayload(encodedPayload);
-    uint32_t bitErrors = noFEC->decode(encodedPayload.getPayload(), 100.0, dPayload);
+//    uint32_t bitErrors = noFEC->decode(encodedPayload.getPayload(), 100.0, dPayload);
+    uint32_t bitErrors = noFEC->decode(encodedPayload, 100.0, dPayload);
 
     same = true;
-    for (unsigned long i = 0; i < iPayload.size(); i++) {
-      same = same & (iPayload[i] == dPayload[i]);
+    for (unsigned long i = 0; i < p.size(); i++) {
+      same = same & (p[i] == dPayload[i]);
     }
 
     ASSERT_TRUE(same) << "decoded payload does not match input payload";
