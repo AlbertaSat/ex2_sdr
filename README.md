@@ -27,3 +27,5 @@ meson test
     
 ## Build and Test for Hercules
 
+foo
+
