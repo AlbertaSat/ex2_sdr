@@ -13,14 +13,14 @@
 #ifndef EX2_SDR_WRAPPER_MAC_H_
 #define EX2_SDR_WRAPPER_MAC_H_
 
+#include <stdint.h>
+#include <stdbool.h>
 #include "error_correctionWrapper.h"
 #include "rfModeWrapper.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "csp_types.h"
 
 struct mac;
 typedef struct mac mac_t;
@@ -84,8 +84,8 @@ bool set_rf_mode_number (mac_t *m, rf_mode_number_t rf_mode_number);
 /************************************************************************/
 
 typedef enum {
-  CSP_PACKET_READY = 0, //(uint16_t) MAC::MAC_UHFPacketProcessingStatus::CSP_PACKET_READY,
-  CSP_PACKET_READY_RESUBMIT_PREVIOUS_PACKET = 1, //(uint16_t) MAC::MAC_UHFPacketProcessingStatus::CSP_PACKET_READY_RESUBMIT_PREVIOUS_PACKET,
+  PACKET_READY = 0, //(uint16_t) MAC::MAC_UHFPacketProcessingStatus::PACKET_READY,
+  PACKET_READY_RESUBMIT_PREVIOUS_PACKET = 1, //(uint16_t) MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET,
   READY_FOR_NEXT_UHF_PACKET = 2, //(uint16_t) MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET
   UHF_PACKET_PROCESSING_BAD_WRAPPER_CONTEXT = 100 // needed for wrapper existance checking
 } uhf_packet_processing_status_t;
@@ -94,49 +94,37 @@ typedef enum {
  * @brief Process the received UHF data as an MPDU.
  *
  * @details Process each MPDU received (UHF received data in transparent
- * mode) until a full CSP packet is received or there is an error.
+ * mode) until a full packet is received or there is an error.
  *
  * @param m Pointer to the MAC object wrapper
  * @param uhf_payload The transparent mode data received from the UHF radio
  * @param payload_length The number of transparent mode data bytes received
  *
- * @return The status of the process operation. If @p CSP_PACKET_READY,
- * a raw CSP packet (i.e., a @p csp_packet_t cast to a uint8_t pointer)
- * is in the raw buffer. If there is a problem, @p UHF_PACKET_PROCESSING_BAD_WRAPPER_CONTEXT
- * is returned.
+ * @return The status of the process operation. If @p PACKET_READY,
+ * a raw packet is in the raw buffer. 
+ * If there is a problem, @p UHF_PACKET_PROCESSING_BAD_WRAPPER_CONTEXT is returned.
  */
 uhf_packet_processing_status_t process_uhf_packet(mac_t *m, const uint8_t *uhf_payload, const uint32_t payload_length);
 
 /*!
- * @brief When ready, the raw CSP Packet buffer can be retrieved.
+ * @brief When ready, the raw packet buffer can be retrieved.
  *
  * @param m Pointer to the MAC object wrapper
  *
- * @return Pointer to the raw CSP packet buffer. If there is a problem, NULL
+ * @return Pointer to the raw packet buffer. If there is a problem, NULL
  * is returned
  */
-const uint8_t * get_raw_csp_packet_buffer(mac_t *m);
+const uint8_t * get_raw_packet_buffer(mac_t *m);
 
 /*!
- * @brief When ready, the raw CSP Packet buffer length can be returned.
+ * @brief When ready, the raw packet buffer length can be returned.
  *
  * @param m Pointer to the MAC object wrapper
  *
- * @return The raw CSP Packet buffer length in bytes. If there is a problem
+ * @return The raw Packet buffer length in bytes. If there is a problem
  * return -1
  */
-int32_t get_raw_csp_packet_buffer_length(mac_t *m);
-
-/*!
- * @brief When ready, the length of the CSP packet data in the raw CSP
- * Packet buffer can be returned.
- *
- * @param m Pointer to the MAC object wrapper
- *
- * @return The length of the CSP packet data in the raw CSP Packet buffer. If
- * there is a problem return -1
- */
-int32_t get_raw_csp_packet_length(mac_t *m);
+int32_t get_raw_packet_length(mac_t *m);
 
 
 /************************************************************************/
@@ -144,18 +132,19 @@ int32_t get_raw_csp_packet_length(mac_t *m);
 /************************************************************************/
 
 /*!
- * @brief Receive and encode new CSP packet.
+ * @brief Receive and encode new packet.
  *
- * @details Processed the received CSP packet to create MPDUs ready for
+ * @details Processed the received packet to create MPDUs ready for
  * transmission by the UHF radio in transparent mode. If the method returns
  * true, then there will be raw MPDUs in the mpdu payloads buffer
  *
  * @param m Pointer to the MAC object wrapper
- * @param cspPacket
+ * @param packet
+ * @param len
  *
- * @return True if the CSP packet was encoded, false otherwise
+ * @return True if the packet was encoded, false otherwise
  */
-bool receive_csp_packet(mac_t *m, csp_packet_t * csp_packet);
+    bool receive_packet(mac_t *m, uint8_t *packet, uint16_t len);
 
 /*!
  * @brief Pointer to MPDU payloads buffer.
@@ -166,7 +155,7 @@ bool receive_csp_packet(mac_t *m, csp_packet_t * csp_packet);
  *
  * @return pointer to the MPDU payloads buffer.
  */
-const uint8_t * mpdu_payloads_buffer(mac_t *m);
+const uint8_t* mpdu_payloads_buffer(mac_t *m);
 
 /*!
  * @breif The number of bytes in the MPDU payloads buffer.
