@@ -102,7 +102,7 @@ uhf_packet_processing_status_t process_uhf_packet(mac_t *m, const uint8_t *uhf_p
   return (uhf_packet_processing_status_t) (obj->processUHFPacket(uhf_payload, payload_length));
 }
 
-const uint8_t * get_raw_csp_packet_buffer(mac_t *m)
+const uint8_t* get_raw_packet_buffer(mac_t *m)
 {
   ex2::sdr::MAC *obj;
 
@@ -110,21 +110,10 @@ const uint8_t * get_raw_csp_packet_buffer(mac_t *m)
     return NULL;
 
   obj = static_cast<ex2::sdr::MAC *>(m->obj);
-  return obj->getRawCspPacketBuffer();
+  return obj->getRawPacketBuffer();
 }
 
-int32_t get_raw_csp_packet_buffer_length(mac_t *m)
-{
-  ex2::sdr::MAC *obj;
-
-  if (m == NULL)
-    return -1;
-
-  obj = static_cast<ex2::sdr::MAC *>(m->obj);
-  return obj->getRawCspPacketBufferLength();
-}
-
-int32_t get_raw_csp_packet_length(mac_t *m)
+int32_t get_raw_packet_length(mac_t *m)
 {
   ex2::sdr::MAC *obj;
 
@@ -132,10 +121,10 @@ int32_t get_raw_csp_packet_length(mac_t *m)
     return 1;
 
   obj = static_cast<ex2::sdr::MAC *>(m->obj);
-  return obj->getRawCspPacketLength();
+  return obj->getRawPacketLength();
 }
 
-bool receive_csp_packet(mac_t *m, csp_packet_t * csp_packet)
+bool receive_packet(mac_t *m, uint8_t *data, uint16_t len)
 {
   ex2::sdr::MAC *obj;
 
@@ -143,7 +132,7 @@ bool receive_csp_packet(mac_t *m, csp_packet_t * csp_packet)
     return false;
 
   obj = static_cast<ex2::sdr::MAC *>(m->obj);
-  return obj->receiveCSPPacket(csp_packet);
+  return obj->receivePacket(data, len);
 }
 
 const uint8_t * mpdu_payloads_buffer(mac_t *m)

@@ -14,31 +14,9 @@
 #include "mac.hpp"
 #include <cmath>
 
-#if defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN || \
-    defined(__BIG_ENDIAN__) || \
-    defined(__ARMEB__) || \
-    defined(__THUMBEB__) || \
-    defined(__AARCH64EB__) || \
-    defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
-// It's a big-endian target architecture
-#define LITTLE_ENDIAN_ARCH 0
-#elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
-    defined(__LITTLE_ENDIAN__) || \
-    defined(__ARMEL__) || \
-    defined(__THUMBEL__) || \
-    defined(__AARCH64EL__) || \
-    defined(_MIPSEL) || defined(__MIPSEL) || defined(__MIPSEL__)
-// It's a little-endian target architecture
-#define LITTLE_ENDIAN_ARCH 1
-#else
-#error "I don't know what architecture this is!"
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "csp_buffer.h"
 
 #ifdef __cplusplus
 }
@@ -53,16 +31,6 @@ extern "C" {
 
 namespace ex2 {
   namespace sdr {
-
-#if MAC_DEBUG
-  uint32_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection) {
-  // Get length of CSP packet in bytes. Make sure we are not fooled by
-  // alignment, so add up the struct members
-  uint32_t cspPacketSize = sizeof(csp_packet_t) + cspPacket->length;
-
-  return MPDU::mpdusInNBytes(cspPacketSize, errorCorrection);
-} // mpdusPerCSPPacket
-#endif
 
 
     MAC::MAC (RF_Mode::RF_ModeNumber rfModeNumber,
@@ -100,10 +68,10 @@ namespace ex2 {
       }
       m_FEC = FEC::makeFECCodec(errorCorrectionScheme);
 
-      // Always reset the first CSP fragment received flag if the FEC changes
-      m_firstCSPFragmentReceived = false;
+      // Always reset the first packet fragment received flag if the FEC changes
+      m_firstFragmentReceived = false;
 
-      m_currentCSPPacketLength = 0;
+      m_currentPacketLength = 0;
       m_mpduCount = 0;
       m_expectedMPDUs = 0;
 
@@ -141,24 +109,16 @@ namespace ex2 {
 
         // @todo Could do some header checks in case we are unlucky. Check packet length is >= 0, for example
 
-        // The first MPDU transmitted will have the CSP header in it, which is
-        // necessary to make the full CSP packet. Without it, there is no point
-        // in making a CSP packet so we keep track of its reception.
-        if (m_firstCSPFragmentReceived) {
+        // The first MPDU transmitted may have a header in it, which is
+        // necessary to make the full packet. Without it, there is no point
+        // in making an application packet so we keep track of its reception.
+        if (m_firstFragmentReceived) {
           // If we are here, we expected more raw MPDUs.
 
-          // We could check the CSP packet length based on the current MPDU header
-          // data, but what should we do if they don't match?
-#if MAC_MPDU_CHECK
-          uint32_t cspPacketLen = mpdu.getMpduHeader()->getUserPacketPayloadLength() + sizeof(csp_packet_t);
-          if (m_currentCSPPacketLength != cspPacketLen) {
-            printf("m_currentCSPPacketLength = %d doesn't match CSP packet length %ld from current MPDU\n", m_currentCSPPacketLength, cspPacketLen);
-          }
-#endif
           // If the received raw MPDU index matches the current count, this is
           // the next raw MPDU we expected.
           if (mpdu.getMpduHeader()->getCodewordFragmentIndex() == m_mpduCount) {
-            m_expectedMPDUs = MPDU::mpdusInNBytes(m_currentCSPPacketLength, *m_errorCorrection);
+            m_expectedMPDUs = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
             m_mpduCount++;
 
             // append to the codewordBuffer this MPDU payload, which may contain
@@ -185,7 +145,7 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
               // Ack, the raw MPDUs are out of order, which should not happen
               // unless we missed several transparent mode packets. All we can
               // do is reset
-              m_firstCSPFragmentReceived = false;
+              m_firstFragmentReceived = false;
               m_mpduCount = 0;
               return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
             }
@@ -193,16 +153,16 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
 
           // Do we have enough raw MPDUs?
           // @todo refactor to avoid duplicate code
-          m_expectedMPDUs = MPDU::mpdusInNBytes(m_currentCSPPacketLength, *m_errorCorrection);
+          m_expectedMPDUs = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
           if (m_mpduCount == m_expectedMPDUs) {
-            m_decodeCSPPacket();
-            return MAC_UHFPacketProcessingStatus::CSP_PACKET_READY;
+            m_decodePacket();
+            return MAC_UHFPacketProcessingStatus::PACKET_READY;
           } // Have all the MPDUs?
 
         }
         else {
 
-          // Check if the first CSP packet fragment
+          // Check if the first application packet fragment
           if (mpdu.getMpduHeader()->getCodewordFragmentIndex() == 0) {
             // Make note of the FEC scheme and check against current.
             // @todo Not sure this is a great idea since it could lead to being locked out.
@@ -214,12 +174,12 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
               return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
             }
             else {
-              // We keep in mind that the MPDU header only has the CSP payload
-              // length when we set the current CSP packet length
+              // We keep in mind that the MPDU header only has the user payload
+              // length when we set the current packet length
               // @todo what if the header decoded with errors? Need to do subsequent checking!
-              m_currentCSPPacketLength = mpdu.getMpduHeader()->getUserPacketPayloadLength() + sizeof(csp_packet_t);
+              m_currentPacketLength = mpdu.getMpduHeader()->getUserPacketPayloadLength();
 
-              m_expectedMPDUs = MPDU::mpdusInNBytes(m_currentCSPPacketLength, *m_errorCorrection);
+              m_expectedMPDUs = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
               m_mpduCount++;
 
               // save this MPDU payload that may contain some part of a codeword
@@ -229,20 +189,20 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
               m_codewordBuffer.reserve(m_expectedMPDUs*MPDU::maxMTU());
               m_codewordBuffer.assign(mpdu.getPayload().begin(),mpdu.getPayload().end());
 
-              // If only one MPDU is expected for this CSP packet, decode the codeword(s) in the buffer
+              // If only one MPDU is expected for this packet, decode the codeword(s) in the buffer
               if (m_mpduCount == m_expectedMPDUs) {
-                m_decodeCSPPacket();
-                return MAC_UHFPacketProcessingStatus::CSP_PACKET_READY;
+                m_decodePacket();
+                return MAC_UHFPacketProcessingStatus::PACKET_READY;
               }
-              m_firstCSPFragmentReceived = true;
+              m_firstFragmentReceived = true;
               return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
             }
 
           }
           else {
-            // If we don't receive the first MPDU for a CSP packet, we have to
+            // If we don't receive the first MPDU for a user packet, we have to
             // wait for the next MPDU. If we have already received the first
-            // MPDU for a CSP packet, we should not be here...
+            // MPDU for a user packet, we should not be here...
           }
 
           return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
@@ -257,19 +217,19 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
 
         // If we already have the first fragment, then continue even if the
         // header was bad
-        if (m_firstCSPFragmentReceived) {
+        if (m_firstFragmentReceived) {
           // we did receive a codeword  or codeword fragment, but it's junk since
           // there was a problem making the MPDU. Increment the count of received
           // MPDUs.
           m_mpduCount++;
           // Maybe this is the final expected MPDU? Better check.
           if (m_mpduCount == m_expectedMPDUs) {
-            m_decodeCSPPacket();
-            return MAC_UHFPacketProcessingStatus::CSP_PACKET_READY;
+            m_decodePacket();
+            return MAC_UHFPacketProcessingStatus::PACKET_READY;
           } // Have all the MPDUs?
         }
         else {
-          // If the first CSP packet fragment has not yet been received, then
+          // If the first user packet fragment has not yet been received, then
           // we can't tell if this failed MPDU was supposed to be it, so all
           // we can do is continue to look for a first MPDU
           return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
@@ -280,9 +240,9 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
     } // processUHFPacket
 
     void
-    MAC::m_decodeCSPPacket() {
+    MAC::m_decodePacket() {
 
-      m_rawCSPPacket.resize(0);
+      m_rawPacket.resize(0);
       std::vector<uint8_t> codeword;
       std::vector<uint8_t> decodedMessage;
       uint32_t cwLen = m_errorCorrection->getCodewordLen()/8;
@@ -292,20 +252,20 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
         codeword.insert(codeword.end(), m_codewordBuffer.begin()+c*cwLen, m_codewordBuffer.begin()+c*cwLen+cwLen);
         __attribute__((unused)) uint32_t bitErrors = m_FEC->decode(codeword, 100.0, decodedMessage);
         // @todo could log the bit errors
-        m_rawCSPPacket.insert(m_rawCSPPacket.end(), decodedMessage.begin(), decodedMessage.end());
+        m_rawPacket.insert(m_rawPacket.end(), decodedMessage.begin(), decodedMessage.end());
       }
-      m_rawCSPPacket.resize(m_currentCSPPacketLength);
-      m_firstCSPFragmentReceived = false;
+      m_rawPacket.resize(m_currentPacketLength);
+      m_firstFragmentReceived = false;
       m_mpduCount = 0;
     }
 
     bool
-    MAC::receiveCSPPacket(csp_packet_t * cspPacket) {
+    MAC::receivePacket(uint8_t * packet, uint16_t len) {
       // @TODO Lock the error correction scheme so that all of this
-      // csp packet is processed using the same FEC scheme
+      // packet is processed using the same FEC scheme
       //      std::unique_lock<std::mutex> lck(m_ecSchemeMutex); // how to do this for the whole receive process?
 
-      // A CSP packet is never all that big, so choose to first encode all
+      // A packet is never all that big, so choose to first encode all
       // the codewords for the packet.
       // Then put each codeword into an MPDU, which effectivley creates the
       // transparent mode payload comprising the MPDU header followed by one or
@@ -314,9 +274,9 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
 
       // Everything is done in units of bytes
 
-      //      uint32_t const numMPDUsPerPacket = MPDU::mpdusPerCSPPacket(cspPacket, *m_errorCorrection);
+      //      uint32_t const numMPDUsPerPacket = MPDU::mpdusPerPacket(packet, *m_errorCorrection);
       //      uint32_t const numMPDUsPerCodeword = MPDU::mpdusPerCodeword(*m_errorCorrection);
-      uint16_t const cspPacketLength = sizeof(csp_packet_t) + cspPacket->length;
+        uint16_t const packetLength = len;
 
       // @note the message length returned by the ErrorCorrection object is
       // in bits. It may be that it's not a multiple of 8 bits (1 byte), so
@@ -326,11 +286,11 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
 #if MAC_DEBUG
       uint32_t const cwLen = m_errorCorrection->getCodewordLen() / 8;
       printf("current ECS = %d\n", (uint16_t) getErrorCorrectionScheme());
-      uint32_t numMPDUsPerPacket = mpdusPerCSPPacket(cspPacket, *m_errorCorrection);
-      printf("numMPDUsPerPacket %d cspPacketLength %d messageLength %d cwLen %d\n",numMPDUsPerPacket,cspPacketLength,messageLength,cwLen);
+      uint32_t numMPDUsPerPacket = mpdusPerPacket(packet, *m_errorCorrection);
+      printf("numMPDUsPerPacket %d packetLength %d messageLength %d cwLen %d\n",numMPDUsPerPacket,packetLength,messageLength,cwLen);
 #endif
 
-      // A CSP packet is broken into codewords for transmission. Each codeword
+      // A packet is broken into codewords for transmission. Each codeword
       // is placed into (split across) one or more MPDUs. If the codeword does
       // not quite fill up the MPDU(s), it is zero-padded. Finally, each MPDU is
       // sent to the UHF radio for transmission in transparent mode.
@@ -346,61 +306,31 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
 
       m_transparentModePayloads.resize(0);
 
-      // Keep track of how much CSP packet data has been encoded
-      uint32_t cspDataOffset = 0;
-      uint32_t cspBytesRemaining = cspPacketLength;
+      // Keep track of how much packet data has been encoded
+      uint32_t dataOffset = 0;
+      uint32_t bytesRemaining = packetLength;
 
-      // The first chunk is special because we encode the csp_packet_t struct
-      // members.
-
-      // Insert in the message buffer the CSP padding, the length, and the id
-      // @todo this could be a standalone method
       message.resize(0);
-      message.insert(message.end(), cspPacket->padding, cspPacket->padding + CSP_PADDING_BYTES);
-      cspBytesRemaining -= CSP_PADDING_BYTES;
-#if LITTLE_ENDIAN_ARCH
-      message.push_back((uint8_t) (cspPacket->length & 0x00FF));
-      message.push_back((uint8_t) ((cspPacket->length & 0xFF00) >> 8));
-#else
-      message.push_back((uint8_t) ((cspPacket->length & 0xFF00) >> 8));
-      message.push_back((uint8_t) (cspPacket->length & 0x00FF));
-#endif
-      cspBytesRemaining -= sizeof(uint16_t);
-#if LITTLE_ENDIAN_ARCH
-      message.push_back((uint8_t) (cspPacket->id.ext & 0x000000FF));
-      message.push_back((uint8_t) ((cspPacket->id.ext & 0x0000FF00) >> 8));
-      message.push_back((uint8_t) ((cspPacket->id.ext & 0x00FF0000) >> 16));
-      message.push_back((uint8_t) ((cspPacket->id.ext & 0xFF000000) >> 24));
-#else
-      message.push_back((uint8_t) ((cspPacket->id.ext & 0xFF000000) >> 24));
-      message.push_back((uint8_t) ((cspPacket->id.ext & 0x00FF0000) >> 16));
-      message.push_back((uint8_t) ((cspPacket->id.ext & 0x0000FF00) >> 8));
-      message.push_back((uint8_t) (cspPacket->id.ext & 0x000000FF));
-#endif
-      cspBytesRemaining -= sizeof(uint32_t);
-
-      // We know/assume that the CSP header is smaller than the smallest message
-      // size for any FEC scheme we employ, so we need to do at least one
-      // iteration of this loop
       do {
-        // Fill the rest of the message buffer with CSP data; if not enough CSP data is
-        // available, use what remains and pad
+        // Fill the rest of the message buffer with data; if not enough data is
+        // available, use what's there and pad
         if (message.size() < messageLength) {
           // Check if we can fill the rest of the message
-          if (cspBytesRemaining >= messageLength - message.size()) {
-            // More than enough CSP packet data remaining, so fill up the message
+          if (bytesRemaining >= messageLength - message.size()) {
+            // More than enough packet data remaining, so fill up the message
             uint32_t bytesToAppend = messageLength - message.size();
             message.insert(message.end(),
-              cspPacket->data + cspDataOffset, cspPacket->data + cspDataOffset + messageLength - message.size());
-            cspBytesRemaining -= bytesToAppend;
-            cspDataOffset += bytesToAppend;
+                           packet + dataOffset,
+                           packet + dataOffset + messageLength - message.size());
+            bytesRemaining -= bytesToAppend;
+            dataOffset += bytesToAppend;
           }
           else {
-            // Not enough CSP packet data remaining, so put what there is in message
+            // Not enough packet data remaining, so put what there is in message
             message.insert(message.end(),
-              cspPacket->data + cspDataOffset, cspPacket->data + cspDataOffset + cspBytesRemaining);
-            cspDataOffset += cspBytesRemaining; // @todo don't really need to update this
-            cspBytesRemaining -= cspBytesRemaining;
+                           packet + dataOffset, packet + dataOffset + bytesRemaining);
+            dataOffset += bytesRemaining; // @todo don't really need to update this
+            bytesRemaining -= bytesRemaining;
             // Zero-pad the rest of the message
             message.resize(messageLength, 0);
           }
@@ -428,7 +358,7 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
 
             // Now have a full MPDU payload, so make the MPDU and stash the raw payload
             MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
-              mpduCount++, cspPacket->length, 0);
+              mpduCount++, len, 0);
             // Make an MPDU
             MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
             PPDU_u8::payload_t rawMPDU = mpdu->getRawMPDU();
@@ -456,7 +386,7 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
         catch (FECException& e) { // @todo need an FEC exception that all subclasses inherit
         }
 
-      } while (cspBytesRemaining > 0);
+      } while (bytesRemaining > 0);
 
       // There may be an incomplete mpduPayload at this point, so make one
       // last MPDU if needed. The mpduPayload is incomplete only if more bytes
@@ -466,7 +396,7 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
         mpduPayload.resize(MPDU::maxMTU(),0); // zero-pad to length
         // Now have a full MPDU payload, so make the MPDU and stash the raw payload
         MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
-          mpduCount++, cspPacket->length, 0);
+          mpduCount++, len, 0);
         // Make an MPDU
         MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
         PPDU_u8::payload_t rawMPDU = mpdu->getRawMPDU();

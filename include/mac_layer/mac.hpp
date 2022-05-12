@@ -3,10 +3,10 @@
  * @author Steven Knudsen
  * @date May 25, 2021
  *
- * @details The MAC class. It handles CSP packets received from the application
- * layer, processes them to make transparent more packets, and sends them to
+ * @details The MAC class. It handles packets received from the application
+ * layer, processes them to make transparent mode packets, and sends them to
  * the PHY. It also receives transparent mode packets, processes them, and
- * reassembles them into CSP packets to be sent to the application layer.
+ * reassembles them into packets to be sent to the application layer.
  *
  * @copyright University of Alberta, 2021
  *
@@ -27,8 +27,6 @@
 extern "C" {
 #endif
 
-#include "csp_types.h"
-
 #ifdef __cplusplus
 }
 #endif
@@ -38,9 +36,6 @@ extern "C" {
 #include "ppdu_u8.hpp"
 #include "mpdu.hpp"
 #include "rfMode.hpp"
-
-// TODO This definition belongs somewhere else
-#define CSP_MTU_LENGTH ( 4096 )
 
 #define MAC_MAX_RX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
 #define MAC_MAX_TX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
@@ -55,10 +50,10 @@ namespace ex2
      * @brief This is the media access controller (MAC)
      *
      * @details The MAC class is a singleton that instantiates two tasks that
-     * manage queues to the CSP server. One queue transports CSP packets from
-     * the CSP server to the MAC that are to be transmitted by the UHF radio.
-     * The other queue is used by the MAC to send CSP packets up to the CSP
-     * server that are reconstructed from packets received by the UHF Radio.
+     * manage queues to the upper level driver. One queue transports packets
+     * from the driver to the MAC that are to be transmitted by the radio.
+     * The other queue is used by the MAC to send packets up to the driver
+     * that are reconstructed from packets received by the Radio.
      *
      *
      * @todo Add diagrams (state machine, messaging, other)?
@@ -124,19 +119,19 @@ namespace ex2
       /************************************************************************/
 
       enum class MAC_UHFPacketProcessingStatus : uint16_t {
-        // All the necessary UHF packets have been received and a CSP packet
-        // was formed and must be removed.
-        CSP_PACKET_READY = 0x0000,
+        // All the necessary UHF packets have been received and an application
+        // packet was formed and must be removed.
+        PACKET_READY = 0x0000,
         // Not all the necessary UHF packets have been received, but there are
-        // no more expected. A CSP packet was formed and must be removed. Then
-        // the last UHF packet must be resubmitted.
-        CSP_PACKET_READY_RESUBMIT_PREVIOUS_PACKET = 0x0001,
+        // no more expected. An application packet was formed and must be
+        // removed. Then the last UHF packet must be resubmitted.
+        PACKET_READY_RESUBMIT_PREVIOUS_PACKET = 0x0001,
         // @todo this is not used at this point, eliminate?
         // Not all the necessary UHF packets have been received, waiting for
         // the next one.
         READY_FOR_NEXT_UHF_PACKET = 0x0002
         // @todo is another value needed to indicate that the first packet of
-        // a CSP packet was not received? Or is READY_FOR_NEXT_UHF_PACKET good
+        // a user packet was not received? Or is READY_FOR_NEXT_UHF_PACKET good
         // enough? See current logic in mac.cpp
       };
 
@@ -144,50 +139,48 @@ namespace ex2
        * @brief Process the received UHF data as an MPDU.
        *
        * @details Process each MPDU received (UHF received data in transparent
-       * mode) until a full CSP packet is received or there is an error.
+       * mode) until a full application packet is received or there is an error.
        *
        * @param uhfPayload The transparent mode data received from the UHF radio
        * @param payloadLength The number of transparent mode data bytes received
        *
-       * @return The status of the process operation. If @p CSP_PACKET_READY,
-       * a raw CSP packet (i.e., a @p csp_packet_t cast to a uint8_t pointer)
-       * is in the raw buffer.
+       * @return The status of the process operation. If @p PACKET_READY,
+       * a raw application packet is in the raw buffer.
        */
       MAC_UHFPacketProcessingStatus processUHFPacket(const uint8_t *uhfPayload, const uint32_t payloadLength);
 
       /*!
-       * @brief When ready, the raw CSP Packet buffer can be retrieved.
+       * @brief When ready, the raw packet buffer can be retrieved.
        *
-       * @return Pointer to the raw CSP packet buffer
+       * @return Pointer to the raw packet buffer
        */
       const uint8_t *
-      getRawCspPacketBuffer () const
+      getRawPacketBuffer () const
       {
-        return &*m_rawCSPPacket.begin();
+        return &*m_rawPacket.begin();
       }
 
       /*!
-       * @brief When ready, the raw CSP Packet buffer length can be returned.
+       * @brief When ready, the raw packet buffer length can be returned.
        *
-       * @return The raw CSP Packet buffer length in bytes
+       * @return The raw packet buffer length in bytes
        */
       uint32_t
-      getRawCspPacketBufferLength () const
+      getRawPacketBufferLength () const
       {
-        return m_rawCSPPacket.size();
+        return m_rawPacket.size();
       }
 
       /*!
-       * @brief When ready, the length of the CSP packet data in the raw CSP
-       * Packet buffer can be returned.
+       * @brief When ready, the length of the packet data in the raw
+       * packet buffer can be returned.
        *
-       * @return The length of the CSP packet data in the raw CSP Packet buffer
+       * @return The length of the packet data in the raw packet buffer
        */
       uint32_t
-      getRawCspPacketLength () const
+      getRawPacketLength () const
       {
-        csp_packet_t * recvCSPPacket = (csp_packet_t *) &*m_rawCSPPacket.begin();
-        return recvCSPPacket->length;
+        return m_rawPacket.size();
       }
 
       /************************************************************************/
@@ -195,17 +188,18 @@ namespace ex2
       /************************************************************************/
 
       /*!
-       * @brief Receive and encode new CSP packet.
+       * @brief Receive and encode new packet.
        *
-       * @details Processed the received CSP packet to create MPDUs ready for
+       * @details Process the received packet to create MPDUs ready for
        * transmission by the UHF radio in transparent mode. If the method returns
        * true, then there will be raw MPDUs in the mpdu payloads buffer
        *
-       * @param cspPacket
+       * @param packet
+       * @param len
        *
-       * @return True if the CSP packet was encoded, false otherwise
+       * @return True if the packet was encoded, false otherwise
        */
-      bool receiveCSPPacket(csp_packet_t * cspPacket);
+        bool receivePacket(uint8_t *packet, uint16_t len);
 
       /*!
        * @brief Pointer to MPDU payloads buffer.
@@ -229,7 +223,7 @@ namespace ex2
       void m_updateErrorCorrection(
         ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
 
-      void m_decodeCSPPacket();
+      void m_decodePacket();
 
       // member vars that define the MAC operation
       ErrorCorrection *m_errorCorrection = 0;
@@ -242,19 +236,19 @@ namespace ex2
       // by an inadvertant change in FEC parameters
 //      std::mutex m_ecSchemeMutex;
 
-      // buffers needed to fragment a CSP Packet prior to transmission
+      // buffers needed to fragment a packet prior to transmission
       std::vector<uint8_t> m_codewordBuffer;
       std::vector<uint8_t> m_transparentModePayloads;
 
-      // member vars to track received CSP packet fragments
-      bool m_firstCSPFragmentReceived;
-      uint16_t m_currentCSPPacketLength;
+      // member vars to track received packet fragments
+      bool m_firstFragmentReceived;
+      uint16_t m_currentPacketLength;
       uint16_t m_expectedMPDUs;
       uint16_t m_mpduCount;
 
       float m_SNREstimate;
 
-      std::vector<uint8_t> m_rawCSPPacket;
+      std::vector<uint8_t> m_rawPacket;
     };
 
   } // namespace sdr
