@@ -1,37 +1,34 @@
 /*!
  * @file vectorTools
  * @author Steven Knudsen
- * @date Nov. 14, 2019
+ * @date December 14, 2021
  *
- * @details A collection of operations used by Darkstar stuff.
+ * @details A collection of vector tools.
  *
- * @copyright Xiphos Systems Corp. 2019
+ * @copyright AlbertaSat 2021
  *
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
  */
 
-#ifndef UTILITIES_VECTOR_TOOLS_H_
-#define UTILITIES_VECTOR_TOOLS_H_
+#ifndef EX2_SDR_UTILITIES_VECTOR_TOOLS_H_
+#define EX2_SDR_UTILITIES_VECTOR_TOOLS_H_
 
 #include <cstdint>
 #include <vector>
 
-namespace xiphos {
-  namespace darkstar {
+namespace ex2 {
+  namespace sdr {
 
     /*!
-     * @brief Manage a version number in the form <major>.<minor>.<patch>
+     * @brief Misc tools to manipulate vectors.
+     *
+     * @details For now, the methods are all static, so no object is needed; no
+     * constructor or destructor.
      */
     class VectorTools {
     public:
 
-      /*!
-       * @brief Default Constructor
-       */
-      VectorTools();
-
-      virtual ~VectorTools();
 
       /*!
        * @brief Convert a vector of floats to packed bytes according to the threshold.
@@ -47,7 +44,7 @@ namespace xiphos {
        * in @p in is the msb of the resulting byte in @p out. If true, the order
        * is reversed.
        * @param[in] in Vector of floats
-       * @param[inout] out Vector of uint8_t (bytes). The length is the length of
+       * @param[inout] out Vector of packed uint8_t (bytes). The length is the length of
        * @p in / 8, plus one if there is a remainder
        */
       static void floatToBytes(float threshold, bool reverseBitOrder, std::vector<float>& in, std::vector<uint8_t>& out);
@@ -55,7 +52,7 @@ namespace xiphos {
       /*!
        * @brief Convert a vector of packed bytes to a vector of floats.
        *
-       * @param[in] in Vector of packed bytes
+       * @param[in] in Vector of packed packed bytes
        * @param[in] packed If true, there are 8 1-bit symbols per byte. Otherwise
        * a byte contains 1, 1-bit symbol in bit position lsb or msb as per @p lsbFirst
        * @param[in] lsbFirst If true, the first symbol in an input byte is the
@@ -84,7 +81,7 @@ namespace xiphos {
     private:
     };
 
-  } /* namespace darkstar */
-} /* namespace xiphos */
+  } /* namespace sdr */
+} /* namespace ex2 */
 
-#endif /* UTILITIES_VECTOR_TOOLS_H_ */
+#endif /* EX2_SDR_UTILITIES_VECTOR_TOOLS_H_ */

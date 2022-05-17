@@ -47,7 +47,7 @@ namespace ex2
        */
       LDPC (
         bool testMode = false,
-        ErrorCorrection::ErrorCorrectionCoding errorCorrectionCoding = ErrorCorrection::ErrorCorrectionCoding::LDPC_IEEE_1944,
+        ErrorCorrection::ErrorCorrectionCoding errorCorrectionCoding = ErrorCorrection::ErrorCorrectionCoding::,
         ErrorCorrection::CodingRate codingRate = ErrorCorrection::CodingRate::RATE_1_2,
         uint32_t decodeIterations = DECODE_ITERATIONS_DEFAULT);
 

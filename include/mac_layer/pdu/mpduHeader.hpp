@@ -5,6 +5,8 @@
  *
  * @details
  *
+ * @todo change the user packet fragment index to be a CRC8 field
+ *
  * @copyright AlbertaSat 2021
  *
  * @license
@@ -14,7 +16,6 @@
 #ifndef EX2_SDR_MAC_LAYER_PDU_FRAME_HEADER_H_
 #define EX2_SDR_MAC_LAYER_PDU_FRAME_HEADER_H_
 
-#include <chrono>
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
@@ -22,6 +23,8 @@
 #include "error_correction.hpp"
 #include "pdu.hpp"
 #include "rfMode.hpp"
+
+#define TRANSPARENT_MODE_DATA_FIELD_2_MAX_LEN 128 // bytes
 
 namespace ex2 {
   namespace sdr {
@@ -39,27 +42,31 @@ namespace ex2 {
       /*!
        * @brief Constructor
        *
+       * @param[in] uhfPacketLength The UHF radio packet length (as from Data Field 1) **deprecated
        * @param[in] modulation The UHF radio modulation (RF mode)
-       * @param[in] errorCorrectionScheme The error correction scheme
-       * @param[in] codewordFragmentIndex The index of the codeword
-       * @param[in] packetNumber The packet number
+       * @param[in] errorCorrection The error correction for this MPDU header
+       * @param[in] codewordFragmentIndex The index of the codeword fragment
+       * @param[in] userPacketPayloadLength The length of the original user (CSP) packet payload
+       * @param[in] userPacketFragmentIndex The current fragment of the user (CSP) packet
        */
-      MPDUHeader(const RF_Mode::RF_ModeNumber modulation,
-          const ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme,
-          const uint8_t codewordFragmentIndex,
-          const uint16_t userPacketLength,
-          const uint8_t userPacketFragmentIndex);
+      MPDUHeader(/*const uint8_t uhfPacketLength,*/
+        const RF_Mode::RF_ModeNumber modulation,
+        const ErrorCorrection &errorCorrection,
+        const uint8_t codewordFragmentIndex,
+        const uint16_t userPacketPayloadLength,
+        const uint8_t userPacketFragmentIndex);
 
       /*!
        * @brief Constructor
        *
        * @details Reconstitute a header object from raw (received, we assume)
-       * packet. Check the data for correctness and throw an exepction if bad.
+       * bytes. Check the data for correctness and throw an exepction if bad.
        *
-       * @param[in] rawHeader
+       * @param[in] rawHeader The first @p k_MACHeaderLength / 8 bytes of this
+       * vector are assumed to contain the MACHeader information.
        * @throws MPDUHeaderException
        */
-      MPDUHeader (std::vector<uint8_t> &packet);
+      MPDUHeader (std::vector<uint8_t> &rawHeader);
 
       /*!
        * @brief Copy Constructor
@@ -72,30 +79,76 @@ namespace ex2 {
 
       /*!
        * @brief Accessor
-       * @return MAC header length in bits
+       * @return MAC header length in bytes
        */
       static uint16_t
       MACHeaderLength ()
       {
-        return k_MACHeaderLength;
+        return k_MACHeaderLength / 8;
+      }
+
+      /*!
+       * @brief Return the FEC scheme
+       *
+       * @return The FEC aka Error Correction scheme
+       */
+      ErrorCorrection::ErrorCorrectionScheme
+      getErrorCorrectionScheme() const
+      {
+        return m_errorCorrection->getErrorCorrectionScheme();
       }
 
       uint8_t
-      getMCodewordFragmentIndex () const
+      getCodewordFragmentIndex () const
       {
         return m_codewordFragmentIndex;
       }
 
-      ErrorCorrection::ErrorCorrectionScheme
-      getMErrorCorrectionScheme () const
+      /*!
+       * @brief Return the FEC scheme codeword length
+       *
+       * @return FEC scheme codeword length in bits
+       */
+      uint32_t
+      getCodewordLength () const
       {
-        return m_errorCorrectionScheme;
+        return m_errorCorrection->getCodewordLen();
+      }
+
+      /*!
+       * @brief Return the FEC scheme message length
+       *
+       * @return FEC scheme message length in bits
+       */
+      uint32_t
+      getMessageLength () const
+      {
+        return m_errorCorrection->getMessageLen();
       }
 
       const std::vector<uint8_t>&
-      getMHeaderPayload () const
+      getHeaderPayload () const
       {
         return m_headerPayload;
+      }
+
+
+      RF_Mode::RF_ModeNumber
+      getRfModeNumber () const
+      {
+        return m_rfModeNumber;
+      }
+
+      uint16_t
+      getUserPacketFragmentIndex () const
+      {
+        return m_userPacketFragmentIndex;
+      }
+
+      uint16_t
+      getUserPacketPayloadLength () const
+      {
+        return m_userPacketPayloadLength;
       }
 
       bool
@@ -103,49 +156,34 @@ namespace ex2 {
       {
         return m_headerValid;
       }
-
-      RF_Mode::RF_ModeNumber
-      getMRfModeNumber () const
-      {
-        return m_rfModeNumber;
-      }
-
-      uint16_t
-      getMUserPacketFragmentIndex () const
-      {
-        return m_userPacketFragmentIndex;
-      }
-
-      uint16_t
-      getMUserPacketLength () const
-      {
-        return m_userPacketLength;
-      }
-
     private:
 
       /*!
        * @details These constants are a function of the number of bits allocated
        * for their information in the header, not a function of the underlying
        * type size.
+       *
+       * @todo The parity bits should be based on the number of Golay codewords
        */
       static const uint16_t k_modulation              = 3; // bits
       static const uint16_t k_FECScheme               = 6; // bits
       static const uint16_t k_modulationFECScheme     = k_modulation + k_FECScheme;
       static const uint16_t k_codewordFragmentIndex   = 7; // bits
-      static const uint16_t k_userPacketLength        = 12; // bits
+      static const uint16_t k_userPacketPayloadLength = 12; // bits
       static const uint16_t k_userPacketFragmentIndex = 8; // bits
       static const uint16_t k_parityBits              = 36; // bits
       static const uint16_t k_MACHeaderLength =
           k_modulationFECScheme +
           k_codewordFragmentIndex +
-          k_userPacketLength +
-          k_userPacketFragmentIndex;
+          k_userPacketPayloadLength +
+          k_userPacketFragmentIndex +
+          k_parityBits;
 
+      /*uint8_t m_uhfPacketLength;*/
       RF_Mode::RF_ModeNumber m_rfModeNumber;
-      ErrorCorrection::ErrorCorrectionScheme m_errorCorrectionScheme;
+      ErrorCorrection *m_errorCorrection;
       uint8_t  m_codewordFragmentIndex;
-      uint16_t m_userPacketLength;
+      uint16_t m_userPacketPayloadLength;
       uint16_t m_userPacketFragmentIndex;
       std::vector<uint8_t> m_headerPayload;
 
@@ -155,11 +193,10 @@ namespace ex2 {
        * @brief Used to decode a raw received packet to get the MAC header
        *
        * @param packet The received transparent mode packet
-       * @param dataField1Included True if Data Field 1 is the first byte
        * @return True if header decodes without errors, but could still bad because
        * if there are > 4 errors in a Golay codeword, they will not be detected
        */
-      bool decodeMACHeader(std::vector<uint8_t> &packet, bool dataField1Included = true);
+      bool decodeMACHeader(std::vector<uint8_t> &packet);
 
       void encodeMACHeader();
 

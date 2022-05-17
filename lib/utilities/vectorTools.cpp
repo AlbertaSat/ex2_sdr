@@ -1,11 +1,11 @@
 /*!
  * @file vectorTools.cpp
  * @author Steven Knudsen
- * @date Nov. 14, 2019
+ * @date December 14, 2021
  *
- * @details Implement @p vectorTools.h interface
+ * @details A collection of vector tools.
  *
- * @copyright Xiphos Systems Corp. 2019
+ * @copyright AlbertaSat 2021
  *
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
@@ -13,16 +13,8 @@
 
 #include <vectorTools.h>
 
-namespace xiphos {
-  namespace darkstar {
-
-
-    VectorTools::VectorTools()
-    {
-    }
-
-    VectorTools::~VectorTools() {
-    }
+namespace ex2 {
+  namespace sdr {
 
     void
     VectorTools::floatToBytes(float threshold, bool reverseBitOrder, std::vector<float>& in, std::vector<uint8_t>& out)
@@ -136,5 +128,5 @@ namespace xiphos {
 
     } // blockReverse
 
-  } /* namespace darkstar */
-} /* namespace xiphos */
+  } /* namespace sdr */
+} /* namespace ex2 */

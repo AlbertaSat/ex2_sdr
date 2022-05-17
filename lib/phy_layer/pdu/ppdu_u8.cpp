@@ -23,18 +23,18 @@ namespace ex2
   namespace sdr
   {
     PPDU_u8::PPDU_u8(const BitsPerSymbol bps) : PDU()
-    {
+        {
       m_bps = bps;
       m_reversed = false;
 
-    }
+        }
 
     PPDU_u8::PPDU_u8 (
-        const payload_t& payload,
-        const BitsPerSymbol bps) :
-            PDU(payload),
-                  m_bps (bps),
-                  m_reversed(false)
+      const payload_t& payload,
+      const BitsPerSymbol bps) :
+                PDU(payload),
+                m_bps (bps),
+                m_reversed(false)
     {
       uint8_t mask = 0x00;
       switch (bps)
@@ -63,8 +63,11 @@ namespace ex2
         case BitsPerSymbol::BPSymb_8:
           return;
       }
-      for (unsigned int i = 0; i < m_payload.size (); i++)
-        m_payload[i] = m_payload[i] & mask;
+      if (bps != BitsPerSymbol::BPSymb_8) {
+        for (unsigned int i = 0; i < m_payload.size (); i++) {
+          m_payload[i] = m_payload[i] & mask;
+        }
+      }
     }
 
     PPDU_u8::~PPDU_u8 ()
@@ -99,8 +102,8 @@ namespace ex2
 
     void
     PPDU_u8::append (
-        const uint8_t *data,
-        const size_t count)
+      const uint8_t *data,
+      const size_t count)
     {
       for (size_t i = 0; i < count; i++)
       {
@@ -110,7 +113,7 @@ namespace ex2
 
     void
     PPDU_u8::repack (
-        PPDU_u8::BitsPerSymbol newBps)
+      PPDU_u8::BitsPerSymbol newBps)
     {
       // already done?
       if (m_bps == newBps) return;
@@ -280,6 +283,13 @@ namespace ex2
       }
       repack(tempBPS);
     }
+
+    void
+    PPDU_u8::clearPayload()
+    {
+      m_payload.resize(0);
+    }
+
 
   } /* namespace sdr */
 } /* namespace ex2 */

@@ -143,6 +143,8 @@ namespace ex2
        */
       void roll(uint32_t numBits, bool left);
 
+      void clearPayload();
+
     private:
 
       typedef payload_t::pointer data_ptr_t;
