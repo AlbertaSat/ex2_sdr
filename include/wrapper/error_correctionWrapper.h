@@ -13,8 +13,6 @@
 #ifndef EX2_SDR_WRAPPER_ERROR_CORRECTION_H_
 #define EX2_SDR_WRAPPER_ERROR_CORRECTION_H_
 
-#include "error_correction.hpp"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
