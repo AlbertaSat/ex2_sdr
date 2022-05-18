@@ -40,10 +40,17 @@
 #endif
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> a88b8dc (Accomodate TI C++ compiler)
 =======
 >>>>>>> 8fe1a2e (rebasing work...)
 >>>>>>> 789338b (undo header changes)
+=======
+>>>>>>> 8fe1a2e (rebasing work...)
+=======
+>>>>>>> a88b8dc (Accomodate TI C++ compiler)
+>>>>>>> 56342a0 (revert endianess changes for mpdu header.)
+>>>>>>> 55455b9 (undo header changes)
 namespace ex2 {
   namespace sdr {
 
