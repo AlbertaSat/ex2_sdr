@@ -39,7 +39,11 @@
 #error "I don't know what architecture this is!"
 #endif
 
+<<<<<<< HEAD
 >>>>>>> a88b8dc (Accomodate TI C++ compiler)
+=======
+>>>>>>> 8fe1a2e (rebasing work...)
+>>>>>>> 789338b (undo header changes)
 namespace ex2 {
   namespace sdr {
 
