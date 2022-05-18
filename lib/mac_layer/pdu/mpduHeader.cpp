@@ -24,7 +24,7 @@
     defined(_MIBSEB) || defined(__MIBSEB) || defined(__MIBSEB__)
 // It's a big-endian target architecture
 #define LITTLE_ENDIAN_ARCH 0
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
 #elif defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN || \
     defined(__LITTLE_ENDIAN__) || \
     defined(__ARMEL__) || \
