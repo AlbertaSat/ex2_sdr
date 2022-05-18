@@ -1,5 +1,6 @@
 # ex2_sdr
 Software Defined Radio software for Ex-Alta2 on-board computer and AlbertaSat ground station.
+<<<<<<< HEAD
 
 ## Tags
 
@@ -12,6 +13,8 @@ likely source files that are present but not compiled. This should be cleaned up
 when merged with the develop branch.
 
 Check `unit_tests/meson.build` to see which unit test sources are compiled.
+=======
+>>>>>>> 0e5cec6 (Update README.md)
 
 ## Build and Test on Linux
 
