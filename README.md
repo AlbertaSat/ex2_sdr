@@ -1,20 +1,5 @@
 # ex2_sdr
 Software Defined Radio software for Ex-Alta2 on-board computer and AlbertaSat ground station.
-<<<<<<< HEAD
-
-## Tags
-
-   * v_linux_0.8 : happy path for CSP tx/rx with FEC stubbed
-   
-## Build source
-
-Check `meson.build` to see which source files are actually included. There are
-likely source files that are present but not compiled. This should be cleaned up
-when merged with the develop branch.
-
-Check `unit_tests/meson.build` to see which unit test sources are compiled.
-=======
->>>>>>> 0e5cec6 (Update README.md)
 
 ## Build and Test on Linux
 
@@ -25,8 +10,5 @@ meson setup build
 cd build
 ninja
 meson test
-```
-
     
 ## Build and Test for Hercules
-
