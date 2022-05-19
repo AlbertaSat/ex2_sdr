@@ -39,7 +39,7 @@
 
 #define configUSE_PREEMPTION          1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION	0
-#define configUSE_IDLE_HOOK           0 // KSK 1
+#define configUSE_IDLE_HOOK           1
 #define configUSE_TICK_HOOK           1
 #define configUSE_DAEMON_TASK_STARTUP_HOOK 1
 #define configTICK_RATE_HZ              ( 1000 ) /* In this non-real time simulated environment the tick frequency has to be at least a multiple of the Win32 tick frequency, and therefore very slow. */
@@ -93,23 +93,23 @@ requested. */
 /* Set the following definitions to 1 to include the API function, or zero
 to exclude the API function.  In most cases the linker will remove unused
 functions anyway. */
-#define INCLUDE_vTaskPrioritySet               1
-#define INCLUDE_uxTaskPriorityGet              1
-#define INCLUDE_vTaskDelete                    1
-#define INCLUDE_vTaskCleanUpResources          0
-#define INCLUDE_vTaskSuspend                   1
-#define INCLUDE_vTaskDelayUntil                1
-#define INCLUDE_vTaskDelay                     1
-#define INCLUDE_uxTaskGetStackHighWaterMark    1
-#define INCLUDE_uxTaskGetStackHighWaterMark2   1
-#define INCLUDE_xTaskGetSchedulerState         1
-#define INCLUDE_xTimerGetTimerDaemonTaskHandle 1
-#define INCLUDE_xTaskGetIdleTaskHandle         1
-#define INCLUDE_xTaskGetHandle                 1
-#define INCLUDE_eTaskGetState                  1
-#define INCLUDE_xSemaphoreGetMutexHolder       1
-#define INCLUDE_xTimerPendFunctionCall         1
-#define INCLUDE_xTaskAbortDelay                1
+#define INCLUDE_vTaskPrioritySet				1
+#define INCLUDE_uxTaskPriorityGet				1
+#define INCLUDE_vTaskDelete						1
+#define INCLUDE_vTaskCleanUpResources			0
+#define INCLUDE_vTaskSuspend					1
+#define INCLUDE_vTaskDelayUntil					1
+#define INCLUDE_vTaskDelay						1
+#define INCLUDE_uxTaskGetStackHighWaterMark		1
+#define INCLUDE_uxTaskGetStackHighWaterMark2	1
+#define INCLUDE_xTaskGetSchedulerState			1
+#define INCLUDE_xTimerGetTimerDaemonTaskHandle	1
+#define INCLUDE_xTaskGetIdleTaskHandle			1
+#define INCLUDE_xTaskGetHandle					1
+#define INCLUDE_eTaskGetState					1
+#define INCLUDE_xSemaphoreGetMutexHolder		1
+#define INCLUDE_xTimerPendFunctionCall			1
+#define INCLUDE_xTaskAbortDelay					1
 
 #define configINCLUDE_MESSAGE_BUFFER_AMP_DEMO	0
 #if ( configINCLUDE_MESSAGE_BUFFER_AMP_DEMO == 1 )
