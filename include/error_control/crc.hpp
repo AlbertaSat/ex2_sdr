@@ -15,14 +15,11 @@
 #define EX2_SDR_ERROR_CONTROL_CRC_H_
 
 #include <cstdint>
+#include <vector>
 #include <boost/crc.hpp>
-
-#include "ppdu_u8.hpp"
 
 namespace ex2 {
   namespace sdr {
-
-    class PPDU_u8;
 
     class crc
     {
@@ -46,7 +43,7 @@ namespace ex2 {
        * @param[inout] pdu
        * @param[in] crcSize
        */
-      void add(PPDU_u8 &pdu, crc_size_t crcSize);
+      void add(std::vector<uint8_t> &pdu, crc_size_t crcSize);
 
       /*!
        * @brief Checks the PDU.
@@ -58,7 +55,7 @@ namespace ex2 {
        * @param[in] crcSize
        * @throws std::runtime_error if the CRC check fails.
        */
-      void check(PPDU_u8 &pdu, crc_size_t crcSize);
+      void check(std::vector<uint8_t> &pdu, crc_size_t crcSize);
 
     private:
 
