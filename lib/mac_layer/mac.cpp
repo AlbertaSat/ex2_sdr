@@ -296,10 +296,10 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
       // sent to the UHF radio for transmission in transparent mode.
 
       // The message buffer is eventually encoded to give the codeword
-      PPDU_u8::payload_t message;
+      std::vector<uint8_t> message;
 
       // Set up the MPDU payload
-      PPDU_u8::payload_t mpduPayload;
+      std::vector<uint8_t> mpduPayload;
       mpduPayload.resize(0); // ensure it's empty
       uint32_t mpduPayloadBytesRemaining = MPDU::maxMTU();
       uint32_t mpduCount = 0;
@@ -337,12 +337,10 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
         }
 
         // Now apply the FEC encoding
-        PPDU_u8 chunk(message);
         try {
-          PPDU_u8::payload_t cw = m_FEC->encode(message);
+          std::vector<uint8_t> cw = m_FEC->encode(message);
 
           // Add codeword to current mpduPayload
-//          PPDU_u8::payload_t cw = encodedChunk.getPayload();
           uint32_t codewordBytesRemaining = cw.size(); // @TODO this is always the same, so could get only somewhere.
 
           // Don't assiume the mpduPayload is empty
@@ -361,7 +359,7 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
               mpduCount++, len, 0);
             // Make an MPDU
             MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
-            PPDU_u8::payload_t rawMPDU = mpdu->getRawMPDU();
+            std::vector<uint8_t> rawMPDU = mpdu->getRawMPDU();
             m_transparentModePayloads.insert(m_transparentModePayloads.end(), rawMPDU.begin(), rawMPDU.end());
             delete mpdu;
             delete mpduHeader;
@@ -399,7 +397,7 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
           mpduCount++, len, 0);
         // Make an MPDU
         MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
-        PPDU_u8::payload_t rawMPDU = mpdu->getRawMPDU();
+        std::vector<uint8_t> rawMPDU = mpdu->getRawMPDU();
         m_transparentModePayloads.insert(m_transparentModePayloads.end(), rawMPDU.begin(), rawMPDU.end());
         delete mpdu;
         delete mpduHeader;
