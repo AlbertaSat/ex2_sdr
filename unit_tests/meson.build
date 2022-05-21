@@ -3,8 +3,6 @@
 # golay test for example.
 
 incdirUT = include_directories(
-    '/usr/local/include/csp',
-    '../include/HAL',
     '../include/configuration',
     '../include/error_control',
     '../include/mac_layer',
@@ -13,7 +11,7 @@ incdirUT = include_directories(
 #    '../include/math/eigen',
     '../include/pdu',
     '../include/phy_layer',
-    '../include/phy_layer/pdu',
+#    '../include/phy_layer/pdu',
     '../include/utilities',
     '../include/wrapper',
     '../include/',
