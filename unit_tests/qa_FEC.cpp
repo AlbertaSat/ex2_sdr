@@ -21,18 +21,6 @@
 
 #include "NoFEC.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "csp.h"
-#include "csp_types.h"
-#include "csp_buffer.h"
-
-#ifdef __cplusplus
-}
-#endif
-
 using namespace std;
 using namespace ex2::sdr;
 
@@ -41,101 +29,58 @@ using namespace ex2::sdr;
 #define QA_NOFEC_DEBUG 0 // set to 1 for debugging output
 
 /*!
- * @brief Test Main Constructors, the one that is parameterized, and the one
- * that takes the received packet as input
+ * @brief Test Constructor and no FEC encode and decode
  */
-TEST(noFEC, Foo )
+TEST(noFEC, ConstructorAndEncodeDecode )
 {
   /* ---------------------------------------------------------------------
    * Confirm the NoFEC object can be constructed
    * ---------------------------------------------------------------------
    */
 
-  // First do a little CSP config work
-  csp_conf_t cspConf;
-  csp_conf_get_defaults(&cspConf);
-  cspConf.buffer_data_size = 4096; // TODO set as CSP_MTU
-  csp_init(&cspConf);
-
-  // Set the length of the test CSP packet so it all fits into a transparent mode payload
-  const unsigned long int testCSPPacketLength = 10;
+  // Set the length of the test packet so it all fits into a transparent mode payload
+  const size_t testPacketLength = 10;
 
   FEC * noFEC = new NoFEC(ErrorCorrection::ErrorCorrectionScheme::NO_FEC);
 
   ASSERT_TRUE(noFEC != NULL) << "NoFEC failed to instantiate";
 
   if (noFEC) {
-    csp_packet_t * packet = (csp_packet_t *) csp_buffer_get(testCSPPacketLength);
+    std::vector<uint8_t> packet;
 
-    if (packet == NULL) {
-      /* Could not get buffer element */
-      csp_log_error("Failed to get CSP buffer");
-      return;
-    }
-
-#if QA_NOFEC_DEBUG
-    printf("size of packet padding = %ld\n", sizeof(packet->padding));
-    printf("size of packet length = %ld\n", sizeof(packet->length));
-    printf("size of packet id = %ld\n", sizeof(packet->id));
-#endif
-
-    int cspPacketHeaderLen = sizeof(packet->padding) + sizeof(packet->length) + sizeof(packet->id);
-
-    for (unsigned long i = 0; i < testCSPPacketLength; i++) {
-      packet->data[i] = i | 0x30; // ASCII numbers
-    }
-    // CSP forces us to do our own bookkeeping...
-    packet->length = testCSPPacketLength;
-
-#if QA_NOFEC_DEBUG
-    printf("packet length = %d\n", packet->length);
-#endif
-
-    std::vector<uint8_t> p;
-
-    uint8_t * pptr = (uint8_t *) packet;
-    for (int i = 0; i < cspPacketHeaderLen; i++) {
-      p.push_back(pptr[i]);
-    }
-    // This is ugly, so maybe we need to rethink using PPDU_xx?
-    for (unsigned long i = 0; i < testCSPPacketLength; i++) {
-      p.push_back(packet->data[i]);
+    for (unsigned long i = 0; i < testPacketLength; i++) {
+      packet.push_back( i | 0x30 ); // ASCII numbers
     }
 
 #if QA_NOFEC_DEBUG
     // Look at the contents :-)
-    for (int i = 0; i < p.size(); i++) {
-      printf("p[%d] = 0x%02x\n", i, p[i]);
+    for (int i = 0; i < testPacketLength; i++) {
+      printf("packet[%d] = 0x%02x\n", i, packet[i]);
     }
 #endif
 
     // @TODO maybe make these std::vector<uint8_t> ???
-    PPDU_u8 inputPayload(p);
-    PPDU_u8 encodedPayload = noFEC->encode(inputPayload);
+    std::vector<uint8_t> encodedPayload = noFEC->encode(packet);
 
     bool same = true;
-    std::vector<uint8_t> iPayload = inputPayload.getPayload();
-    std::vector<uint8_t> ePayload = encodedPayload.getPayload();
-    for (unsigned long i = 0; i < iPayload.size(); i++) {
-      same = same & (iPayload[i] == ePayload[i]);
+    for (unsigned long i = 0; i < packet.size(); i++) {
+      same = same & (packet[i] == encodedPayload[i]);
     }
 
     ASSERT_TRUE(same) << "encoded payload does not match input payload";
 
-    PPDU_u8::payload_t dPayload;
-    const PPDU_u8 ecopyPayload(encodedPayload);
-    uint32_t bitErrors = noFEC->decode(encodedPayload.getPayload(), 100.0, dPayload);
+    std::vector<uint8_t> dPayload;
+    uint32_t bitErrors = noFEC->decode(encodedPayload, 100.0, dPayload);
 
+    // Check the decoded and original messages match
+    ASSERT_TRUE(packet.size() == dPayload.size()) << "decoded payload size does not match input payload size";
     same = true;
-    for (unsigned long i = 0; i < iPayload.size(); i++) {
-      same = same & (iPayload[i] == dPayload[i]);
+    for (unsigned long i = 0; i < packet.size(); i++) {
+      same = same & (packet[i] == dPayload[i]);
     }
 
     ASSERT_TRUE(same) << "decoded payload does not match input payload";
     ASSERT_TRUE(bitErrors == 0) << "Bit error count > 0";
-
-    // Clean up!
-    csp_buffer_free(packet);
   }
 
 }
