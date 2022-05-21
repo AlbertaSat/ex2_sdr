@@ -22,18 +22,6 @@
 #include "viterbi.hpp"
 #include "viterbi-utils.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "csp.h"
-#include "csp_types.h"
-#include "csp_buffer.h"
-
-#ifdef __cplusplus
-}
-#endif
-
 using namespace std;
 
 #include "gtest/gtest.h"
