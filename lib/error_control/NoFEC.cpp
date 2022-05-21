@@ -19,15 +19,15 @@ namespace ex2 {
 
     NoFEC::~NoFEC() {  }
 
-    PPDU_u8::payload_t
-    NoFEC::encode(const PPDU_u8::payload_t &payload) {
-      PPDU_u8::payload_t notEncoded = payload;
+    std::vector<uint8_t>
+    NoFEC::encode(const std::vector<uint8_t>& payload) {
+      std::vector<uint8_t> notEncoded = payload;
       return notEncoded;
     }
 
     uint32_t
-    NoFEC::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
-      PPDU_u8::payload_t& decodedPayload) {
+    NoFEC::decode(std::vector<uint8_t> &encodedPayload, float snrEstimate,
+      std::vector<uint8_t> &decodedPayload) {
 
       (void) snrEstimate; // Not used in this method
 

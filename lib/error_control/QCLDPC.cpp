@@ -28,8 +28,8 @@ namespace ex2 {
       }
     }
 
-    PPDU_u8::payload_t
-    QCLDPC::encode(const PPDU_u8::payload_t &payload) {
+    std::vector<uint8_t>
+    QCLDPC::encode(const std::vector<uint8_t>& payload) {
       // @todo For now we pretend to encode the payload according to the rate
       // @todo change me!
 
@@ -47,7 +47,7 @@ namespace ex2 {
       // we'd repack the payload to 1 bit per byte and, if needed, append zeros
       // to make it the true message length, then encode, then repack to 8 bits
       // per byte and return
-      PPDU_u8::payload_t payloadData = payload;
+      std::vector<uint8_t> payloadData = payload;
       // extend the unencoded payload to the codeword length, padding with zeros
       payloadData.resize(m_errorCorrection->getCodewordLen()/8,0);
       // @TODO don't forget to convert to bits, or change LDPC code to work with
@@ -56,8 +56,8 @@ namespace ex2 {
     }
 
     uint32_t
-    QCLDPC::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
-      PPDU_u8::payload_t& decodedPayload) {
+    QCLDPC::decode(std::vector<uint8_t>& encodedPayload, float snrEstimate,
+      std::vector<uint8_t>& decodedPayload) {
 
       (void) snrEstimate; // Not used in this method
 
