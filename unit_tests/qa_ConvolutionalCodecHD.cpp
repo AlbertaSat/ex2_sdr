@@ -25,7 +25,6 @@
 
 #include "ConvolutionalCodecHD.hpp"
 #include "mpdu.hpp"
-#include "ppdu_f.hpp"
 #include "vectorTools.h"
 
 using namespace std;
@@ -135,7 +134,7 @@ check_decoder_ber (
     printf("\n");
 #endif
 
-    PPDU_f::payload_t payloadFloat;
+    std::vector<float> payloadFloat;
     VectorTools::bytesToFloat(payload, true, false, true, 1.0f, payloadFloat);
 
     // Add noise. The bytesToFloat method makes float symbols of mag 1.
