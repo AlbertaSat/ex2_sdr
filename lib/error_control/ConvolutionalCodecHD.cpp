@@ -14,6 +14,7 @@
 
 #include "ConvolutionalCodecHD.hpp"
 #include "mpdu.hpp"
+#include "mpduUtility.hpp"
 
 #define CC_HD_DEBUG 0
 
@@ -51,9 +52,14 @@ namespace ex2 {
 
       // @TODO does this belong in the FEC constructor?
       m_errorCorrection = new ErrorCorrection(ecScheme, (MPDU::maxMTU() * 8));
-      std::vector<int> polynomials{ CCSDS_CONVOLUTIONAL_CODE_POLY_G1, CCSDS_CONVOLUTIONAL_CODE_POLY_G2};
+//      std::vector<int> polynomials{ CCSDS_CONVOLUTIONAL_CODE_POLY_G1, CCSDS_CONVOLUTIONAL_CODE_POLY_G2};
+//
+//      m_codec = new ViterbiCodec(CCSDS_CONVOLUTIONAL_CODE_CONSTRAINT, polynomials);
 
-      m_codec = new ViterbiCodec(CCSDS_CONVOLUTIONAL_CODE_CONSTRAINT, polynomials);
+      // for dev of memory-reduced algorithm, use constraint len 3 and { 7, 5 }, which is used for a unit test; see qa_viterbi
+      std::vector<int> polynomials{ 7, 5};
+
+      m_codec = new ViterbiCodec(3, polynomials);
     }
 
     ConvolutionalCodecHD::~ConvolutionalCodecHD() {
@@ -65,8 +71,8 @@ namespace ex2 {
       }
     }
 
-    PPDU_u8::payload_t
-    ConvolutionalCodecHD::encode(const PPDU_u8::payload_t &payload)
+    std::vector<uint8_t>
+    ConvolutionalCodecHD::encode(const std::vector<uint8_t>& payload)
     {
       // Encode the 8 BPS message
       std::vector<uint8_t> encodedPayload = m_codec->encodePacked(payload);
@@ -75,8 +81,8 @@ namespace ex2 {
     }
 
     uint32_t
-    ConvolutionalCodecHD::decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
-      PPDU_u8::payload_t& decodedPayload) {
+    ConvolutionalCodecHD::decode(std::vector<uint8_t>& encodedPayload, float snrEstimate,
+      std::vector<uint8_t>& decodedPayload) {
 
       (void) snrEstimate; // Not used in this method
 
@@ -89,18 +95,15 @@ namespace ex2 {
       else {
         // assume the encoded payload is packed, 8 bits per byte. Repack to be
         // 1 bit per byte
-        PPDU_u8 ePPDU(encodedPayload, PPDU_u8::BPSymb_8);
-        ePPDU.repack(PPDU_u8::BPSymb_1);
-        PPDU_u8::payload_t ePPDUpayload = ePPDU.getPayload();
+        MPDUUtility::repack(encodedPayload, MPDUUtility::BPSymb_8, MPDUUtility::BPSymb_1);
 
         // Decode the 1 bit per byte payload.
-        ViterbiCodec::bitarr_t dPPDUpayload = m_codec->decode(ePPDUpayload);
+        ViterbiCodec::bitarr_t decoded = m_codec->decode(encodedPayload);
 
         // Repack the result to be 8 bits per byte
-        PPDU_u8 dPPDU(dPPDUpayload, PPDU_u8::BPSymb_1);
-        dPPDU.repack(PPDU_u8::BPSymb_8);
-        dPPDUpayload = dPPDU.getPayload();
-        decodedPayload.insert(decodedPayload.end(),dPPDUpayload.begin(),dPPDUpayload.end());
+        MPDUUtility::repack(decoded, MPDUUtility::BPSymb_1, MPDUUtility::BPSymb_8);
+        decodedPayload.resize(0);
+        decodedPayload.insert(decodedPayload.end(),decoded.begin(),decoded.end());
 
         // We have no way to know if there are bit errors, so return zero (0)
         return 0;
