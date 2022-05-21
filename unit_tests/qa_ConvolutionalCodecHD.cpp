@@ -28,18 +28,6 @@
 #include "ppdu_f.hpp"
 #include "vectorTools.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "csp.h"
-#include "csp_types.h"
-#include "csp_buffer.h"
-
-#ifdef __cplusplus
-}
-#endif
-
 using namespace std;
 using namespace ex2::sdr;
 
@@ -112,7 +100,7 @@ check_decoder_ber (
   // being 1 bit per 8-bit symbol, aka unpacked
   unsigned int payloadBitCount = ec.getMessageLen();
   unsigned int payloadByteCount = payloadBitCount/8;
-  PPDU_u8::payload_t packedMessage(payloadByteCount);
+  std::vector<uint8_t> packedMessage(payloadByteCount);
 
   // Calculate the number of bits needed for the desired BER. Assume at least
   // 100 errors are needed to establish the BER.
@@ -138,7 +126,7 @@ check_decoder_ber (
 #endif
 
     // Encode the packet
-    PPDU_u8::payload_t payload = ccHDCodec.encode (packedMessage);
+    std::vector<uint8_t> payload = ccHDCodec.encode (packedMessage);
 #if QA_CC_HD_DEBUG
     printf("codeword : ");
     for (int i = 0; i < 10; i++) {
@@ -171,7 +159,7 @@ check_decoder_ber (
     printf("pSignal = %g pNoise = %g snr = %g\n", pSignal, pNoise, 10.0f*std::log10(pSignal/pNoise));
 #endif
     // We convert back to binary data and impose our own hard decision.
-    PPDU_u8::payload_t payloadPlusNoise;
+    std::vector<uint8_t> payloadPlusNoise;
     float threshold = 0.0; // The float payload was NRZ, so in [-1,1]
     VectorTools::floatToBytes(threshold, false, payloadFloat, payloadPlusNoise);
 
@@ -184,7 +172,7 @@ check_decoder_ber (
 #endif
 
     // Try to decode the noisy codeword
-    PPDU_u8::payload_t decodedMessage;
+    std::vector<uint8_t> decodedMessage;
     ccHDCodec.decode(payloadPlusNoise, snr, decodedMessage);
 #if QA_CC_HD_DEBUG
     printf("dmessage : ");
@@ -298,7 +286,7 @@ TEST(convolutional_codec_hd, r_1_2_simple_encode_decode_no_errs )
    *
    * The codec should not care what length of message to encode and decode.
    * For the UHF radio we have a max payload of 119 bytes, but we should test
-   * it, longer, and shorter messages. Might as well follow the CSP packet
+   * it, longer, and shorter messages. Might as well follow the packet
    * lengths used in MAC testing understanding that this unit test is
    * independent of the MAC fragmentation into UHF payloads...
    *
@@ -309,105 +297,68 @@ TEST(convolutional_codec_hd, r_1_2_simple_encode_decode_no_errs )
   try {
     ccHDCodec = new ConvolutionalCodecHD(ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2);
 
-    // Do a little CSP config work
-    csp_conf_t cspConf;
-    csp_conf_get_defaults(&cspConf);
-    cspConf.buffer_data_size = 4095; // TODO set as CSP_MTU
-    if (csp_init(&cspConf) != CSP_ERR_NONE) {
-      FAIL() << "CSP init failed";
-    }
 
-
-    // Set the CSP packet test lengths to be a superset of what is used in
+    // Set the packet test lengths to be a superset of what is used in
     // other unit tests, because why not
-//    uint16_t const numCSPPackets = 6;
-//    uint16_t cspPacketDataLengths[numCSPPackets] = {0, 10, 103, 119, 358, 4095};
-    uint16_t const numCSPPackets = 1;
-    uint16_t cspPacketDataLengths[numCSPPackets] = {50};
-    for (uint16_t currentCSPPacket = 0; currentCSPPacket < numCSPPackets; currentCSPPacket++) {
+//    uint16_t const numPackets = 6;
+//    uint16_t packetDataLengths[numPackets] = {0, 10, 103, 119, 358, 4095};
+    uint16_t const numPackets = 1;
+    uint16_t packetDataLengths[numPackets] = {10};
 
-      csp_packet_t * packet = (csp_packet_t *) csp_buffer_get(cspPacketDataLengths[currentCSPPacket]);
+    std::vector<uint8_t> packet;
+    for (uint16_t currentPacket = 0; currentPacket < numPackets; currentPacket++) {
 
-      if (packet == NULL) {
-        // Could not get buffer element
-        csp_log_error("Failed to get CSP buffer");
-        FAIL() << "Failed to get CSP buffer";
-      }
+      packet.resize(0);
 
-      int cspPacketHeaderLen = sizeof(packet->padding) + sizeof(packet->length) + sizeof(packet->id);
-
-      // CSP forces us to do our own bookkeeping...
-      packet->length = cspPacketDataLengths[currentCSPPacket];
-      packet->id.ext = 0x87654321;
       // Set the payload to readable ASCII
-      for (unsigned long i = 0; i < cspPacketDataLengths[currentCSPPacket]; i++) {
-        packet->data[i] = (i % 79) + 0x30; // ASCII numbers through to ~
+      for (unsigned long i = 0; i < packetDataLengths[currentPacket]; i++) {
+        packet.push_back( (i % 79) + 0x30 ); // ASCII numbers through to ~
       }
 
 #if QA_CC_HD_DEBUG
-      printf("size of packet padding = %ld\n", sizeof(packet->padding));
-      printf("size of packet length = %ld\n", sizeof(packet->length));
-      printf("size of packet id = %ld\n", sizeof(packet->id));
-      printf("size of csp_id_t %ld\n",sizeof(csp_id_t));
-      printf("packet length %d (2 bytes) %02x\n", packet->length, packet->length);
-      printf("packet id (4 bytes) %04x\n", packet->id);
-      printf("Padding\n\t");
-      for (uint8_t p = 0; p < sizeof(packet->padding); p++) {
-        printf("%02x",packet->padding[p]);
-      }
+      printf("packet length %d (2 bytes) %02x\n", packet.size(), packet.size());
 #endif
 
-      // The CSP packet needs to be in a PPDU_u8 and passed to the encoder
-      uint8_t * pptr = (uint8_t *) packet;
-
-      std::vector<uint8_t> p;
-      p.assign(pptr, pptr + cspPacketHeaderLen + packet->length);
-
-      PPDU_u8 inputPayload(p);
-      // @TODO maybe make the input to the encoder a std::vector<uint8_t> ???
-      PPDU_u8::payload_t encodedPayload = ccHDCodec->encode(p);
+      std::vector<uint8_t> encodedPayload = ccHDCodec->encode(packet);
 
       // The codeword (encoded payload) is not systematic, so the message and
       // first p.size() bytes of the codeword should have differences.
       bool same = true;
-      for (unsigned long i = 0; i < p.size(); i++) {
-        same = same & (p[i] == encodedPayload[i]);
+      for (unsigned long i = 0; i < packet.size(); i++) {
+        same = same & (packet[i] == encodedPayload[i]);
       }
       ASSERT_FALSE(same) << "encoded payload matches payload; not possible if codeword is non-systematic";
 
 
 #if QA_CC_HD_DEBUG
-      printf("p len %ld\n",p.size());
-      printf("inputPayload len %ld encodedPayload len %ld\n",inputPayload.payloadLength(),encodedPayload.payloadLength());
+      printf("input packet len %ld encodedPayload len %ld\n",packet.size(),encodedPayload.size());
 #endif
 
       // Decode the encoded payload
-      PPDU_u8::payload_t dPayload;
+      std::vector<uint8_t> dPayload;
       uint32_t bitErrors = ccHDCodec->decode(encodedPayload, 100.0, dPayload);
 
-
       // Convolutional decoding cannot tell how many bit errors there might be
-      ASSERT_TRUE(bitErrors == 0) << "Bit error count > 0; Convolutional coding does not ";
+      ASSERT_TRUE(bitErrors == 0) << "Bit error count > 0; Convolutional coding does not proivide this number...";
+
 
       // Check the decoded and original messages match
-      std::vector<uint8_t> iPayload = inputPayload.getPayload();
+      ASSERT_TRUE(packet.size() == dPayload.size()) << "decoded payload size does not match input payload size";
 #if QA_CC_HD_DEBUG
-      printf("csp packet len %ld packet len %ld encoded len %ld decoded len %ld\n",
-        cspPacketDataLengths[currentCSPPacket], iPayload.size(), encodedPayload.size(), dPayload.size());
+      printf("packet len %ld packet len %ld encoded len %ld decoded len %ld\n",
+        packetDataLengths[currentPacket], iPayload.size(), encodedPayload.size(), dPayload.size());
 #endif
       if (bitErrors == 0) {
         same = true;
-        for (unsigned long i = 0; i < iPayload.size(); i++) {
-          same = same & (iPayload[i] == dPayload[i]);
+        for (unsigned long i = 0; i < packet.size(); i++) {
+          same = same & (packet[i] == dPayload[i]);
         }
         ASSERT_TRUE(same) << "decoded payload does not match input payload";
       }
 
-    } // for various CSP packet lengths
+    } // for various packet lengths
 
     delete ccHDCodec;
-
-    csp_free_resources(); // make valgrind happier
 
   }
   catch (FECException *e) {
