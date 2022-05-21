@@ -38,6 +38,7 @@ class ViterbiCodec
     bitarr_t encode(const bitarr_t& bits) const;
     std::vector<uint8_t> encodePacked(const std::vector<uint8_t>& bits) const;
     bitarr_t decode(const bitarr_t& bits) const;
+    bitarr_t decodeTruncated(const bitarr_t& bits) const;
     int constraint() const { return _constraint; }
     const std::vector<int>& polynomials() const { return _poly; }
 

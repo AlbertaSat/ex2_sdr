@@ -93,6 +93,7 @@ std::vector<uint8_t> ViterbiCodec::encodePacked(const std::vector<uint8_t>& bits
     t = bits[i];
     for (int b = 7; b >= 0; b--) {
       bit = (t >> b) & 0x01;
+      printf("%d",bit);
       auto output = _curr_output(state, bit);
       encodedBits <<= 1;
       encodedBits = encodedBits | output[0];
@@ -107,6 +108,7 @@ std::vector<uint8_t> ViterbiCodec::encodePacked(const std::vector<uint8_t>& bits
       state = _next_state(state, bit);
     } // for each bit in a message byte
   } // for all message bytes
+  printf("\n");
 
 //  printf("encoding %ld bits to get a codeword of %ld bits\n",bits.size(),encoded.size());
 
@@ -179,7 +181,22 @@ void ViterbiCodec::_update_path_metrics(const bitarr_t& bits, std::vector<uint8_
 //    printf("[%ld] first %ld second %ld\n",i,p.first,p.second);
   }
 
+  printf("tcol ");
+  for (unsigned int i = 0; i < new_trellis_column.size(); i++) {
+    printf("%d ",new_trellis_column[i]);
+  }
+  printf(" | pmet ");
+  for (unsigned int i = 0; i < path_metrics.size(); i++) {
+    printf("%d ",path_metrics[i]);
+  }
+  printf(" | npmet ");
+
   path_metrics = new_path_metrics;
+  for (unsigned int i = 0; i < path_metrics.size(); i++) {
+    printf("%d ",path_metrics[i]);
+  }
+  printf("\n");
+
   trellis.push_back(new_trellis_column);
 //  printf("_update_path_metrics new_path_metrics %ld new_trellis_column %ld path_metrics %ld trellis %ld\n",
 //    new_path_metrics.size(), new_trellis_column.size(), path_metrics.size(), trellis.size());
@@ -188,13 +205,15 @@ void ViterbiCodec::_update_path_metrics(const bitarr_t& bits, std::vector<uint8_
 
 ViterbiCodec::bitarr_t ViterbiCodec::decode(const bitarr_t& bits) const
 {
+  printf("decoding %ld bits\n",bits.size());
   // Compute path metrics and generate trellis.
   Trellis trellis;
   std::vector<uint8_t> path_metrics(1 << (_constraint - 1), std::numeric_limits<uint8_t>::max());
   path_metrics.front() = 0;
   const unsigned int poly_len = _poly.size();
-
+printf("i\n");
   for (unsigned int i = 0; i < bits.size(); i += poly_len) {
+    printf("%d ",i);
     bitarr_t current_bits((bits.begin() + i), (bits.begin() + i + poly_len));
     // If some bits are missing, fill with trailing zeros.
     // This is not ideal but it is the best we can do.
@@ -204,21 +223,103 @@ ViterbiCodec::bitarr_t ViterbiCodec::decode(const bitarr_t& bits) const
     }
     _update_path_metrics(current_bits, path_metrics, trellis);
   }
+    printf("\n");
+
+//  for (unsigned int i = 0; i < trellis.size(); i++) {
+//    printf("t[%d] ",i);
+//    for (unsigned int j = 0; j < trellis[i].size(); j++) {
+//      printf(" %0d",trellis[i][j]);
+//    }
+//    printf("\n");
+//  }
+//  printf("\n");
+//
+//  printf("t[%d] ",trellis.size());
+//  for (int i = 0; i < path_metrics.size(); i++) {
+//    printf("%d ",path_metrics[i]);
+//  }
+//  printf("\n");
 
   // Traceback.
-//  printf("for %ld bits, traceback starts at trellis[%ld]\n",bits.size(),(trellis.size()-1));
+  printf("for %ld bits, traceback starts at trellis[%ld]\n",bits.size(),(trellis.size()));
+  printf("min element %ld\n",std::distance(path_metrics.begin(),std::min_element(path_metrics.begin(), path_metrics.end())));
   bitarr_t decoded;
   int state = std::min_element(path_metrics.begin(), path_metrics.end()) - path_metrics.begin();
-//  printf("initial state = %d[%d]\t\n",state,(state >> (_constraint - 2)));
+  printf("trellis col(state|bit] = %ld(%d|%d] ",trellis.size(),state,(state >> (_constraint - 2)));
   for (int i = trellis.size() - 1; i >= 0; i--) {
     decoded.push_back(state >> (_constraint - 2));
     state = trellis[i][state];
-//    printf("%d[%d] ",state,(state >> (_constraint - 2)));
+    printf("%d(%d|%d] ",i,state,(state >> (_constraint - 2)));
   }
-//  printf("\n");
+  printf("\n");
   std::reverse(decoded.begin(), decoded.end());
 
+  for (unsigned int i = 0; i < decoded.size(); i++) {
+    printf("%d ",decoded[i]);
+  }
+  printf("\n");
   // TEST
 //  printf("first max %ld first min %ld second max %ld second min %ld\n",m_first_max,m_first_min,m_second_max,m_second_min);
   return decoded;
-}
+} // decode
+
+ViterbiCodec::bitarr_t ViterbiCodec::decodeTruncated(const bitarr_t& bits) const
+{
+  printf("truncated decoding %ld bits\n",bits.size());
+  // Compute path metrics and generate trellis.
+  Trellis trellis;
+  std::vector<uint8_t> path_metrics(1 << (_constraint - 1), std::numeric_limits<uint8_t>::max());
+  path_metrics.front() = 0;
+  const unsigned int poly_len = _poly.size();
+printf("i\n");
+  for (unsigned int i = 0; i < bits.size(); i += poly_len) {
+    printf("%d ",i);
+    bitarr_t current_bits((bits.begin() + i), (bits.begin() + i + poly_len));
+    // If some bits are missing, fill with trailing zeros.
+    // This is not ideal but it is the best we can do.
+    if (current_bits.size() < poly_len) {
+      int len = poly_len - current_bits.size();
+      current_bits.resize(current_bits.size() + len);
+    }
+    _update_path_metrics(current_bits, path_metrics, trellis);
+  }
+    printf("\n");
+
+//  for (unsigned int i = 0; i < trellis.size(); i++) {
+//    printf("t[%d] ",i);
+//    for (unsigned int j = 0; j < trellis[i].size(); j++) {
+//      printf(" %0d",trellis[i][j]);
+//    }
+//    printf("\n");
+//  }
+//  printf("\n");
+//
+//  printf("t[%d] ",trellis.size());
+//  for (int i = 0; i < path_metrics.size(); i++) {
+//    printf("%d ",path_metrics[i]);
+//  }
+//  printf("\n");
+
+  // Traceback.
+  printf("for %ld bits, traceback starts at trellis[%ld]\n",bits.size(),(trellis.size()));
+  printf("min element %ld\n",std::distance(path_metrics.begin(),std::min_element(path_metrics.begin(), path_metrics.end())));
+  bitarr_t decoded;
+  int state = std::min_element(path_metrics.begin(), path_metrics.end()) - path_metrics.begin();
+  printf("trellis col(state|bit] = %ld(%d|%d] ",trellis.size(),state,(state >> (_constraint - 2)));
+  for (int i = trellis.size() - 1; i >= 0; i--) {
+    decoded.push_back(state >> (_constraint - 2));
+    state = trellis[i][state];
+    printf("%d(%d|%d] ",i,state,(state >> (_constraint - 2)));
+  }
+  printf("\n");
+  std::reverse(decoded.begin(), decoded.end());
+
+  for (unsigned int i = 0; i < decoded.size(); i++) {
+    printf("%d ",decoded[i]);
+  }
+  printf("\n");
+  // TEST
+//  printf("first max %ld first min %ld second max %ld second min %ld\n",m_first_max,m_first_min,m_second_max,m_second_min);
+  return decoded;
+} // decodeTruncated
+
