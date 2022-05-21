@@ -20,16 +20,6 @@
 #include <stdexcept>
 #include <vector>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "csp_types.h"
-
-#ifdef __cplusplus
-}
-#endif
-
 #include "pdu.hpp"
 #include "mpduHeader.hpp"
 #include "radio.h"
@@ -78,7 +68,7 @@ namespace ex2
      *   * the Modulation (3 bits)
      *   * the FEC Scheme (6 bits)
      * * the Codeword Fragment Index (7 bits), an index used to order split codewords when a FEC scheme codeword is longer than 119 bytes
-     * * the User Packet Length, the length of the user packet provided to the MAC, which should be a CSP packet
+     * * the User Packet Length, the length of the user packet provided to the MAC
      * * the User Packet Fragement Index, which of the User Packet fragments this is
      * *
      * @dot

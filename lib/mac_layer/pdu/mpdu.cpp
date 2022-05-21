@@ -48,8 +48,8 @@ namespace ex2
       //     3. Longer than expected
       //
       // For 1., as long as there are enough bytes to make an MPDUHeader, it's
-      // worth processing because it might be the first CSP packet fragment. The
-      // MPDUHeader may decode alright and then if it's the first CSP packet
+      // worth processing because it might be the first packet fragment. The
+      // MPDUHeader may decode alright and then if it's the first packet
       // fragment, we can choose to substitute dummy data for the missing,
       // but expected message. Maybe subsequent payload will be okay...
       //
@@ -110,20 +110,26 @@ namespace ex2
 
       // First find how many messages are needed for @p byteCount bytes
       uint32_t msgLen = errorCorrection.getMessageLen() / 8;
-      uint32_t numMsgsPerCSPPacket = byteCount / msgLen;
-      if (byteCount % msgLen != 0) {
-        numMsgsPerCSPPacket++;
+      uint32_t numMsgsPerPacket;
+      if (byteCount > 0) {
+        numMsgsPerPacket = byteCount / msgLen;
+        if (byteCount % msgLen != 0) {
+          numMsgsPerPacket++;
+        }
+      }
+      else {
+        numMsgsPerPacket = 1;
       }
 
       // Codewords are packed into consecutive MPDUs, so find out how many
       // are needed, being sure to round up.
-      uint32_t numCodewordBytesPerCSPPacket = numMsgsPerCSPPacket * errorCorrection.getCodewordLen() / 8;
-      uint32_t numMPDUsPerCSPPacket = numCodewordBytesPerCSPPacket / maxMTU();
-      if (numCodewordBytesPerCSPPacket % maxMTU() != 0) {
-        numMPDUsPerCSPPacket++;
+      uint32_t numCodewordBytesPerPacket = numMsgsPerPacket * errorCorrection.getCodewordLen() / 8;
+      uint32_t numMPDUsPerPacket = numCodewordBytesPerPacket / maxMTU();
+      if (numCodewordBytesPerPacket % maxMTU() != 0) {
+        numMPDUsPerPacket++;
       }
 
-      return numMPDUsPerCSPPacket;
+      return numMPDUsPerPacket;
     }
 
   } /* namespace sdr */

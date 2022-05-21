@@ -13,8 +13,8 @@
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
  */
 
-#ifndef EX2_SDR_MAC_LAYER_PDU_FRAME_HEADER_H_
-#define EX2_SDR_MAC_LAYER_PDU_FRAME_HEADER_H_
+#ifndef EX2_SDR_MAC_LAYER_PDU_MPDU_HEADER_H_
+#define EX2_SDR_MAC_LAYER_PDU_MPDU_HEADER_H_
 
 #include <cstdint>
 #include <stdexcept>
@@ -46,8 +46,8 @@ namespace ex2 {
        * @param[in] modulation The UHF radio modulation (RF mode)
        * @param[in] errorCorrection The error correction for this MPDU header
        * @param[in] codewordFragmentIndex The index of the codeword fragment
-       * @param[in] userPacketPayloadLength The length of the original user (CSP) packet payload
-       * @param[in] userPacketFragmentIndex The current fragment of the user (CSP) packet
+       * @param[in] userPacketPayloadLength The length of the original user packet payload
+       * @param[in] userPacketFragmentIndex The current fragment of the user packet
        */
       MPDUHeader(/*const uint8_t uhfPacketLength,*/
         const RF_Mode::RF_ModeNumber modulation,
@@ -205,4 +205,4 @@ namespace ex2 {
   } /* namespace sdr */
 } /* namespace ex2 */
 
-#endif /* EX2_SDR_MAC_LAYER_PDU_FRAME_HEADER_H_ */
+#endif /* EX2_SDR_MAC_LAYER_PDU_MPDU_HEADER_H_ */
