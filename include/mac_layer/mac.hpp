@@ -24,8 +24,6 @@
 #include <time.h>
 
 #include "FEC.hpp"
-#include "ppdu_cf.hpp"
-#include "ppdu_u8.hpp"
 #include "mpdu.hpp"
 #include "rfMode.hpp"
 
