@@ -133,10 +133,8 @@ namespace ex2 {
             // pad m_codewordBuffer to catch things up
             if (mpdu.getMpduHeader()->getCodewordFragmentIndex() > m_mpduCount) {
               uint32_t numMissingMPDUs = mpdu.getMpduHeader()->getCodewordFragmentIndex() - m_mpduCount;
-printf("numMissingMPDUs %d\n",numMissingMPDUs);
               // We need to first zero-fill the numMissingMPDUs, then insert
               // the payload from the one just received.
-//              m_codewordBuffer.resize(m_codewordBuffer.size() + numMissingMPDUs * MPDU::maxMTU(), 0);
               m_codewordBuffer.insert(m_codewordBuffer.end(), numMissingMPDUs * MPDU::maxMTU(), 0);
               m_codewordBuffer.insert(m_codewordBuffer.end(),mpdu.getPayload().begin(),mpdu.getPayload().end());
               m_mpduCount = mpdu.getMpduHeader()->getCodewordFragmentIndex() + 1;
