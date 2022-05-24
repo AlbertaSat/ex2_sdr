@@ -14,14 +14,6 @@
 #include "mac.hpp"
 #include <cmath>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
 #include "golay.h"
 #include "mpdu.hpp"
 #include "QCLDPC.hpp"
