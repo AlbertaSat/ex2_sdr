@@ -80,6 +80,8 @@ TEST(noFEC, Foo )
 
     ASSERT_TRUE(same) << "decoded payload does not match input payload";
     ASSERT_TRUE(bitErrors == 0) << "Bit error count > 0";
+
+    delete(noFEC);
   }
 
 }
