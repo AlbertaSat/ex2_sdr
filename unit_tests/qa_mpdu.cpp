@@ -155,8 +155,10 @@ TEST(mpdu, ConstructorsAndAccessors)
   }
   else {
     ASSERT_TRUE(false) << "Codeword lengths don't match!";
-
   }
+  delete(header1);
+  delete(mpdu1);
+  delete(mpdu2);
 }
 
 /*!

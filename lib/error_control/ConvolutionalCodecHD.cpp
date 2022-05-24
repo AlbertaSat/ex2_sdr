@@ -52,14 +52,14 @@ namespace ex2 {
 
       // @TODO does this belong in the FEC constructor?
       m_errorCorrection = new ErrorCorrection(ecScheme, (MPDU::maxMTU() * 8));
-//      std::vector<int> polynomials{ CCSDS_CONVOLUTIONAL_CODE_POLY_G1, CCSDS_CONVOLUTIONAL_CODE_POLY_G2};
+      std::vector<int> polynomials{ CCSDS_CONVOLUTIONAL_CODE_POLY_G1, CCSDS_CONVOLUTIONAL_CODE_POLY_G2};
+
+      m_codec = new ViterbiCodec(CCSDS_CONVOLUTIONAL_CODE_CONSTRAINT, polynomials);
+
+//      // for dev of memory-reduced algorithm, use constraint len 3 and { 7, 5 }, which is used for a unit test; see qa_viterbi
+//      std::vector<int> polynomials{ 7, 5};
 //
-//      m_codec = new ViterbiCodec(CCSDS_CONVOLUTIONAL_CODE_CONSTRAINT, polynomials);
-
-      // for dev of memory-reduced algorithm, use constraint len 3 and { 7, 5 }, which is used for a unit test; see qa_viterbi
-      std::vector<int> polynomials{ 7, 5};
-
-      m_codec = new ViterbiCodec(3, polynomials);
+//      m_codec = new ViterbiCodec(3, polynomials);
     }
 
     ConvolutionalCodecHD::~ConvolutionalCodecHD() {
@@ -98,7 +98,7 @@ namespace ex2 {
         MPDUUtility::repack(encodedPayload, MPDUUtility::BPSymb_8, MPDUUtility::BPSymb_1);
 
         // Decode the 1 bit per byte payload.
-        ViterbiCodec::bitarr_t decoded = m_codec->decode(encodedPayload);
+        ViterbiCodec::bitarr_t decoded = m_codec->decodeTruncated(encodedPayload);
 
         // Repack the result to be 8 bits per byte
         MPDUUtility::repack(decoded, MPDUUtility::BPSymb_1, MPDUUtility::BPSymb_8);
