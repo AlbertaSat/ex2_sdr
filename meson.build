@@ -59,13 +59,11 @@ endif
 
 core_source_files = [
     PRJ_DIR / 'lib/error_control/ConvolutionalCodecHD.cpp',
-#    PRJ_DIR / 'lib/error_control/crc.cpp',
     PRJ_DIR / 'lib/error_control/error_correction.cpp',
     PRJ_DIR / 'lib/error_control/FEC.cpp',
     PRJ_DIR / 'lib/error_control/golay.cpp',
     PRJ_DIR / 'lib/error_control/NoFEC.cpp',
     PRJ_DIR / 'lib/error_control/QCLDPC.cpp',
-#    PRJ_DIR / 'lib/math/eigen/matrix2d.cpp',
     PRJ_DIR / 'lib/mac_layer/mac.cpp',
     PRJ_DIR / 'lib/mac_layer/pdu/mpdu.cpp',
     PRJ_DIR / 'lib/mac_layer/pdu/mpduHeader.cpp',
@@ -75,17 +73,15 @@ core_source_files = [
 ]
 
 incdir = include_directories(
+    'include',
     'include/configuration',
     'include/error_control',
     'include/mac_layer',
     'include/mac_layer/pdu',
     'include/math',
-#    'include/math/eigen',
     'include/pdu',
-#    'include/phy_layer',
     'include/utilities',
     'include/wrapper',
-    'include',
     'third_party/viterbi'
 )
 
