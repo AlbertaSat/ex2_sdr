@@ -23,6 +23,8 @@
 #include "viterbi-utils.h"
 
 using namespace std;
+using namespace ex2;
+using namespace sdr;
 
 #include "gtest/gtest.h"
 
