@@ -390,29 +390,29 @@ TEST(convolutional_codec_hd, r_1_2_ber_match )
   //    0.0001,
   //    false,
   //    10.0);
-//  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
-//    8 /* dB */,
-//    0.0001,
-//    false,
-//    10.0);
-//  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
-//    7 /* dB */,
-//    0.0001,
-//    false,
-//    10.0);
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    8 /* dB */,
+    0.0001,
+    false,
+    10.0);
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    7 /* dB */,
+    0.0001,
+    false,
+    10.0);
   // According to Proakis, 4th ed, Figure 8-2-21, right near 6dB SNR a BER of
   // 1e-4 is achieved. Check a little above assuming it will do better than 1e-4
   // and a little below assuming it won't
-//  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
-//    6.3 /* dB */,
-//    0.0001,
-//    false,
-//    10.0);
-//  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
-//    5.7 /* dB */,
-//    0.0001,
-//    true,
-//    10.0);
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    6.3 /* dB */,
+    0.0001,
+    false,
+    10.0);
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    5.7 /* dB */,
+    0.0001,
+    true,
+    10.0);
   // At 5 dB SNR, 1e-4 BER will always be exceeded
   check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
     5 /* dB */,
