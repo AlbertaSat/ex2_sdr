@@ -379,7 +379,7 @@ TEST(mac, PacketLoopbackDroppedPackets) {
 
   for (int ecScheme : schemes) {
 
-    printf("ecs %d\n",ecScheme);
+//    printf("ecs %d\n",ecScheme);
     switch(ecScheme) {
       case 0:
         ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
