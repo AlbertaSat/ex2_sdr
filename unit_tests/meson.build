@@ -40,7 +40,7 @@ test('mpduUtility', unit_test_mpduUtility,
     )
     
 test('mpduHeader', unit_test_mpduHeader,
-    timeout: 30
+    timeout: 150
     )
     
 unit_test_mpdu = executable('unit_test-mpdu', 'qa_mpdu.cpp', core_source_files, third_party_source_files,
@@ -58,7 +58,7 @@ unit_test_mac = executable('unit_test-mac', 'qa_mac.cpp', core_source_files, thi
     )
     
 test('mac', unit_test_mac,
-    timeout: 100
+    timeout: 150
     )
     
 unit_test_mac_wrapper = executable('unit_test-mac-wrapper', 'qa_macWrapper.cpp', core_source_files, third_party_source_files,
@@ -67,7 +67,7 @@ unit_test_mac_wrapper = executable('unit_test-mac-wrapper', 'qa_macWrapper.cpp',
     )
     
 test('mac-wrapper', unit_test_mac_wrapper,
-    timeout: 100
+    timeout: 150
     )
     
 unit_test_no_FEC = executable('unit_test-no_FEC', 'qa_NoFEC.cpp', core_source_files, third_party_source_files,
