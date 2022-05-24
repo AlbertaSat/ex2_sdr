@@ -379,7 +379,6 @@ TEST(mac, PacketLoopbackDroppedPackets) {
 
   for (int ecScheme : schemes) {
 
-//    printf("ecs %d\n",ecScheme);
     switch(ecScheme) {
       case 0:
         ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
@@ -532,6 +531,39 @@ TEST(mac, PacketLoopbackDroppedPackets) {
             } // skip the second MPDU
           } // for all the raw MPDUs except the second
 
+          // Test if corrupting the second MPDU results in a packet. It should not
+          for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
+
+            MAC::MAC_UHFPacketProcessingStatus status;
+
+            if (rawMPDUCount == 1) {
+              // offset the raw packet start by 1
+              status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength() + 1, MPDU::rawMPDULength());
+            } else {
+              status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
+            }
+
+            switch (status) {
+              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+              {
+                const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
+
+                bool same = true;
+                for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
+                  same = same && (rawPacket[i] == packet[i]);
+                }
+                ASSERT_FALSE(same) << "decoded packet matches original even though an MPDU was mangled";
+              }
+              break;
+              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
+                break;
+              case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+                break;
+              default:
+                break;
+            } // switch on returned UHF packet process status
+
+          } // for all the raw MPDUs except the first
 
         } // check if have an integral number of raw MPDUs
       } // was the packet successfully encoded

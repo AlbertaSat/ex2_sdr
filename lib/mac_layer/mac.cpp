@@ -175,7 +175,6 @@ namespace ex2 {
               // save this MPDU payload that may contain some part of a codeword
               // or multiple codewords (remembering codewords are packed into
               // one or more consecutive MPDUs)
-//              m_codewordBuffer.resize(0);
               m_codewordBuffer.reserve(m_expectedMPDUs*MPDU::maxMTU());
               m_codewordBuffer.assign(mpdu.getPayload().begin(),mpdu.getPayload().end());
 
@@ -198,10 +197,8 @@ namespace ex2 {
           return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
         }
 
-
-
       }
-      catch (const MPDUHeaderException& e) {
+      catch (const MPDUException& e) {
         // @todo log this exception
         printf("MPDU packet exception %s\n", e.what());
 
@@ -264,8 +261,6 @@ namespace ex2 {
 
       // Everything is done in units of bytes
 
-      //      uint32_t const numMPDUsPerPacket = MPDU::mpdusPerPacket(packet, *m_errorCorrection);
-      //      uint32_t const numMPDUsPerCodeword = MPDU::mpdusPerCodeword(*m_errorCorrection);
         uint16_t const packetLength = len;
 
       // @note the message length returned by the ErrorCorrection object is
@@ -344,10 +339,17 @@ namespace ex2 {
             codewordOffset += mpduPayloadBytesRemaining;
             codewordBytesRemaining -= mpduPayloadBytesRemaining;
 
-            // Now have a full MPDU payload, so make the MPDU and stash the raw payload
+            // Now have a full MPDU payload, so make the MPDU and stash the raw
+            // payload. Note, the MPDUHeader constructor cannot fail since the
+            // only possible error would be from a bad ErrorCorrection, but that
+            // would have been caught when m_errorCorrection was made.
             MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
               mpduCount++, len, 0);
-            // Make an MPDU
+            // Make an MPDU.
+            // Just the same as for the MPDUHeader, there is no way for this
+            // constructor to generate an exception because the only check that
+            // could be made is for the MPDUHeader, which as noted above can't
+            // fail.
             MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
             std::vector<uint8_t> rawMPDU = mpdu->getRawMPDU();
             m_transparentModePayloads.insert(m_transparentModePayloads.end(), rawMPDU.begin(), rawMPDU.end());
@@ -372,6 +374,7 @@ namespace ex2 {
           message.resize(0);
         }
         catch (FECException& e) { // @todo need an FEC exception that all subclasses inherit
+          // @note No FEC method will throw an exception for encoding at this time.
         }
 
       } while (bytesRemaining > 0);
@@ -382,10 +385,17 @@ namespace ex2 {
       // whole mpduPayload's worth...
       if (mpduPayloadBytesRemaining > 0 && mpduPayloadBytesRemaining < MPDU::maxMTU()) {
         mpduPayload.resize(MPDU::maxMTU(),0); // zero-pad to length
-        // Now have a full MPDU payload, so make the MPDU and stash the raw payload
+        // Now have a full MPDU payload, so make the MPDU and stash the raw
+        // payload. Note, the MPDUHeader constructor cannot fail since the
+        // only possible error would be from a bad ErrorCorrection, but that
+        // would have been caught when m_errorCorrection was made.
         MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
           mpduCount++, len, 0);
-        // Make an MPDU
+        // Make an MPDU.
+        // Just the same as for the MPDUHeader, there is no way for this
+        // constructor to generate an exception because the only check that
+        // could be made is for the MPDUHeader, which as noted above can't
+        // fail.
         MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
         std::vector<uint8_t> rawMPDU = mpdu->getRawMPDU();
         m_transparentModePayloads.insert(m_transparentModePayloads.end(), rawMPDU.begin(), rawMPDU.end());

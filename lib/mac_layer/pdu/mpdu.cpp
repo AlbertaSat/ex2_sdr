@@ -26,6 +26,7 @@ namespace ex2
       MPDUHeader& header,
       std::vector<uint8_t>& codeword)
     {
+      try {
       // Make a copy
       m_mpduHeader = new MPDUHeader(header);
       // TODO Not sure we need to keep the codeword for this constructor since
@@ -37,6 +38,12 @@ namespace ex2
       std::vector<uint8_t> temp = header.getHeaderPayload();
       m_rawMPDU.insert(m_rawMPDU.end(), temp.begin(), temp.end());
       m_rawMPDU.insert(m_rawMPDU.end(), codeword.begin(), codeword.end());
+      }
+      catch (MPDUHeaderException& e) {
+        // @todo should log this
+        printf("MPDUHeader exception : %s\n", e.what());
+        throw MPDUException("MPDU: Bad MPDUHeader.");
+      }
     }
 
     MPDU::MPDU (
