@@ -779,5 +779,5 @@ namespace ex2 {
       return r;
     }
 
-  } /* namespace darkstar */
-} /* namespace xiphos */
+  } /* namespace sdr */
+} /* namespace ex2 */
