@@ -191,12 +191,12 @@ check_decoder_ber (
 #endif
     numBits += payloadBitCount;
   } // while not enough bits for BER
-#if QA_CC_HD_DEBUG
-  printf("@%g dB, numbBits %d numErrors %d\n", snr, numBits, numErrors);
-#endif
 
   std::string ecn = ec.ErrorCorrectionName(errorCorrectionScheme);
   double calcBER = (double) numErrors / (double) numBits;
+#if QA_CC_HD_DEBUG
+  printf("@%g dB, numbBits %d numErrors %d ber %g\n", snr, numBits, numErrors, calcBER);
+#endif
   if (berExceedExpected) {
     if (calcBER < ber) {
       ASSERT_TRUE(calcBER > (1.0 - berTolerance/100.0)*ber) << (boost::format ("BER too low for %1% @ %2% dB SNR") % ecn % snr).str();
@@ -207,6 +207,8 @@ check_decoder_ber (
       ASSERT_TRUE(calcBER > (1.0 + berTolerance/100.0)*ber) << (boost::format ("BER too high for %1% @ %2% dB SNR") % ecn % snr).str();
     }
   }
+
+  delete(rng);
 } // check decoder
 
 
@@ -299,10 +301,10 @@ TEST(convolutional_codec_hd, r_1_2_simple_encode_decode_no_errs )
 
     // Set the packet test lengths to be a superset of what is used in
     // other unit tests, because why not
-//    uint16_t const numPackets = 6;
-//    uint16_t packetDataLengths[numPackets] = {0, 10, 103, 119, 358, 4095};
-    uint16_t const numPackets = 1;
-    uint16_t packetDataLengths[numPackets] = {10};
+    //    uint16_t const numPackets = 6;
+    //    uint16_t packetDataLengths[numPackets] = {0, 10, 103, 119, 358, 4095};
+    uint16_t const numPackets = 5;
+    uint16_t packetDataLengths[numPackets] = {10, 103, 119, 358, 4095};
 
     std::vector<uint8_t> packet;
     for (uint16_t currentPacket = 0; currentPacket < numPackets; currentPacket++) {
@@ -382,12 +384,12 @@ TEST(convolutional_codec_hd, r_1_2_ber_match )
    * ----------------------------------------------------------------------
    */
 
-//  // Check some SNRs that should easily do better than 1e-4 BER
-//  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
-//    60 /* dB */,
-//    0.0001,
-//    false,
-//    10.0);
+  //  // Check some SNRs that should easily do better than 1e-4 BER
+  //  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+  //    60 /* dB */,
+  //    0.0001,
+  //    false,
+  //    10.0);
 //  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
 //    8 /* dB */,
 //    0.0001,
@@ -398,9 +400,9 @@ TEST(convolutional_codec_hd, r_1_2_ber_match )
 //    0.0001,
 //    false,
 //    10.0);
-//  // According to Proakis, 4th ed, Figure 8-2-21, right near 6dB SNR a BER of
-//  // 1e-4 is achieved. Check a little above assuming it will do better than 1e-4
-//  // and a little below assuming it won't
+  // According to Proakis, 4th ed, Figure 8-2-21, right near 6dB SNR a BER of
+  // 1e-4 is achieved. Check a little above assuming it will do better than 1e-4
+  // and a little below assuming it won't
 //  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
 //    6.3 /* dB */,
 //    0.0001,
@@ -411,18 +413,18 @@ TEST(convolutional_codec_hd, r_1_2_ber_match )
 //    0.0001,
 //    true,
 //    10.0);
-//  // At 5 dB SNR, 1e-4 BER will always be exceeded
-//  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
-//    5 /* dB */,
-//    0.0001,
-//    true,
-//    10.0);
-//  // At 0 dB SNR, 1e-4 BER will be exceeded really quickly -- see the log.
-//  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
-//    5 /* dB */,
-//    0.0001,
-//    true,
-//    10.0);
+  // At 5 dB SNR, 1e-4 BER will always be exceeded
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    5 /* dB */,
+    0.0001,
+    true,
+    10.0);
+  // At 0 dB SNR, 1e-4 BER will be exceeded really quickly -- see the log.
+  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+    0 /* dB */,
+    0.0001,
+    true,
+    10.0);
 
 }
 
