@@ -52,10 +52,10 @@ TEST(viterbi, Poly_7x5_err )
    * ----------------------------------------------------------------------
    */
   ViterbiCodec codec(3, {7, 5});
-  ASSERT_EQ(codec.decode("001110000110011111100010110011"_b), "010111001010001"_b);
+  ASSERT_EQ(codec.decodeTruncated("001110000110011111100010110011"_b), "010111001010001"_b);
 
   // Inject 1 error bit.
-  ASSERT_EQ(codec.decode("001110000110011111000010110011"_b), "010111001010001"_b);
+  ASSERT_EQ(codec.decodeTruncated("001110000110011111000010110011"_b), "010111001010001"_b);
 }
 
 
@@ -66,10 +66,10 @@ TEST(Viterbi, Poly_7x6_err)
    * ----------------------------------------------------------------------
    */
     ViterbiCodec codec(3, {7, 6});
-    ASSERT_EQ(codec.decode("101101010011"_b), "101100"_b);
+    ASSERT_EQ(codec.decodeTruncated("101101010011"_b), "101100"_b);
 
     // Inject 1 error bit.
-    ASSERT_EQ(codec.decode("101101110011"_b), "101100"_b);
+    ASSERT_EQ(codec.decodeTruncated("101101110011"_b), "101100"_b);
 }
 
 TEST(Viterbi, Poly_6x5_err)
@@ -79,14 +79,14 @@ TEST(Viterbi, Poly_6x5_err)
    * ----------------------------------------------------------------------
    */
     ViterbiCodec codec(3, {6, 5});
-    ASSERT_EQ(codec.decode("01101101110110"_b), "1001101"_b);
+    ASSERT_EQ(codec.decodeTruncated("01101101110110"_b), "1001101"_b);
 
 #if QA_VITERBI_TRELLIS_COL_8_BIT
     // Inject 1 error bits.
-    ASSERT_EQ(codec.decode("01101101110010"_b), "1001101"_b);
+    ASSERT_EQ(codec.decodeTruncated("01101101110010"_b), "1001101"_b);
 #else
     // Inject 2 error bits.
-    ASSERT_EQ(codec.decode("11101101110010"_b), "1001101"_b);
+    ASSERT_EQ(codec.decodeTruncated("11101101110010"_b), "1001101"_b);
 #endif
 }
 
@@ -122,25 +122,35 @@ TEST(Viterbi, Voyager_err)
         encoded[idx] = (encoded[idx] == 0) ? (1) : (0);
     }
 
-    auto decoded = codec.decode(encoded);
+    auto decoded = codec.decodeTruncated(encoded);
     ASSERT_EQ(message, decoded);
 }
 
 // Test the given ViterbiCodec by randomly generating 10 input sequences of
 // length 8, 16, 32 respectively, encode and decode them, then test if the
 // decoded string is the same as the original input.
-void TestViterbiCodecAutomatic(const ViterbiCodec& codec)
+void TestViterbiCodecAutomatic(const ViterbiCodec& codec, bool truncated)
 {
     for (int num_bits = 8; num_bits <= 32; num_bits <<= 1) {
         for (int i = 0; i < 10; i++) {
             auto message = _gen_message(num_bits);
             auto encoded = codec.encode(message);
-            auto decoded = codec.decode(encoded);
+            if (truncated) {
+              auto decoded = codec.decodeTruncated(encoded);
 #if QA_VITERBI_DEBUG
-            printf("lengths: message %ld encoded %ld decoded %ld\n",
-              message.size(), encoded.size(), decoded.size());
+              printf("lengths: message %ld encoded %ld decoded %ld\n",
+                message.size(), encoded.size(), decoded.size());
 #endif
-            ASSERT_EQ(decoded, message);
+              ASSERT_EQ(decoded, message);
+            }
+            else {
+              auto decoded = codec.decode(encoded);
+#if QA_VITERBI_DEBUG
+              printf("lengths: message %ld encoded %ld decoded %ld\n",
+                message.size(), encoded.size(), decoded.size());
+#endif
+              ASSERT_EQ(decoded, message);
+            }
         }
     }
 }
@@ -152,7 +162,7 @@ TEST(Viterbi, Poly_7x5)
    * ----------------------------------------------------------------------
    */
     ViterbiCodec codec(3, {7, 5});
-    TestViterbiCodecAutomatic(codec);
+    TestViterbiCodecAutomatic(codec, true);
 }
 
 TEST(Viterbi, Poly_6x5)
@@ -162,7 +172,7 @@ TEST(Viterbi, Poly_6x5)
    * ----------------------------------------------------------------------
    */
     ViterbiCodec codec(3, {6, 5});
-    TestViterbiCodecAutomatic(codec);
+    TestViterbiCodecAutomatic(codec, true);
 }
 
 TEST(Viterbi, Voyager)
@@ -173,7 +183,7 @@ TEST(Viterbi, Voyager)
    * ----------------------------------------------------------------------
    */
     ViterbiCodec codec(7, {109, 79});
-    TestViterbiCodecAutomatic(codec);
+    TestViterbiCodecAutomatic(codec, true);
 }
 
 TEST(Viterbi, LTE)
@@ -184,7 +194,7 @@ TEST(Viterbi, LTE)
    * ----------------------------------------------------------------------
    */
     ViterbiCodec codec(7, {91, 117, 121});
-    TestViterbiCodecAutomatic(codec);
+    TestViterbiCodecAutomatic(codec, false);
 }
 
 TEST(Viterbi, CDMA_2000)
@@ -195,7 +205,7 @@ TEST(Viterbi, CDMA_2000)
    * ----------------------------------------------------------------------
    */
     ViterbiCodec codec(9, {501, 441, 331, 315});
-    TestViterbiCodecAutomatic(codec);
+    TestViterbiCodecAutomatic(codec, false);
 }
 
 #if QA_VITERBI_TRELLIS_COL_8_BIT
