@@ -7,7 +7,7 @@
  *
  * This unit tests the ParityCheck class.
  *
- * @copyright Xiphos Systems Corp. 2019
+ * @copyright AlbertaSat 2021
  *
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
@@ -33,7 +33,7 @@
 #include "ppdu_u8.h"
 
 using namespace std;
-using namespace xiphos::darkstar;
+using namespace ex2::sdr;
 namespace fs = boost::filesystem;
 
 #include "gtest/gtest.h"
