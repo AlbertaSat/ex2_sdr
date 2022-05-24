@@ -8,10 +8,8 @@ incdirUT = include_directories(
     '../include/mac_layer',
     '../include/mac_layer/pdu',
     '../include/math',
-#    '../include/math/eigen',
     '../include/pdu',
     '../include/phy_layer',
-#    '../include/phy_layer/pdu',
     '../include/utilities',
     '../include/wrapper',
     '../include/',
@@ -96,16 +94,17 @@ unit_test_cc_hd_FEC = executable('unit_test-cc_hd_FEC', 'qa_ConvolutionalCodecHD
     )
     
 test('cc_hd_FEC', unit_test_cc_hd_FEC,
-    timeout: 60
+    timeout: 100
     )
 
-unit_test_matrix2d = executable('unit_test-matrix2d', 'qa_matrix2d.cpp',
-    include_directories : incdirUT,
-    dependencies: [boost_dep, gtest_dep],
+#unit_test_matrix2d = executable('unit_test-matrix2d', 'qa_matrix2d.cpp',
+#    include_directories : incdirUT,
+#    dependencies: [boost_dep, gtest_dep],
 #    link_with: DarkstarTxRxlib
-    )
-    
-test('matrix2d', unit_test_matrix2d,
-    timeout: 30
-    )
-   
+#    )
+#    
+#test('matrix2d', unit_test_matrix2d,
+#    timeout: 30
+#    )
+ 
+ 
