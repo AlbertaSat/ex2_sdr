@@ -94,7 +94,6 @@ TEST(mpduHeader, ConstructorParemeterized )
           // Really can't iterate over all packet lengths and fragments, so just do some
           for (userPacketPayloadLength = 0; userPacketPayloadLength < 0x0100; userPacketPayloadLength++ ) {
             for (userPacketFragmentIndex = 0; userPacketFragmentIndex < 0x04; userPacketFragmentIndex++ ) {
-              //            printf("pre header \n");
 
               header1 = new MPDUHeader(/*UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH,*/
                 modulation,
@@ -107,10 +106,6 @@ TEST(mpduHeader, ConstructorParemeterized )
 
               std::vector<uint8_t> payload1 = header1->getHeaderPayload();
 
-//              printf("payload1 size %ld\n", payload1.size());
-
-              // Make the payload long enough
-//              payload1.resize(UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH);
               try {
                 header2 = new MPDUHeader(payload1);
               }
@@ -122,6 +117,8 @@ TEST(mpduHeader, ConstructorParemeterized )
               // Check headers match
               ASSERT_TRUE(headersSame(header1, header2)) << "Oops, header packets don't match!";
 
+              delete(header2);
+              delete(header1);
             } // over all user packet fragment indices
           } // over all user packet lengths
 
@@ -206,5 +203,7 @@ TEST(mpduHeader, Accessors )
   headerLength = header2->MACHeaderLength();
   ASSERT_TRUE(headerLength == MPDUHeader::MACHeaderLength()) << "Header length is wrong!";
 
+  delete(header2);
+  delete(header1);
 }
 
