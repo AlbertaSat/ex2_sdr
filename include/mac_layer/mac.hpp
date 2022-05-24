@@ -23,6 +23,8 @@
 #include <vector>
 #include <time.h>
 
+<<<<<<< HEAD
+=======
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,9 +33,8 @@ extern "C" {
 }
 #endif
 
+>>>>>>> main
 #include "FEC.hpp"
-#include "ppdu_cf.hpp"
-#include "ppdu_u8.hpp"
 #include "mpdu.hpp"
 #include "rfMode.hpp"
 
