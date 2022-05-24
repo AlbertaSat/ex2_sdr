@@ -16,6 +16,7 @@
 #define EX2_SDR_ERROR_CONTROL_ERROR_CORRECTION_H_
 
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -24,6 +25,12 @@
 
 namespace ex2 {
   namespace sdr {
+
+    class ECException: public std::runtime_error {
+
+    public:
+      ECException(const std::string& message);
+    };
 
     /*!
      * @brief Define a forward error correction scheme.
@@ -210,8 +217,6 @@ namespace ex2 {
       CodingRate m_getCodingRate(ErrorCorrectionScheme scheme);
 
       CodingRate m_bits2rate(uint16_t bits) const;
-
-//      ErrorCorrectionScheme m_bits2errorCorrection(uint16_t bits) const;
 
       double m_rate;          // r, fractional rate
       uint32_t m_messageLen;  // k, bits
