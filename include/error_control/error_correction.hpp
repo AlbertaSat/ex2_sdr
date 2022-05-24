@@ -150,28 +150,6 @@ namespace ex2 {
        */
       uint32_t numCodewordFragments(uint32_t payloadLength);
 
-//      /*!
-//       * @brief Decode the codeword using the current ErrorCorrectionScheme
-//       *
-//       * @note Not all schemes are supported yet.
-//       *
-//       * @param [in out] codeword On invocation, the codeword to decode. If
-//       * successful, the message replaces the contents. If not successful,
-//       * the contents are indeterminate, invalid.
-//       * @return If successful, the message is returned. If not, a zero-length
-//       * vector is returned.
-//       */
-//      std::vector<uint8_t> & decode(std::vector<uint8_t> &codeword);
-//
-//      /*!
-//       * @brief Encode the message using the current ErrorCorrectionScheme
-//       *
-//       * @param message
-//       * @return If successful, the codeword is returned. If not, a zero-length
-//       * vector is returned.
-//       */
-//      std::vector<uint8_t> & encode(std::vector<uint8_t> &codeword);
-
       /*!
        * @brief Accessor
        * @return The ErrorCorrectionScheme
