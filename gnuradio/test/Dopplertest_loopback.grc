@@ -491,6 +491,58 @@ blocks:
     coordinate: [744, 252.0]
     rotation: 0
     state: enabled
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "#!/usr/bin/env python\n'''\n   Copyright 2015 Wolfgang Nagele\n\
+      \n   Licensed under the Apache License, Version 2.0 (the \"License\");\n   you\
+      \ may not use this file except in compliance with the License.\n   You may obtain\
+      \ a copy of the License at\n\n       http://www.apache.org/licenses/LICENSE-2.0\n\
+      \n   Unless required by applicable law or agreed to in writing, software\n \
+      \  distributed under the License is distributed on an \"AS IS\" BASIS,\n   WITHOUT\
+      \ WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n   See the\
+      \ License for the specific language governing permissions and\n   limitations\
+      \ under the License.\n'''\nfrom gnuradio import gr\nimport threading\nimport\
+      \ time\nimport socket\n\n\nclass doppler_runner(threading.Thread):\n  def __init__(self,\
+      \ callback=None, freq=None, gpredict_host=None, gpredict_port=None):\n    threading.Thread.__init__(self)\n\
+      \n    self.callback = callback\n    self.gpredict_host = gpredict_host\n   \
+      \ self.gpredict_port = gpredict_port\n    self.freq = freq\n\n\n  def run(self):\n\
+      \    #bind_to = (self.gpredict_host, self.gpredict_port)\n    bind_to = ('127.0.0.1',\
+      \ 4532)\n    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n  \
+      \  print(bind_to)\n    server.bind(bind_to)\n    server.listen(0)\n\n    time.sleep(0.5)\
+      \ # TODO: Find better way to know if init is all done\n\n    while True:\n \
+      \     print(\"Waiting for connection on: %s:%d\" % bind_to)\n      sock, addr\
+      \ = server.accept()\n      print(\"Connected from: %s:%d\" % (addr[0], addr[1]))\n\
+      \n      cur_freq = 0\n      while True:\n        data = sock.recv(1024)\n  \
+      \      if not data:\n          break\n\n        if data.startswith(b'F'):\n\
+      \          self.freq = int(data[1:].strip())\n          if cur_freq != self.freq:\n\
+      \            print(\"New frequency: %d\" % self.freq)\n            self.callback(self.freq)\n\
+      \            cur_freq = self.freq\n          sock.sendall(b'RPRT 0\\n')\n  \
+      \      elif data.startswith(b'f'):\n          sock.sendall(b'f: %d\\n' % cur_freq)\n\
+      \n      sock.close()\n      print(\"Disconnected from: %s:%d\" % (addr[0], addr[1]))\n\
+      \n    #sys.exit()\n\nclass doppler(gr.sync_block):\n  def __init__(self, callback=None,\
+      \ freq=None, gpredict_host=None, gpredict_port=None):\n    gr.sync_block.__init__(self,\n\
+      \                           name = \"Gpredict Doppler\",\n                 \
+      \          in_sig = None,\n                           out_sig = None)\n    doppler_runner(callback,\
+      \ freq, gpredict_host, gpredict_port).start()\n\n"
+    affinity: ''
+    alias: ''
+    callback: ''
+    comment: ''
+    freq: ''
+    gpredict_host: ''
+    gpredict_port: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('Gpredict Doppler', 'doppler', [('callback', 'None'), ('freq', 'None'),
+      ('gpredict_host', 'None'), ('gpredict_port', 'None')], [], [], '', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [592, 356.0]
+    rotation: 0
+    state: true
 - name: freq
   id: blocks_probe_signal_x
   parameters:

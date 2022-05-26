@@ -81,7 +81,7 @@ class k2sat_image(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_per_sym = samp_per_sym = 8
+        self.samp_per_sym = samp_per_sym = 4
         self.nfilts = nfilts = 32
         self.baud_bit = baud_bit = 2e6
         self.syncword = syncword = "0101010101111110"
@@ -220,6 +220,8 @@ class k2sat_image(gr.top_block, Qt.QWidget):
         self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(2)
         self.blocks_socket_pdu_0 = blocks.socket_pdu('TCP_SERVER', '127.0.0.1', '4321', 10000, False)
         self.blocks_multiply_const_vxx_1 = blocks.multiply_const_cc(1)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, '/home/josh/git/ex2_sdr/gnuradio_sband/decodeddata.bin', False)
+        self.blocks_file_sink_0.set_unbuffered(False)
         self.blocks_char_to_float_1 = blocks.char_to_float(1, 1)
         self.blocks_char_to_float_0 = blocks.char_to_float(1, 1)
 
@@ -237,6 +239,7 @@ class k2sat_image(gr.top_block, Qt.QWidget):
         self.connect((self.digital_constellation_decoder_cb_0, 0), (self.digital_map_bb_0, 0))
         self.connect((self.digital_costas_loop_cc_1, 0), (self.digital_pfb_clock_sync_xxx_0_0, 0))
         self.connect((self.digital_diff_decoder_bb_0_1, 0), (self.blocks_char_to_float_1, 0))
+        self.connect((self.digital_diff_decoder_bb_0_1, 0), (self.blocks_file_sink_0, 0))
         self.connect((self.digital_diff_decoder_bb_0_1, 0), (self.satellites_sync_to_pdu_packed_0_0_1, 0))
         self.connect((self.digital_diff_decoder_bb_0_1, 0), (self.satellites_sync_to_pdu_packed_0_0_1_0, 0))
         self.connect((self.digital_map_bb_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
