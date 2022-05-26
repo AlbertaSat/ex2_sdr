@@ -139,7 +139,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '8'
+    value: '4'
   states:
     bus_sink: false
     bus_source: false
@@ -202,7 +202,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2336, 108.0]
+    coordinate: [1104, 460.0]
     rotation: 0
     state: true
 - name: blocks_char_to_float_1
@@ -219,7 +219,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2152, 236.0]
+    coordinate: [920, 588.0]
     rotation: 0
     state: enabled
 - name: blocks_file_sink_0
@@ -237,27 +237,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2096, 572.0]
+    coordinate: [864, 924.0]
     rotation: 0
-    state: disabled
-- name: blocks_multiply_const_vxx_0
-  id: blocks_multiply_const_vxx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    const: 1j
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    type: complex
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [280, 748.0]
-    rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_multiply_const_vxx_1
   id: blocks_multiply_const_vxx
   parameters:
@@ -309,7 +291,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1992, 108.0]
+    coordinate: [760, 460.0]
     rotation: 0
     state: true
 - name: digital_constellation_decoder_cb_0
@@ -325,41 +307,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1592, 108.0]
+    coordinate: [360, 460.0]
     rotation: 0
     state: true
-- name: digital_constellation_soft_decoder_cf_0
-  id: digital_constellation_soft_decoder_cf
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    constellation: qpsk_const
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [408, 620.0]
-    rotation: 0
-    state: disabled
-- name: digital_constellation_soft_decoder_cf_0_0
-  id: digital_constellation_soft_decoder_cf
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    constellation: qpsk_const
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [472, 748.0]
-    rotation: 0
-    state: disabled
 - name: digital_costas_loop_cc_1
   id: digital_costas_loop_cc
   parameters:
@@ -378,40 +328,6 @@ blocks:
     coordinate: [920, 136.0]
     rotation: 0
     state: enabled
-- name: digital_diff_decoder_bb_0
-  id: digital_diff_decoder_bb
-  parameters:
-    affinity: ''
-    alias: ''
-    coding: digital.DIFF_DIFFERENTIAL
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    modulus: '2'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [920, 612.0]
-    rotation: 0
-    state: disabled
-- name: digital_diff_decoder_bb_0_0
-  id: digital_diff_decoder_bb
-  parameters:
-    affinity: ''
-    alias: ''
-    coding: digital.DIFF_DIFFERENTIAL
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    modulus: '2'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [992, 740.0]
-    rotation: 0
-    state: disabled
 - name: digital_diff_decoder_bb_0_1
   id: digital_diff_decoder_bb
   parameters:
@@ -426,7 +342,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1888, 308.0]
+    coordinate: [656, 660.0]
     rotation: 0
     state: enabled
 - name: digital_map_bb_0
@@ -442,7 +358,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1832, 108.0]
+    coordinate: [600, 460.0]
     rotation: 0
     state: true
 - name: digital_map_bb_1
@@ -458,7 +374,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2176, 108.0]
+    coordinate: [944, 460.0]
     rotation: 0
     state: true
 - name: digital_pfb_clock_sync_xxx_0_0
@@ -484,46 +400,6 @@ blocks:
     coordinate: [1184, 100.0]
     rotation: 0
     state: enabled
-- name: fec_extended_decoder_0_0
-  id: fec_extended_decoder
-  parameters:
-    affinity: ''
-    alias: ''
-    ann: None
-    comment: ''
-    decoder_list: dec_cc
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    puncpat: '''11'''
-    threadtype: none
-    value: fec_extended_decoder
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [672, 596.0]
-    rotation: 0
-    state: disabled
-- name: fec_extended_decoder_0_0_0
-  id: fec_extended_decoder
-  parameters:
-    affinity: ''
-    alias: ''
-    ann: None
-    comment: ''
-    decoder_list: dec_cc
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    puncpat: '''11'''
-    threadtype: none
-    value: fec_extended_decoder
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [752, 724.0]
-    rotation: 0
-    state: disabled
 - name: fec_extended_decoder_0_0_1
   id: fec_extended_decoder
   parameters:
@@ -541,7 +417,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1616, 292.0]
+    coordinate: [384, 644.0]
     rotation: 0
     state: enabled
 - name: qtgui_const_sink_x_0_0
@@ -633,7 +509,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1504, 180.0]
+    coordinate: [272, 540.0]
     rotation: 0
     state: enabled
 - name: qtgui_freq_sink_x_0
@@ -814,103 +690,6 @@ blocks:
     coordinate: [576, 340.0]
     rotation: 0
     state: disabled
-- name: qtgui_time_sink_x_0_0
-  id: qtgui_time_sink_x
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha1: '1.0'
-    alpha10: '1.0'
-    alpha2: '1.0'
-    alpha3: '1.0'
-    alpha4: '1.0'
-    alpha5: '1.0'
-    alpha6: '1.0'
-    alpha7: '1.0'
-    alpha8: '1.0'
-    alpha9: '1.0'
-    autoscale: 'False'
-    axislabels: 'True'
-    color1: blue
-    color10: dark blue
-    color2: red
-    color3: green
-    color4: black
-    color5: cyan
-    color6: magenta
-    color7: yellow
-    color8: dark red
-    color9: dark green
-    comment: ''
-    ctrlpanel: 'False'
-    entags: 'True'
-    grid: 'False'
-    gui_hint: ''
-    label1: Signal 1
-    label10: Signal 10
-    label2: Signal 2
-    label3: Signal 3
-    label4: Signal 4
-    label5: Signal 5
-    label6: Signal 6
-    label7: Signal 7
-    label8: Signal 8
-    label9: Signal 9
-    legend: 'True'
-    marker1: '0'
-    marker10: '-1'
-    marker2: '-1'
-    marker3: '-1'
-    marker4: '-1'
-    marker5: '-1'
-    marker6: '-1'
-    marker7: '-1'
-    marker8: '-1'
-    marker9: '-1'
-    name: '""'
-    nconnections: '1'
-    size: '200'
-    srate: samp_rate/samp_per_sym
-    stemplot: 'False'
-    style1: '0'
-    style10: '1'
-    style2: '1'
-    style3: '1'
-    style4: '1'
-    style5: '1'
-    style6: '1'
-    style7: '1'
-    style8: '1'
-    style9: '1'
-    tr_chan: '0'
-    tr_delay: '0'
-    tr_level: '0.0'
-    tr_mode: qtgui.TRIG_MODE_FREE
-    tr_slope: qtgui.TRIG_SLOPE_POS
-    tr_tag: '""'
-    type: float
-    update_time: '0.4'
-    width1: '1'
-    width10: '1'
-    width2: '1'
-    width3: '1'
-    width4: '1'
-    width5: '1'
-    width6: '1'
-    width7: '1'
-    width8: '1'
-    width9: '1'
-    ylabel: Before CC
-    ymax: '1.5'
-    ymin: '-1.5'
-    yunit: '""'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [784, 500.0]
-    rotation: 0
-    state: disabled
 - name: qtgui_time_sink_x_0_0_0
   id: qtgui_time_sink_x
   parameters:
@@ -1005,24 +784,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2328, 220.0]
+    coordinate: [1096, 572.0]
     rotation: 0
     state: enabled
-- name: satellites_descrambler308_0
-  id: satellites_descrambler308
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1128, 624.0]
-    rotation: 0
-    state: disabled
 - name: satellites_rms_agc_0
   id: satellites_rms_agc
   parameters:
@@ -1040,42 +804,6 @@ blocks:
     coordinate: [728, 156.0]
     rotation: 0
     state: bypassed
-- name: satellites_sync_to_pdu_packed_0_0
-  id: satellites_sync_to_pdu_packed
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    packlen: '1000'
-    sync: '''11011010110110110000110100111101'''
-    threshold: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1360, 604.0]
-    rotation: 0
-    state: disabled
-- name: satellites_sync_to_pdu_packed_0_0_0
-  id: satellites_sync_to_pdu_packed
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    packlen: '1000'
-    sync: '''11011010110110110000110100111101'''
-    threshold: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1304, 732.0]
-    rotation: 0
-    state: disabled
 - name: satellites_sync_to_pdu_packed_0_0_1
   id: satellites_sync_to_pdu_packed
   parameters:
@@ -1091,7 +819,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2120, 300.0]
+    coordinate: [888, 652.0]
     rotation: 0
     state: enabled
 - name: satellites_sync_to_pdu_packed_0_0_1_0
@@ -1109,7 +837,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1904, 404.0]
+    coordinate: [672, 764.0]
     rotation: 0
     state: enabled
 - name: satellites_sync_to_pdu_packed_0_0_1_0_0
@@ -1127,7 +855,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1728, 532.0]
+    coordinate: [544, 892.0]
     rotation: 0
     state: disabled
 - name: uhd_usrp_source_0
@@ -1571,18 +1299,12 @@ connections:
 - [analog_simple_squelch_cc_0, '0', satellites_rms_agc_0, '0']
 - [blocks_char_to_float_0, '0', fec_extended_decoder_0_0_1, '0']
 - [blocks_char_to_float_1, '0', qtgui_time_sink_x_0_0_0, '0']
-- [blocks_multiply_const_vxx_0, '0', digital_constellation_soft_decoder_cf_0_0, '0']
 - [blocks_multiply_const_vxx_1, '0', analog_simple_squelch_cc_0, '0']
 - [blocks_multiply_const_vxx_1, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_multiply_const_vxx_1, '0', qtgui_time_sink_x_0, '0']
 - [blocks_unpack_k_bits_bb_0, '0', digital_map_bb_1, '0']
 - [digital_constellation_decoder_cb_0, '0', digital_map_bb_0, '0']
-- [digital_constellation_soft_decoder_cf_0, '0', fec_extended_decoder_0_0, '0']
-- [digital_constellation_soft_decoder_cf_0, '0', qtgui_time_sink_x_0_0, '0']
-- [digital_constellation_soft_decoder_cf_0_0, '0', fec_extended_decoder_0_0_0, '0']
 - [digital_costas_loop_cc_1, '0', digital_pfb_clock_sync_xxx_0_0, '0']
-- [digital_diff_decoder_bb_0, '0', satellites_descrambler308_0, '0']
-- [digital_diff_decoder_bb_0_0, '0', satellites_sync_to_pdu_packed_0_0_0, '0']
 - [digital_diff_decoder_bb_0_1, '0', blocks_char_to_float_1, '0']
 - [digital_diff_decoder_bb_0_1, '0', blocks_file_sink_0, '0']
 - [digital_diff_decoder_bb_0_1, '0', satellites_sync_to_pdu_packed_0_0_1, '0']
@@ -1590,17 +1312,10 @@ connections:
 - [digital_diff_decoder_bb_0_1, '0', satellites_sync_to_pdu_packed_0_0_1_0_0, '0']
 - [digital_map_bb_0, '0', blocks_unpack_k_bits_bb_0, '0']
 - [digital_map_bb_1, '0', blocks_char_to_float_0, '0']
-- [digital_pfb_clock_sync_xxx_0_0, '0', blocks_multiply_const_vxx_0, '0']
 - [digital_pfb_clock_sync_xxx_0_0, '0', digital_constellation_decoder_cb_0, '0']
-- [digital_pfb_clock_sync_xxx_0_0, '0', digital_constellation_soft_decoder_cf_0, '0']
 - [digital_pfb_clock_sync_xxx_0_0, '0', qtgui_const_sink_x_0_0, '0']
-- [fec_extended_decoder_0_0, '0', digital_diff_decoder_bb_0, '0']
-- [fec_extended_decoder_0_0_0, '0', digital_diff_decoder_bb_0_0, '0']
 - [fec_extended_decoder_0_0_1, '0', digital_diff_decoder_bb_0_1, '0']
-- [satellites_descrambler308_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
 - [satellites_rms_agc_0, '0', digital_costas_loop_cc_1, '0']
-- [satellites_sync_to_pdu_packed_0_0, out, blocks_socket_pdu_0, pdus]
-- [satellites_sync_to_pdu_packed_0_0_0, out, blocks_socket_pdu_0, pdus]
 - [satellites_sync_to_pdu_packed_0_0_1, out, blocks_socket_pdu_0, pdus]
 - [satellites_sync_to_pdu_packed_0_0_1_0, out, blocks_socket_pdu_0, pdus]
 - [satellites_sync_to_pdu_packed_0_0_1_0_0, out, blocks_socket_pdu_0, pdus]
