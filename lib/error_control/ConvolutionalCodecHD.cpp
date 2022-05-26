@@ -34,19 +34,19 @@ namespace ex2 {
           break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3:
           throw new FECException("Convolutional coding rate 2/3 not yet implemented");
-          break;
+//          break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4:
           throw new FECException("Convolutional coding rate 3/4 not yet implemented");
-          break;
+//          break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6:
           throw new FECException("Convolutional coding rate 5/6 not yet implemented");
-          break;
+//          break;
         case ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8:
           throw new FECException("Convolutional coding rate 7/8 not yet implemented");
-          break;
+//          break;
         default:
           throw new FECException("Must be a Convolutional Codec scheme.");
-          break;
+//          break;
       }
 
       // @TODO does this belong in the FEC constructor?

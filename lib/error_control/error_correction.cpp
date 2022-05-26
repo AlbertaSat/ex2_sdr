@@ -116,157 +116,157 @@ namespace ex2 {
       switch(scheme) {
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2:
           return std::string("CCSDS Convolutional Coding rate 1/2");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3:
           return std::string("CCSDS Convolutional Coding rate 2/3");
-          break;
+//          break
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4:
           return std::string("CCSDS Convolutional Coding rate 3/4");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6:
           return std::string("CCSDS Convolutional Coding rate 5/6");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8:
           return std::string("CCSDS Convolutional Coding rate 7/8");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_1:
           return std::string("CCSDS Reed-Solomon (255,239) interleaving level 1");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_2:
           return std::string("CCSDS Reed-Solomon (255,239) interleaving level 2");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_3:
           return std::string("CCSDS Reed-Solomon (255,239) interleaving level 3");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_4:
           return std::string("CCSDS Reed-Solomon (255,239) interleaving level 4");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_5:
           return std::string("CCSDS Reed-Solomon (255,239) interleaving level 5");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_239_INTERLEAVING_8:
           return std::string("CCSDS Reed-Solomon (255,239) interleaving level 8");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_1:
           return std::string("CCSDS Reed-Solomon (255,223) interleaving level 1");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_2:
           return std::string("CCSDS Reed-Solomon (255,223) interleaving level 2");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_3:
           return std::string("CCSDS Reed-Solomon (255,223) interleaving level 3");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_4:
           return std::string("CCSDS Reed-Solomon (255,223) interleaving level 4");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_5:
           return std::string("CCSDS Reed-Solomon (255,223) interleaving level 5");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_REED_SOLOMON_255_223_INTERLEAVING_8:
           return std::string("CCSDS Reed-Solomon (255,223) interleaving level 8");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_1784_R_1_2:
           return std::string("CCSDS Turbo rate n=1784 1/2");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_1784_R_1_3:
           return std::string("CCSDS Turbo rate n=1784 1/3");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_1784_R_1_4:
           return std::string("CCSDS Turbo rate n=1784 1/4");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_1784_R_1_6:
           return std::string("CCSDS Turbo rate n=1784 1/6");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_3568_R_1_2:
           return std::string("CCSDS Turbo rate n=3568 1/2");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_3568_R_1_3:
           return std::string("CCSDS Turbo rate n=3568 1/3");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_3568_R_1_4:
           return std::string("CCSDS Turbo rate n=3568 1/4");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_3568_R_1_6:
           return std::string("CCSDS Turbo rate n=3568 1/6");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_7136_R_1_2:
           return std::string("CCSDS Turbo rate n=7136 1/2");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_7136_R_1_3:
           return std::string("CCSDS Turbo rate n=7136 1/3");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_7136_R_1_4:
           return std::string("CCSDS Turbo rate n=7136 1/4");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_7136_R_1_6:
           return std::string("CCSDS Turbo rate n=7136 1/6");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_8920_R_1_2:
           return std::string("CCSDS Turbo rate n=8920 1/2");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_8920_R_1_3:
           return std::string("CCSDS Turbo rate n=8920 1/3");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_8920_R_1_4:
           return std::string("CCSDS Turbo rate n=8920 1/4");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_TURBO_8920_R_1_6:
           return std::string("CCSDS Turbo rate n=8920 1/6");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_1280:
           return std::string("CCSDS Orange Book 131.1-O-2 LDPC n=1288");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_1536:
           return std::string("CCSDS Orange Book 131.1-O-2 LDPC n=1536");
-          break;
+//          break;
         case ErrorCorrectionScheme::CCSDS_LDPC_ORANGE_BOOK_2048:
           return std::string("CCSDS Orange Book 131.1-O-2 LDPC n=2048");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2:
           return std::string("IEEE 802.11n QC-LDPC n=648 rate 1/2");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3:
           return std::string("IEEE 802.11n QC-LDPC n=648 rate 2/3");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4:
           return std::string("IEEE 802.11n QC-LDPC n=648 rate 3/4");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6:
           return std::string("IEEE 802.11n QC-LDPC n=648 rate 5/6");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2:
           return std::string("IEEE 802.11n QC-LDPC n=1296 rate 1/2");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3:
           return std::string("IEEE 802.11n QC-LDPC n=1296 rate 2/3");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4:
           return std::string("IEEE 802.11n QC-LDPC n=1296 rate 3/4");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6:
           return std::string("IEEE 802.11n QC-LDPC n=1296 rate 5/6");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2:
           return std::string("IEEE 802.11n QC-LDPC n=1944 rate 1/2");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3:
           return std::string("IEEE 802.11n QC-LDPC n=1944 rate 2/3");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4:
           return std::string("IEEE 802.11n QC-LDPC n=1944 rate 3/4");
-          break;
+//          break;
         case ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6:
           return std::string("IEEE 802.11n QC-LDPC n=1944 rate 5/6");
-          break;
+//          break;
         case ErrorCorrectionScheme::NO_FEC:
           return std::string("No FEC");
-          break;
+//          break;
 
         default:
           throw ECException("Invalid Error Correction Coding value.");
-          break;
+//          break;
       }
-      return std::string("bad error coding name");
+//      return std::string("bad error coding name");
     }
 
     bool
@@ -337,7 +337,7 @@ namespace ex2 {
           break;
         default:
           throw ECException("Invalid Error Correction Coding value.");
-          break;
+//          break;
       }
       return isValid;
     }
@@ -389,7 +389,7 @@ namespace ex2 {
           break;
         default:
           throw ECException("Invalid Coding Rate value.");
-          break;
+//          break;
       }
       return fractionalRate;
     }
@@ -538,7 +538,7 @@ namespace ex2 {
 
         default:
           throw ECException("Invalid Error Correction Scheme.");
-          break;
+          //break;
       }
       return codewordLen;
     }
@@ -674,7 +674,7 @@ namespace ex2 {
 
         default:
           throw ECException("Invalid Error Correction Scheme.");
-          break;
+//          break;
       }
       return messageLen;
     }
