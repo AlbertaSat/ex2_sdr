@@ -1,6 +1,7 @@
 options:
   parameters:
     author: josh
+    catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
     comment: ''
@@ -22,7 +23,6 @@ options:
     sizing_mode: fixed
     thread_safe_setters: ''
     title: Not titled yet
-    window_size: ''
   states:
     bus_sink: false
     bus_source: false
@@ -154,9 +154,26 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [208, 220.0]
+    coordinate: [224, 216.0]
     rotation: 0
     state: true
+- name: blocks_pdu_to_tagged_stream_1
+  id: blocks_pdu_to_tagged_stream
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    tag: packet_len
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [984, 144.0]
+    rotation: 0
+    state: disabled
 - name: blocks_socket_pdu_1
   id: blocks_socket_pdu
   parameters:
@@ -174,7 +191,26 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [48, 196.0]
+    coordinate: [48, 192.0]
+    rotation: 0
+    state: true
+- name: blocks_throttle_0
+  id: blocks_throttle
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    ignoretag: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_second: baud_bit
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [488, 216.0]
     rotation: 0
     state: true
 - name: blocks_unpacked_to_packed_xx_0
@@ -193,9 +229,76 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [424, 212.0]
+    coordinate: [640, 376.0]
     rotation: 0
-    state: true
+    state: enabled
+- name: blocks_unpacked_to_packed_xx_0_0
+  id: blocks_unpacked_to_packed_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    bits_per_chunk: '8'
+    comment: ''
+    endianness: gr.GR_MSB_FIRST
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1136, 224.0]
+    rotation: 0
+    state: disabled
+- name: satellites_hexdump_sink_0
+  id: satellites_hexdump_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    options: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 312.0]
+    rotation: 0
+    state: disabled
+- name: satellites_sync_to_pdu_packed_0_0
+  id: satellites_sync_to_pdu_packed
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    packlen: '15'
+    sync: '''01111110'''
+    threshold: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [736, 120.0]
+    rotation: 0
+    state: disabled
+- name: zeromq_pub_msg_sink_0
+  id: zeromq_pub_msg_sink
+  parameters:
+    address: tcp://127.0.0.1:4321
+    affinity: ''
+    alias: ''
+    bind: 'True'
+    comment: ''
+    timeout: '100'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1192, 344.0]
+    rotation: 0
+    state: disabled
 - name: zeromq_pub_sink_0
   id: zeromq_pub_sink
   parameters:
@@ -204,6 +307,7 @@ blocks:
     alias: ''
     comment: ''
     hwm: '-1'
+    key: ''
     pass_tags: 'False'
     timeout: '100'
     type: byte
@@ -212,14 +316,41 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [616, 204.0]
+    coordinate: [1352, 232.0]
+    rotation: 0
+    state: disabled
+- name: zeromq_pub_sink_1
+  id: zeromq_pub_sink
+  parameters:
+    address: tcp://127.0.0.1:4321
+    affinity: ''
+    alias: ''
+    comment: ''
+    hwm: '-1'
+    key: ''
+    pass_tags: 'False'
+    timeout: '100'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1032, 424.0]
     rotation: 0
     state: true
 
 connections:
-- [blocks_pdu_to_tagged_stream_0, '0', blocks_unpacked_to_packed_xx_0, '0']
+- [blocks_pdu_to_tagged_stream_0, '0', blocks_throttle_0, '0']
+- [blocks_pdu_to_tagged_stream_1, '0', blocks_unpacked_to_packed_xx_0_0, '0']
 - [blocks_socket_pdu_1, pdus, blocks_pdu_to_tagged_stream_0, pdus]
-- [blocks_unpacked_to_packed_xx_0, '0', zeromq_pub_sink_0, '0']
+- [blocks_throttle_0, '0', blocks_unpacked_to_packed_xx_0, '0']
+- [blocks_unpacked_to_packed_xx_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
+- [blocks_unpacked_to_packed_xx_0, '0', zeromq_pub_sink_1, '0']
+- [blocks_unpacked_to_packed_xx_0_0, '0', zeromq_pub_sink_0, '0']
+- [satellites_sync_to_pdu_packed_0_0, out, blocks_pdu_to_tagged_stream_1, pdus]
+- [satellites_sync_to_pdu_packed_0_0, out, satellites_hexdump_sink_0, in]
+- [satellites_sync_to_pdu_packed_0_0, out, zeromq_pub_msg_sink_0, in]
 
 metadata:
   file_format: 1
