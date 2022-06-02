@@ -26,7 +26,6 @@ from PyQt5 import Qt
 from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
-from gnuradio import analog
 from gnuradio import blocks
 from gnuradio import digital
 from gnuradio import fec
@@ -39,6 +38,8 @@ from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio import uhd
 import time
+from gnuradio.qtgui import Range, RangeWidget
+from PyQt5 import QtCore
 import satellites.hier
 
 
@@ -81,12 +82,13 @@ class k2sat_image(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.samp_per_sym = samp_per_sym = 4
+        self.samp_per_sym = samp_per_sym = 8
         self.nfilts = nfilts = 32
         self.baud_bit = baud_bit = 2e6
         self.syncword = syncword = "0101010101111110"
+        self.scale_const = scale_const = 1
         self.samp_rate = samp_rate = baud_bit*(samp_per_sym/2)
-        self.rx_gain = rx_gain = 42
+        self.rx_gain = rx_gain = 40
         self.rrc_taps = rrc_taps = firdes.root_raised_cosine(nfilts,nfilts,1/float(samp_per_sym),0.35,11*samp_per_sym*nfilts)
         self.qpsk_const = qpsk_const = digital.constellation_rect([-0.707-0.707j, -0.707+0.707j, 0.707-0.707j, 0.707+0.707j], [0, 1, 2, 3],
         4, 2, 2, 1, 1).base()
@@ -96,6 +98,9 @@ class k2sat_image(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
+        self._scale_const_range = Range(1, 100, 1, 1, 200)
+        self._scale_const_win = RangeWidget(self._scale_const_range, self.set_scale_const, "'scale_const'", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._scale_const_win)
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("", '')),
             uhd.stream_args(
@@ -108,7 +113,7 @@ class k2sat_image(gr.top_block, Qt.QWidget):
         self.uhd_usrp_source_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
 
         self.uhd_usrp_source_0.set_center_freq(center_freq, 0)
-        self.uhd_usrp_source_0.set_antenna("TX/RX", 0)
+        self.uhd_usrp_source_0.set_antenna("RX2", 0)
         self.uhd_usrp_source_0.set_rx_agc(False, 0)
         self.uhd_usrp_source_0.set_gain(rx_gain, 0)
         self.satellites_sync_to_pdu_packed_0_0_1_0 = satellites.hier.sync_to_pdu_packed(
@@ -169,6 +174,99 @@ class k2sat_image(gr.top_block, Qt.QWidget):
 
         self._qtgui_time_sink_x_0_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_0_win)
+        self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
+            200, #size
+            samp_rate, #samp_rate
+            "", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_time_sink_x_0.set_update_time(0.2)
+        self.qtgui_time_sink_x_0.set_y_axis(-1.5, 1.5)
+
+        self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
+
+        self.qtgui_time_sink_x_0.enable_tags(True)
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_0.enable_autoscale(True)
+        self.qtgui_time_sink_x_0.enable_grid(False)
+        self.qtgui_time_sink_x_0.enable_axis_labels(True)
+        self.qtgui_time_sink_x_0.enable_control_panel(False)
+        self.qtgui_time_sink_x_0.enable_stem_plot(False)
+
+
+        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [0, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [0, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(2):
+            if len(labels[i]) == 0:
+                if (i % 2 == 0):
+                    self.qtgui_time_sink_x_0.set_line_label(i, "Re{{Data {0}}}".format(i/2))
+                else:
+                    self.qtgui_time_sink_x_0.set_line_label(i, "Im{{Data {0}}}".format(i/2))
+            else:
+                self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_0.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
+        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
+            2048, #size
+            window.WIN_HAMMING, #wintype
+            0, #fc
+            6e6, #bw
+            "", #name
+            1,
+            None # parent
+        )
+        self.qtgui_freq_sink_x_0.set_update_time(0.10)
+        self.qtgui_freq_sink_x_0.set_y_axis(-140, 50)
+        self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
+        self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
+        self.qtgui_freq_sink_x_0.enable_autoscale(False)
+        self.qtgui_freq_sink_x_0.enable_grid(False)
+        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
+        self.qtgui_freq_sink_x_0.enable_axis_labels(True)
+        self.qtgui_freq_sink_x_0.enable_control_panel(False)
+        self.qtgui_freq_sink_x_0.set_fft_window_normalized(False)
+
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_freq_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_freq_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_freq_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
         self.qtgui_const_sink_x_0_0 = qtgui.const_sink_c(
             1024, #size
             'After costas', #name
@@ -219,9 +317,7 @@ class k2sat_image(gr.top_block, Qt.QWidget):
         self.digital_constellation_decoder_cb_0 = digital.constellation_decoder_cb(qpsk_const)
         self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(2)
         self.blocks_socket_pdu_0 = blocks.socket_pdu('TCP_SERVER', '127.0.0.1', '4321', 10000, False)
-        self.blocks_multiply_const_vxx_1 = blocks.multiply_const_cc(1)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_char*1, '/home/josh/git/ex2_sdr/gnuradio_sband/decodeddata.bin', False)
-        self.blocks_file_sink_0.set_unbuffered(False)
+        self.blocks_multiply_const_vxx_1 = blocks.multiply_const_cc(scale_const)
         self.blocks_char_to_float_1 = blocks.char_to_float(1, 1)
         self.blocks_char_to_float_0 = blocks.char_to_float(1, 1)
 
@@ -235,11 +331,12 @@ class k2sat_image(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_char_to_float_0, 0), (self.fec_extended_decoder_0_0_1, 0))
         self.connect((self.blocks_char_to_float_1, 0), (self.qtgui_time_sink_x_0_0_0, 0))
         self.connect((self.blocks_multiply_const_vxx_1, 0), (self.digital_costas_loop_cc_1, 0))
+        self.connect((self.blocks_multiply_const_vxx_1, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.blocks_multiply_const_vxx_1, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.blocks_unpack_k_bits_bb_0, 0), (self.digital_map_bb_1, 0))
         self.connect((self.digital_constellation_decoder_cb_0, 0), (self.digital_map_bb_0, 0))
         self.connect((self.digital_costas_loop_cc_1, 0), (self.digital_pfb_clock_sync_xxx_0_0, 0))
         self.connect((self.digital_diff_decoder_bb_0_1, 0), (self.blocks_char_to_float_1, 0))
-        self.connect((self.digital_diff_decoder_bb_0_1, 0), (self.blocks_file_sink_0, 0))
         self.connect((self.digital_diff_decoder_bb_0_1, 0), (self.satellites_sync_to_pdu_packed_0_0_1, 0))
         self.connect((self.digital_diff_decoder_bb_0_1, 0), (self.satellites_sync_to_pdu_packed_0_0_1_0, 0))
         self.connect((self.digital_map_bb_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
@@ -287,11 +384,19 @@ class k2sat_image(gr.top_block, Qt.QWidget):
     def set_syncword(self, syncword):
         self.syncword = syncword
 
+    def get_scale_const(self):
+        return self.scale_const
+
+    def set_scale_const(self, scale_const):
+        self.scale_const = scale_const
+        self.blocks_multiply_const_vxx_1.set_k(self.scale_const)
+
     def get_samp_rate(self):
         return self.samp_rate
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
+        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_0_0_0.set_samp_rate(self.samp_rate/self.samp_per_sym)
         self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 
