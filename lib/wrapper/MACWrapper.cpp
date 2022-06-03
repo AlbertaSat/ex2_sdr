@@ -15,7 +15,7 @@
 
 #include "mac.hpp"
 #include "mpdu.hpp"
-
+#include "osal.h"
 
 struct mac {
   void *obj;
@@ -40,7 +40,6 @@ void mac_destroy(mac_t *m)
 
   delete static_cast<ex2::sdr::MAC *>(m->obj);
   delete m;
-  m = NULL; // @todo not sure this really does anything that matters
 }
 
 // ErrorCorrection::ErrorCorrectionScheme getErrorCorrectionScheme ();
