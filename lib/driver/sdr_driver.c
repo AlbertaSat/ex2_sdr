@@ -1,23 +1,6 @@
 #include "sdr_driver.h"
 #include "fec.h"
 #include "osal.h"
-#include <logger/logger.h>
-
-char dbg[128];
-
-static inline void dump(const char *msg, const void *data, int len) {
-    uint8_t *src = (uint8_t *) data;
-    char *dst = dbg;
-    for (int i=0; i<len; i++) {
-        char nibble = src[i] >> 4;
-        *dst++ = (nibble >= 10) ? 'a' + (nibble - 10) : '0' + nibble;
-        nibble = src[i] & 0x0f;
-        *dst++ = (nibble >= 10) ? 'a' + (nibble - 10) : '0' + nibble;
-        *dst++ = ' ';
-    }
-    *dst = 0;
-    ex2_log("%s: %s", msg, dbg);
-}
 
 void sdr_rx_dsr(void *cb_data, void *buf, size_t len, void *pxTaskWoken) {
     sdr_uhf_conf_t *sdr_conf = (sdr_uhf_conf_t *) cb_data;
@@ -45,8 +28,6 @@ os_task_return_t sdr_rx_task(void *param) {
         if (os_queue_dequeue(ifdata->rx_queue, mpdu) != true) {
             continue;
         }
-
-        dump("SDR Rx MPDU", mpdu, 32);
         
         int plen = fec_mpdu_to_data(ifdata->mac_data, mpdu, &packet, sdr_conf->mtu);
         if (plen) {

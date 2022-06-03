@@ -5,6 +5,10 @@
 #include <stdint.h>
 #include "osal.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
     SDR_UHF_1200_BAUD = 0,
     SDR_UHF_2400_BAUD,
@@ -78,4 +82,7 @@ int sdr_uhf_tx(sdr_uhf_conf_t *conf, uint8_t *data, uint16_t len);
 
 void sdr_rx_dsr(void *cb_data, void *buf, size_t len, void *pxTaskWoken);
 
+#ifdef __cplusplus
+}
+#endif
 #endif // MPDU_DRIVER_H

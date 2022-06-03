@@ -1,5 +1,5 @@
-#ifndef PORTING_H_
-#define PORTING_H_
+#ifndef OSAL_H_
+#define OSAL_H_
 
 #ifdef __cplusplus
 extern "C" {

@@ -1,10 +1,8 @@
+#include <string.h>
 #include "MACWrapper.h"
 #include "sdr_driver.h"
+#include "fec.h"
 #include "osal.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 bool fec_data_to_mpdu(mac_t *my_mac, uint8_t *packet, uint16_t len) {
     return receive_packet(my_mac, packet, len);
@@ -48,7 +46,3 @@ int fec_get_next_mpdu(mac_t *my_mac, void **buf) {
 int fec_get_mtu() {
     return raw_mpdu_length();
 }
-
-#ifdef __cplusplus
-}
-#endif
