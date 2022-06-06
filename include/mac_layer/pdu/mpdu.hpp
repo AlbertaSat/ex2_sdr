@@ -20,16 +20,6 @@
 #include <stdexcept>
 #include <vector>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "csp_types.h"
-
-#ifdef __cplusplus
-}
-#endif
-
 #include "pdu.hpp"
 #include "mpduHeader.hpp"
 #include "radio.h"
@@ -39,10 +29,13 @@ namespace ex2
   namespace sdr
   {
 
-    class MPDUException: public std::runtime_error {
+    class MPDUException :
+        public std::runtime_error
+    {
 
     public:
-      MPDUException(const std::string& message);
+      MPDUException (
+        const std::string &message);
     };
 
     /*!
@@ -78,7 +71,7 @@ namespace ex2
      *   * the Modulation (3 bits)
      *   * the FEC Scheme (6 bits)
      * * the Codeword Fragment Index (7 bits), an index used to order split codewords when a FEC scheme codeword is longer than 119 bytes
-     * * the User Packet Length, the length of the user packet provided to the MAC, which should be a CSP packet
+     * * the User Packet Length, the length of the user packet provided to the MAC
      * * the User Packet Fragement Index, which of the User Packet fragments this is
      * *
      * @dot
@@ -111,7 +104,8 @@ namespace ex2
      * @enddot
      *
      */
-    class MPDU {
+    class MPDU
+    {
     public:
 
       /*!
@@ -126,8 +120,8 @@ namespace ex2
        * @param[in] payload MAC service data unit
        */
       MPDU (
-        MPDUHeader& header,
-        std::vector<uint8_t>& payload);
+        MPDUHeader &header,
+        std::vector<uint8_t> &payload);
 
       /*!
        * @brief Constructor
@@ -145,7 +139,7 @@ namespace ex2
        * @param[in] rawMPDU The received transparent mode Data Field 2 as a byte vector
        */
       MPDU (
-        std::vector<uint8_t>& rawMPDU);
+        std::vector<uint8_t> &rawMPDU);
 
       ~MPDU ();
 
@@ -154,14 +148,17 @@ namespace ex2
        *
        * @return The MPDU as a byte vector, including the header.
        */
-      const std::vector<uint8_t>& getRawMPDU() const;
+      const std::vector<uint8_t>&
+      getRawMPDU () const;
 
       /*!
        * @brief The length of the raw MPDU comprising the header and the payload
        *
        * @return Length of the raw MPDU comprising the header and the payload
        */
-      static uint32_t rawMPDULength() {
+      static uint32_t
+      rawMPDULength ()
+      {
         return UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH;
       }
 
@@ -170,7 +167,9 @@ namespace ex2
        *
        * @return The payload
        */
-      const std::vector<uint8_t>& getPayload() const {
+      const std::vector<uint8_t>&
+      getPayload () const
+      {
         return m_payload;
       }
 
@@ -178,7 +177,9 @@ namespace ex2
        * @brief Accessor for MPDU header
        * @return The header.
        */
-      MPDUHeader* getMpduHeader() const {
+      MPDUHeader*
+      getMpduHeader () const
+      {
         return m_mpduHeader;
       }
 
@@ -187,8 +188,11 @@ namespace ex2
        *
        * @return The MTU in bytes
        */
-      static uint16_t maxMTU() {
-        return UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH - MPDUHeader::MACHeaderLength();
+      static uint16_t
+      maxMTU ()
+      {
+        return UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH
+          - MPDUHeader::MACHeaderLength ();
       }
 
       /*!
@@ -199,7 +203,10 @@ namespace ex2
        *
        * @return errorCorrection Reference to the current FEC scheme
        */
-      static uint16_t mpdusInNBytes(uint32_t byteCount, ErrorCorrection &errorCorrection);
+      static uint16_t
+      mpdusInNBytes (
+        uint32_t byteCount,
+        ErrorCorrection &errorCorrection);
 
     private:
       MPDUHeader *m_mpduHeader;

@@ -29,10 +29,10 @@ namespace ex2 {
 
       ~NoFEC();
 
-      PPDU_u8 encode(PPDU_u8 &payload);
+      std::vector<uint8_t> encode(const std::vector<uint8_t>& payload);
 
-      uint32_t decode(const PPDU_u8::payload_t& encodedPayload, float snrEstimate,
-        PPDU_u8::payload_t& decodedPayload);
+      uint32_t decode(std::vector<uint8_t>& encodedPayload, float snrEstimate,
+        std::vector<uint8_t>& decodedPayload);
 
     };
 

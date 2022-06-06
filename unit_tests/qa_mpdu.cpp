@@ -21,18 +21,6 @@
 
 #include "mpdu.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "csp.h"
-#include "csp_types.h"
-#include "csp_buffer.h"
-
-#ifdef __cplusplus
-}
-#endif
-
 using namespace std;
 using namespace ex2::sdr;
 
@@ -42,14 +30,11 @@ using namespace ex2::sdr;
 
 #define UHF_TRANSPARENT_MODE_PACKET_LENGTH 128  // UHF transparent mode packet is always 128 bytes
 
-uint32_t mpdusPerCSPPacket(csp_packet_t * cspPacket, ErrorCorrection &errorCorrection) {
-  // Get length of CSP packet in bytes. Make sure we are not fooled by
-  // alignment, so add up the struct members
-  uint32_t cspPacketSize = sizeof(csp_packet_t) + cspPacket->length;
+uint32_t mpdusPerPacket(std::vector<uint8_t>& packet, ErrorCorrection &errorCorrection) {
 
-  return MPDU::mpdusInNBytes(cspPacketSize, errorCorrection);
+  return MPDU::mpdusInNBytes(packet.size(), errorCorrection);
 
-} // mpdusPerCSPPacket
+} // mpdusPerPacket
 
 uint16_t mpdusPerCodeword(ErrorCorrection &errorCorrection) {
 
@@ -170,8 +155,10 @@ TEST(mpdu, ConstructorsAndAccessors)
   }
   else {
     ASSERT_TRUE(false) << "Codeword lengths don't match!";
-
   }
+  delete(header1);
+  delete(mpdu1);
+  delete(mpdu2);
 }
 
 /*!
@@ -186,23 +173,14 @@ TEST(mpdu, NonAccessorMethods)
    * Check all the non-accessor methods.
    */
 
-  // Check that the object can calculate the correct number of MPDUs
-  // needed for a given CSP packet.
-
-  // First do a little CSP config work
-  csp_conf_t cspConf;
-  csp_conf_get_defaults(&cspConf);
-  cspConf.buffer_data_size = 4095; // TODO set as CSP_MTU
-  csp_init(&cspConf);
-
-  // Set the CSP packet test lengths so that
+  // Set the packet test lengths so that
   // * a zero length packet is tested
   // * a non-zero length packet fits well into one MPDU
   // * a non-zero length a packet just fits into one MPDU
   // * a non-zero length a packet needs more than one MPDU
   // * the max size packet
-  uint16_t const numCSPPackets = 5;
-  uint16_t cspPacketDataLengths[numCSPPackets] = {0, 10, 103, 358, 4095};
+  uint16_t const numPackets = 5;
+  uint16_t packetDataLengths[numPackets] = {0, 10, 119, 358, 4095};
 
   // Let's choose a few FEC schemes to test; testing them all would take a long
   // time and really we just want to have a mix of n, k, and r.
@@ -210,113 +188,116 @@ TEST(mpdu, NonAccessorMethods)
   // 802.11 QCLDPC since they are what we plan to use at a minimum.
 
   int const numSchemes = 18;
-  uint16_t expectedMPDUsPerPacket[numSchemes][numCSPPackets] = {
+  uint16_t expectedMPDUsPerPacket[numSchemes][numPackets] = {
+    {1,1,1,4,35}, // NO_FEC, m = n = 119
     {1,1,3,7,71}, // IEEE_802_11N_QCLDPC_648_R_1_2, n = 81 m = 40.5 -> 40 bytes
-    {1,1,3,5,53}, // IEEE_802_11N_QCLDPC_648_R_2_3, n = 81 m = 54 bytes
+    {1,1,3,5,52}, // IEEE_802_11N_QCLDPC_648_R_2_3, n = 81 m = 54 bytes
     {1,1,2,5,47}, // IEEE_802_11N_QCLDPC_648_R_3_4, n = 81 m = 60.75 -> 60 bytes
     {1,1,2,5,43}, // IEEE_802_11N_QCLDPC_648_R_5_6, n = 81 m = 67.5 -> 67 bytes
     {2,2,3,7,70}, // IEEE_802_11N_QCLDPC_1296_R_1_2, n = 162 m = 81 bytes
-    {2,2,3,6,54}, // IEEE_802_11N_QCLDPC_1296_R_2_3, n = 162 m = 108 bytes
-    {2,2,2,6,47}, // IEEE_802_11N_QCLDPC_1296_R_3_4, n = 162 m = 121.5 -> 121 bytes
+    {2,2,3,6,52}, // IEEE_802_11N_QCLDPC_1296_R_2_3, n = 162 m = 108 bytes
+    {2,2,2,5,47}, // IEEE_802_11N_QCLDPC_1296_R_3_4, n = 162 m = 121.5 -> 121 bytes
     {2,2,2,5,43}, // IEEE_802_11N_QCLDPC_1296_R_5_6, n = 162 m = 135 bytes
-    {3,3,3,9,70}, // IEEE_802_11N_QCLDPC_1944_R_1_2, n = 243 m = 121.5 -> 121 bytes
+    {3,3,3,7,70}, // IEEE_802_11N_QCLDPC_1944_R_1_2, n = 243 m = 121.5 -> 121 bytes
     {3,3,3,7,54}, // IEEE_802_11N_QCLDPC_1944_R_2_3, n = 243 m = 162 bytes
-    {3,3,3,7,47}, // IEEE_802_11N_QCLDPC_1944_R_3_4, n = 243 m = 182.25 -> 182 bytes
+    {3,3,3,5,47}, // IEEE_802_11N_QCLDPC_1944_R_3_4, n = 243 m = 182.25 -> 182 bytes
     {3,3,3,5,43}, // IEEE_802_11N_QCLDPC_1944_R_5_6, n = 243 m = 202.5 -> 202 bytes
     {1,1,3,7,70}, // CCSDS_CONVOLUTIONAL_CODING_R_1_2, n = 118 m = 59 bytes
     {1,1,2,5,53}, // CCSDS_CONVOLUTIONAL_CODING_R_2_3, n = 119 m = 79
     {1,1,2,5,47}, // CCSDS_CONVOLUTIONAL_CODING_R_3_4, n = 119 m = 89 bytes
     {1,1,2,4,42}, // CCSDS_CONVOLUTIONAL_CODING_R_5_6, n = 119 m = 99 bytes
-    {1,1,2,4,40},  // CCSDS_CONVOLUTIONAL_CODING_R_7_8, n = 119 m = 104 bytes
-    {1,1,1,4,35}  // NO_FEC, m = n = 119
+    {1,1,2,4,40}  // CCSDS_CONVOLUTIONAL_CODING_R_7_8, n = 119 m = 104 bytes
   };
   uint16_t expectedMPDUsPerCodeword[numSchemes] = {
-    1, // IEEE_802_11N_QCLDPC_648_R_1_2
-    1,   // IEEE_802_11N_QCLDPC_648_R_2_3
-    1,   // IEEE_802_11N_QCLDPC_648_R_3_4
-    1,   // IEEE_802_11N_QCLDPC_648_R_5_6
-    2, // IEEE_802_11N_QCLDPC_1296_R_1_2
-    2,   // IEEE_802_11N_QCLDPC_1296_R_2_3
-    2,   // IEEE_802_11N_QCLDPC_1296_R_3_4
-    2,   // IEEE_802_11N_QCLDPC_1296_R_5_6
-    3, // IEEE_802_11N_QCLDPC_1944_R_1_2
-    3,   // IEEE_802_11N_QCLDPC_1944_R_2_3
-    3,   // IEEE_802_11N_QCLDPC_1944_R_3_4
-    3,   // IEEE_802_11N_QCLDPC_1944_R_5_6
-    1,   // CCSDS_CONVOLUTIONAL_CODING_R_1_2
-    1,   // CCSDS_CONVOLUTIONAL_CODING_R_2_3
-    1,   // CCSDS_CONVOLUTIONAL_CODING_R_3_4
-    1,   // CCSDS_CONVOLUTIONAL_CODING_R_5_6
-    1,   // CCSDS_CONVOLUTIONAL_CODING_R_7_8
-    1    // NO_FEC
+    1,  // NO_FEC
+    1,  // IEEE_802_11N_QCLDPC_648_R_1_2
+    1,  // IEEE_802_11N_QCLDPC_648_R_2_3
+    1,  // IEEE_802_11N_QCLDPC_648_R_3_4
+    1,  // IEEE_802_11N_QCLDPC_648_R_5_6
+    2,  // IEEE_802_11N_QCLDPC_1296_R_1_2
+    2,  // IEEE_802_11N_QCLDPC_1296_R_2_3
+    2,  // IEEE_802_11N_QCLDPC_1296_R_3_4
+    2,  // IEEE_802_11N_QCLDPC_1296_R_5_6
+    3,  // IEEE_802_11N_QCLDPC_1944_R_1_2
+    3,  // IEEE_802_11N_QCLDPC_1944_R_2_3
+    3,  // IEEE_802_11N_QCLDPC_1944_R_3_4
+    3,  // IEEE_802_11N_QCLDPC_1944_R_5_6
+    1,  // CCSDS_CONVOLUTIONAL_CODING_R_1_2
+    1,  // CCSDS_CONVOLUTIONAL_CODING_R_2_3
+    1,  // CCSDS_CONVOLUTIONAL_CODING_R_3_4
+    1,  // CCSDS_CONVOLUTIONAL_CODING_R_5_6
+    1   // CCSDS_CONVOLUTIONAL_CODING_R_7_8
   };
 
   ErrorCorrection::ErrorCorrectionScheme ecs;
   ErrorCorrection * errorCorrection;
 
-  for (int ecScheme = 11; ecScheme < 18; ecScheme++) {
+  std::vector<uint8_t> packet;
+
+  for (int ecScheme = 0; ecScheme < 14; ecScheme++) {
 
     switch(ecScheme) {
       case 0:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
         break;
       case 1:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2;
         break;
       case 2:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3;
         break;
       case 3:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4;
         break;
       case 4:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6;
         break;
       case 5:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2;
         break;
       case 6:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3;
         break;
       case 7:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4;
         break;
       case 8:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6;
         break;
       case 9:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2;
         break;
       case 10:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4;
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3;
         break;
       case 11:
+        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4;
+        break;
+      case 12:
         ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6;
         break;
-
-      case 12:
+      case 13:
         ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2;
         break;
-      case 13:
+      case 14:
         ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3;
         break;
-      case 14:
+      case 15:
         ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4;
         break;
-      case 15:
+      case 16:
         ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6;
         break;
-      case 16:
+      case 17:
         ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8;
         break;
-
-      case 17:
+      default:
         ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
         break;
     }
 
     // Make an MPDUs using several FEC schemes and determine the number
-    // of MPDUs needed for the current CSP packet.
+    // of MPDUs needed for the current packet.
 
     // Error Correction object for the current scheme
     errorCorrection = new ErrorCorrection(ecs, (MPDU::maxMTU() * 8));
@@ -331,45 +312,27 @@ TEST(mpdu, NonAccessorMethods)
     ASSERT_TRUE(numMPDUsPerCodeword == expectedMPDUsPerCodeword[ecScheme]) << "Incorrect number of MPDUs per codeword " << numMPDUsPerCodeword;
 
     // Now let's check that the right number of MPDUs are calculated for
-    // a number of different CSP packet lengths
-    for (uint16_t currLen = 0; currLen < numCSPPackets; currLen++) {
+    // a number of different packet lengths
+    for (uint16_t currLen = 0; currLen < numPackets; currLen++) {
 
-      csp_packet_t * packet = (csp_packet_t *) csp_buffer_get(cspPacketDataLengths[currLen]);
+      packet.resize(0);
 
-      if (packet == NULL) {
-        /* Could not get buffer element */
-        csp_log_error("Failed to get CSP buffer");
-        FAIL() << "Failed to get CSP buffer";
+      for (unsigned long i = 0; i < packetDataLengths[currLen]; i++) {
+        packet.push_back( (i % 10) | 0x30 ); // ASCII numbers
       }
 
-      // CSP forces us to do our own bookkeeping...
-      packet->length = cspPacketDataLengths[currLen];
+      uint32_t numMPDUsPerPacket = mpdusPerPacket(packet, *errorCorrection);
 
 #if QA_MPDU_DEBUG
-      printf("size of packet padding = %ld\n", sizeof(packet->padding));
-      printf("size of packet length = %ld\n", sizeof(packet->length));
-      printf("size of packet id = %ld\n", sizeof(packet->id));
-      // There is no good reason to set the data, but what the heck
-      for (unsigned long i = 0; i < cspPacketDataLengths[currLen]; i++) {
-        packet->data[i] = (i % 10) | 0x30; // ASCII numbers
-      }
-#endif
-
-      uint32_t numMPDUsPerPacket = mpdusPerCSPPacket(packet, *errorCorrection);
-
-#if QA_MPDU_DEBUG
-      printf("packet length = %d\n", packet->length);
+      printf("packet length = %d\n", packet.size());
       printf("numMPDUsPerPacket = %d\n", numMPDUsPerPacket);
       printf("expectedMPDUsPerPacket[%d][%d] = %d\n",ecScheme,currLen,expectedMPDUsPerPacket[ecScheme][currLen]);
 #endif
 
-      // Clean up!
-      csp_buffer_free(packet);
-
       // Check the number of MPDUs per packet required matches expectations
-      ASSERT_TRUE(numMPDUsPerPacket == expectedMPDUsPerPacket[ecScheme][currLen]) << "Incorrect number of MPDUs per CSP Packet " << numMPDUsPerPacket;
+      ASSERT_TRUE(numMPDUsPerPacket == expectedMPDUsPerPacket[ecScheme][currLen]) << "Incorrect number of MPDUs per Packet " << numMPDUsPerPacket;
 
-    } // for various CSP packet lengths
+    } // for various packet lengths
 
     delete errorCorrection;
 

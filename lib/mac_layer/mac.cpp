@@ -5,7 +5,7 @@
  *
  * @details
  *
- * @copyright Xiphos Systems Corp. 2019
+ * @copyright AlbertaSat 2021
  *
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
@@ -13,14 +13,6 @@
 
 #include "mac.hpp"
 #include <cmath>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
 
 #include "golay.h"
 #include "mpdu.hpp"
@@ -133,10 +125,8 @@ namespace ex2 {
             // pad m_codewordBuffer to catch things up
             if (mpdu.getMpduHeader()->getCodewordFragmentIndex() > m_mpduCount) {
               uint32_t numMissingMPDUs = mpdu.getMpduHeader()->getCodewordFragmentIndex() - m_mpduCount;
-printf("numMissingMPDUs %d\n",numMissingMPDUs);
               // We need to first zero-fill the numMissingMPDUs, then insert
               // the payload from the one just received.
-//              m_codewordBuffer.resize(m_codewordBuffer.size() + numMissingMPDUs * MPDU::maxMTU(), 0);
               m_codewordBuffer.insert(m_codewordBuffer.end(), numMissingMPDUs * MPDU::maxMTU(), 0);
               m_codewordBuffer.insert(m_codewordBuffer.end(),mpdu.getPayload().begin(),mpdu.getPayload().end());
               m_mpduCount = mpdu.getMpduHeader()->getCodewordFragmentIndex() + 1;
@@ -185,7 +175,6 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
               // save this MPDU payload that may contain some part of a codeword
               // or multiple codewords (remembering codewords are packed into
               // one or more consecutive MPDUs)
-//              m_codewordBuffer.resize(0);
               m_codewordBuffer.reserve(m_expectedMPDUs*MPDU::maxMTU());
               m_codewordBuffer.assign(mpdu.getPayload().begin(),mpdu.getPayload().end());
 
@@ -208,10 +197,8 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
           return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
         }
 
-
-
       }
-      catch (const MPDUHeaderException& e) {
+      catch (const MPDUException& e) {
         // @todo log this exception
         printf("MPDU packet exception %s\n", e.what());
 
@@ -274,8 +261,6 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
 
       // Everything is done in units of bytes
 
-      //      uint32_t const numMPDUsPerPacket = MPDU::mpdusPerPacket(packet, *m_errorCorrection);
-      //      uint32_t const numMPDUsPerCodeword = MPDU::mpdusPerCodeword(*m_errorCorrection);
         uint16_t const packetLength = len;
 
       // @note the message length returned by the ErrorCorrection object is
@@ -296,10 +281,10 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
       // sent to the UHF radio for transmission in transparent mode.
 
       // The message buffer is eventually encoded to give the codeword
-      PPDU_u8::payload_t message;
+      std::vector<uint8_t> message;
 
       // Set up the MPDU payload
-      PPDU_u8::payload_t mpduPayload;
+      std::vector<uint8_t> mpduPayload;
       mpduPayload.resize(0); // ensure it's empty
       uint32_t mpduPayloadBytesRemaining = MPDU::maxMTU();
       uint32_t mpduCount = 0;
@@ -337,12 +322,10 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
         }
 
         // Now apply the FEC encoding
-        PPDU_u8 chunk(message);
         try {
-          PPDU_u8 encodedChunk = m_FEC->encode(chunk);
+          std::vector<uint8_t> cw = m_FEC->encode(message);
 
           // Add codeword to current mpduPayload
-          PPDU_u8::payload_t cw = encodedChunk.getPayload();
           uint32_t codewordBytesRemaining = cw.size(); // @TODO this is always the same, so could get only somewhere.
 
           // Don't assiume the mpduPayload is empty
@@ -356,12 +339,19 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
             codewordOffset += mpduPayloadBytesRemaining;
             codewordBytesRemaining -= mpduPayloadBytesRemaining;
 
-            // Now have a full MPDU payload, so make the MPDU and stash the raw payload
+            // Now have a full MPDU payload, so make the MPDU and stash the raw
+            // payload. Note, the MPDUHeader constructor cannot fail since the
+            // only possible error would be from a bad ErrorCorrection, but that
+            // would have been caught when m_errorCorrection was made.
             MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
               mpduCount++, len, 0);
-            // Make an MPDU
+            // Make an MPDU.
+            // Just the same as for the MPDUHeader, there is no way for this
+            // constructor to generate an exception because the only check that
+            // could be made is for the MPDUHeader, which as noted above can't
+            // fail.
             MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
-            PPDU_u8::payload_t rawMPDU = mpdu->getRawMPDU();
+            std::vector<uint8_t> rawMPDU = mpdu->getRawMPDU();
             m_transparentModePayloads.insert(m_transparentModePayloads.end(), rawMPDU.begin(), rawMPDU.end());
             delete mpdu;
             delete mpduHeader;
@@ -384,6 +374,7 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
           message.resize(0);
         }
         catch (FECException& e) { // @todo need an FEC exception that all subclasses inherit
+          // @note No FEC method will throw an exception for encoding at this time.
         }
 
       } while (bytesRemaining > 0);
@@ -394,12 +385,19 @@ printf("numMissingMPDUs %d\n",numMissingMPDUs);
       // whole mpduPayload's worth...
       if (mpduPayloadBytesRemaining > 0 && mpduPayloadBytesRemaining < MPDU::maxMTU()) {
         mpduPayload.resize(MPDU::maxMTU(),0); // zero-pad to length
-        // Now have a full MPDU payload, so make the MPDU and stash the raw payload
+        // Now have a full MPDU payload, so make the MPDU and stash the raw
+        // payload. Note, the MPDUHeader constructor cannot fail since the
+        // only possible error would be from a bad ErrorCorrection, but that
+        // would have been caught when m_errorCorrection was made.
         MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
           mpduCount++, len, 0);
-        // Make an MPDU
+        // Make an MPDU.
+        // Just the same as for the MPDUHeader, there is no way for this
+        // constructor to generate an exception because the only check that
+        // could be made is for the MPDUHeader, which as noted above can't
+        // fail.
         MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
-        PPDU_u8::payload_t rawMPDU = mpdu->getRawMPDU();
+        std::vector<uint8_t> rawMPDU = mpdu->getRawMPDU();
         m_transparentModePayloads.insert(m_transparentModePayloads.end(), rawMPDU.begin(), rawMPDU.end());
         delete mpdu;
         delete mpduHeader;

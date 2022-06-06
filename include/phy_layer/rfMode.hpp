@@ -11,8 +11,8 @@
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
  */
-#ifndef EX2_SDR_PHY_LAYER_MODULATION_H_
-#define EX2_SDR_PHY_LAYER_MODULATION_H_
+#ifndef EX2_SDR_PHY_LAYER_RF_MODE_H_
+#define EX2_SDR_PHY_LAYER_RF_MODE_H_
 
 #include <cstdint>
 #include <string>
@@ -73,4 +73,4 @@ namespace ex2 {
 } /* namespace ex2 */
 
 
-#endif /* EX2_SDR_PHY_LAYER_MODULATION_H_ */
+#endif /* EX2_SDR_PHY_LAYER_RF_MODE_H_ */

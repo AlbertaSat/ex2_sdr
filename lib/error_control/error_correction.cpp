@@ -21,18 +21,8 @@
 namespace ex2 {
   namespace sdr {
 
-    class ECException: public std::exception {
-    private:
-      std::string message_;
-    public:
-      explicit ECException(const std::string& message);
-      virtual const char* what() const throw() {
-        return message_.c_str();
-      }
-    };
-
-    ECException::ECException(const std::string& message) : message_(message) {
-    }
+    ECException::ECException(const std::string& message) :
+       runtime_error(message) { }
 
     ErrorCorrection::ErrorCorrection(ErrorCorrectionScheme ecScheme,
       uint32_t continuousMaxCodewordLen) :
@@ -779,5 +769,5 @@ namespace ex2 {
       return r;
     }
 
-  } /* namespace darkstar */
-} /* namespace xiphos */
+  } /* namespace sdr */
+} /* namespace ex2 */

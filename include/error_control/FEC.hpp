@@ -21,7 +21,6 @@
 #include <stdexcept>
 
 #include "error_correction.hpp"
-#include "ppdu_u8.hpp"
 
 namespace ex2 {
   namespace sdr {
@@ -50,7 +49,7 @@ namespace ex2 {
        * @param[in] payload The payload to encode
        * @return The encoded payload
        */
-      virtual PPDU_u8 encode(PPDU_u8 &payload) = 0;
+      virtual std::vector<uint8_t> encode(const std::vector<uint8_t>& payload) = 0;
 
       /*!
        * @brief A virtual function to decode a payload using the FEC scheme
@@ -64,8 +63,8 @@ namespace ex2 {
        * @param[out] decodedPayload The resulting decoded payload
        * @return The number of bit errors from the decoding process
        */
-      virtual uint32_t decode(const PPDU_u8::payload_t &encodedPayload, float snrEstimate,
-        PPDU_u8::payload_t &decodedPayload) = 0;
+      virtual uint32_t decode(std::vector<uint8_t>& encodedPayload, float snrEstimate,
+        std::vector<uint8_t>& decodedPayload) = 0;
 
     private:
       ErrorCorrection::ErrorCorrectionScheme m_ecScheme;

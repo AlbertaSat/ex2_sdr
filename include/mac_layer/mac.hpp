@@ -23,17 +23,7 @@
 #include <vector>
 #include <time.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#ifdef __cplusplus
-}
-#endif
-
 #include "FEC.hpp"
-#include "ppdu_cf.hpp"
-#include "ppdu_u8.hpp"
 #include "mpdu.hpp"
 #include "rfMode.hpp"
 

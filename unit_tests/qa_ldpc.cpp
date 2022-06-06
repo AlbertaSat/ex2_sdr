@@ -34,7 +34,7 @@
 
 
 using namespace std;
-using namespace xiphos::darkstar;
+using namespace ex2::sdr;
 
 #define QA_LDPC_DEBUG 0
 #define QA_IGNORE_LONG_TEST 0 // set to 1 to ignore long duration tests

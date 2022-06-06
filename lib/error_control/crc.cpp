@@ -5,7 +5,7 @@
  *
  * @details
  *
- * @copyright Xiphos Systems Corp. 2019
+ * @copyright AlbertaSat 2021
  *
  * @license
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
@@ -19,9 +19,9 @@
 
 //#define CRC_DEBUG 0
 
-namespace xiphos
+namespace ex2
 {
-  namespace darkstar
+  namespace sdr
   {
 
     crc::crc ()
@@ -119,5 +119,5 @@ namespace xiphos
       }
     }
 
-  } /* namespace darkstar */
-} /* namespace xiphos */
+  } /* namespace sdr */
+} /* namespace ex2 */

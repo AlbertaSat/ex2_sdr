@@ -16,6 +16,7 @@
 #define EX2_SDR_ERROR_CONTROL_ERROR_CORRECTION_H_
 
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -24,6 +25,12 @@
 
 namespace ex2 {
   namespace sdr {
+
+    class ECException: public std::runtime_error {
+
+    public:
+      ECException(const std::string& message);
+    };
 
     /*!
      * @brief Define a forward error correction scheme.
@@ -150,28 +157,6 @@ namespace ex2 {
        */
       uint32_t numCodewordFragments(uint32_t payloadLength);
 
-//      /*!
-//       * @brief Decode the codeword using the current ErrorCorrectionScheme
-//       *
-//       * @note Not all schemes are supported yet.
-//       *
-//       * @param [in out] codeword On invocation, the codeword to decode. If
-//       * successful, the message replaces the contents. If not successful,
-//       * the contents are indeterminate, invalid.
-//       * @return If successful, the message is returned. If not, a zero-length
-//       * vector is returned.
-//       */
-//      std::vector<uint8_t> & decode(std::vector<uint8_t> &codeword);
-//
-//      /*!
-//       * @brief Encode the message using the current ErrorCorrectionScheme
-//       *
-//       * @param message
-//       * @return If successful, the codeword is returned. If not, a zero-length
-//       * vector is returned.
-//       */
-//      std::vector<uint8_t> & encode(std::vector<uint8_t> &codeword);
-
       /*!
        * @brief Accessor
        * @return The ErrorCorrectionScheme
@@ -232,8 +217,6 @@ namespace ex2 {
       CodingRate m_getCodingRate(ErrorCorrectionScheme scheme);
 
       CodingRate m_bits2rate(uint16_t bits) const;
-
-//      ErrorCorrectionScheme m_bits2errorCorrection(uint16_t bits) const;
 
       double m_rate;          // r, fractional rate
       uint32_t m_messageLen;  // k, bits

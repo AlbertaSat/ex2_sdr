@@ -1,10 +1,36 @@
-#pragma once
+/*!
+ * @file viterbi-utils.hpp
+ * @author Steven Knudsen
+ * @date Dec 1, 2021
+ *
+ * @details Utilities from an adaptation of the hard-decision Viterbi decoder.
+ * Used for unit testing.
+ *
+ * See original author below.
+ *
+ * @note See https://github.com/xukmin/viterbi for original source.
+ *
+ * @copyright AlbertaSat 2021
+ *
+ * @license
+ * This software may not be modified or distributed in any form, except as described in the LICENSE file.
+ */
+// Viterbi Codec.
+//
+// Author: Min Xu <xukmin@gmail.com>
+// Date: 01/30/2015
+
+#ifndef EX2_SDR_THIRD_PARTY_VITERBI_UTILS_H_
+#define EX2_SDR_THIRD_PARTY_VITERBI_UTILS_H_
 
 #include <cassert>
 #include <ostream>
 #include <string>
 #include <string_view>
 #include <vector>
+
+using namespace ex2;
+using namespace sdr;
 
 static inline ViterbiCodec::bitarr_t string_to_bits(std::string_view str)
 {
@@ -42,3 +68,5 @@ static inline std::ostream& operator<<(std::ostream& os, const ViterbiCodec& cod
     }
     return os << "})";
 }
+
+#endif /* EX2_SDR_THIRD_PARTY_VITERBI_UTILS_H_ */
