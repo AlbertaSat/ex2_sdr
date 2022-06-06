@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "osal.h"
 
-#ifdef CSP_POSIX
+#ifdef OS_POSIX
 
 #include <stdlib.h>
 
@@ -74,7 +74,7 @@ int os_task_create(os_task_func_t routine, const char * const task_name, unsigne
 	return 0;
 }
 
-#elif defined(CSP_FREERTOS)
+#elif defined(OS_FREERTOS)
 
 #include <FreeRTOS.h>
 #include <os_queue.h>
@@ -117,4 +117,4 @@ int os_task_create(os_task_func_t routine, const char * const task_name, unsigne
 	return (ret == 1)? 0 : ret;
 }
 
-#endif // CSP_FREERTOS
+#endif // OS_FREERTOS

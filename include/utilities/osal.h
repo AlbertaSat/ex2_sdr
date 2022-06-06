@@ -23,7 +23,11 @@ typedef void os_task_return_t;
 
 typedef os_task_return_t (*os_task_func_t)(void* parameter);
 
+#ifdef OS_POSIX
 #define OS_RX_TASK_STACK_SIZE 512
+#elif defined(OS_FREERTOS)
+#define OS_RX_TASK_STACK_SIZE 512/sizeof(int) // FreeRTOS allocates stack sizes based of words, not bytes
+#endif /* OS_FREERTOS */
 
 int os_task_create(os_task_func_t func, const char *const name, unsigned int stack_size, void *parameter, unsigned int priority, os_task_handle_t *handle);
 
