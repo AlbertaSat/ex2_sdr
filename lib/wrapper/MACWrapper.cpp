@@ -15,7 +15,6 @@
 
 #include "mac.hpp"
 #include "mpdu.hpp"
-#include "osal.h"
 
 struct mac {
   void *obj;
