@@ -26,7 +26,7 @@ mac_t *mac_create(rf_mode_number_t rfMode, error_correction_scheme_t fecScheme)
   mac_t *m;
   ex2::sdr::MAC *obj;
 
-  m      = (typeof(m))malloc(sizeof(*m));
+  m      = new mac_t;
   obj    = new ex2::sdr::MAC((ex2::sdr::RF_Mode::RF_ModeNumber) rfMode, (ex2::sdr::ErrorCorrection::ErrorCorrectionScheme) fecScheme);
   m->obj = obj;
 
@@ -39,7 +39,7 @@ void mac_destroy(mac_t *m)
     return;
 
   delete static_cast<ex2::sdr::MAC *>(m->obj);
-  free(m);
+  delete m;
   m = NULL; // @todo not sure this really does anything that matters
 }
 
