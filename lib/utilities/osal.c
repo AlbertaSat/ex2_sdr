@@ -5,6 +5,11 @@
 #ifdef OS_POSIX
 
 #include <stdlib.h>
+#include <limits.h>
+#include <unistd.h>
+#include <time.h>
+#include <errno.h>
+#include "pthread_queue.h"
 
 void* os_malloc(size_t size) {
 	return malloc(size);
@@ -24,25 +29,17 @@ void os_sleep_ms(uint32_t time_ms) {
 	}
 }
 
-#include <csp/arch/csp_queue.h>
-#include <csp/arch/posix/pthread_queue.h>
-
 os_queue_handle_t os_queue_create(int length, size_t item_size) {
 	return pthread_queue_create(length, item_size);
 }
 
-int csp_queue_enqueue(os_queue_handle_t handle, const void *value) {
+int os_queue_enqueue(os_queue_handle_t handle, const void *value) {
 	return pthread_queue_enqueue(handle, value, 0);
 }
 
 int os_queue_dequeue(os_queue_handle_t handle, void *buf) {
   return pthread_queue_dequeue(handle, buf, (uint32_t) -1);
 }
-
-#include <limits.h>
-#include <unistd.h>
-#include <time.h>
-#include <errno.h>
 
 int os_task_create(os_task_func_t routine, const char * const task_name, unsigned int stack_size, void * parameters, unsigned int priority, os_task_handle_t * return_handle) {
 
@@ -68,7 +65,7 @@ int os_task_create(os_task_func_t routine, const char * const task_name, unsigne
 		return ENOMEM;
 	}
 	if (return_handle) {
-		*return_handle = handle;
+		*return_handle = (os_task_handle_t *)handle;
 	}
 
 	return 0;
