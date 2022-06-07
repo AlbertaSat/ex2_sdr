@@ -82,7 +82,7 @@ int sdr_uart_driver_init(sdr_uhf_conf_t *sdr_conf);
 
 int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len);
 
-void sdr_rx_isr(void *cb_data, void *buf, size_t len, void *pxTaskWoken);
+void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken);
 
 os_task_return_t sdr_rx_task(void *param);
 

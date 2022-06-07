@@ -28,7 +28,7 @@ int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
     return 0;
 }
 
-void sdr_rx_isr(void *cb_data, void *buf, size_t len, void *pxTaskWoken) {
+void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken) {
     sdr_interface_data_t *ifdata = (sdr_interface_data_t *)cb_data;
     sdr_uhf_conf_t *sdr_conf = ifdata->sdr_conf;
 

@@ -5,6 +5,10 @@
 extern "C" {
 #endif
 
+#ifndef OS_FREERTOS
+#define OS_POSIX
+#endif
+
 void* os_malloc(size_t size);
 void os_free(void *ptr);
 
