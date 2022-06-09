@@ -127,7 +127,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '40'
+    value: '42'
   states:
     bus_sink: false
     bus_source: false
@@ -139,7 +139,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '8'
+    value: '4'
   states:
     bus_sink: false
     bus_source: false
@@ -159,27 +159,6 @@ blocks:
     coordinate: [256, 12]
     rotation: 0
     state: enabled
-- name: scale_const
-  id: variable_qtgui_range
-  parameters:
-    comment: ''
-    gui_hint: ''
-    label: ''
-    min_len: '200'
-    orient: QtCore.Qt.Horizontal
-    rangeType: float
-    start: '1'
-    step: '1'
-    stop: '100'
-    value: '1'
-    widget: counter_slider
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [952, 320.0]
-    rotation: 0
-    state: true
 - name: syncword
   id: variable
   parameters:
@@ -208,7 +187,7 @@ blocks:
     bus_structure: null
     coordinate: [504, 156.0]
     rotation: 0
-    state: disabled
+    state: bypassed
 - name: blocks_char_to_float_0
   id: blocks_char_to_float
   parameters:
@@ -260,14 +239,14 @@ blocks:
     bus_structure: null
     coordinate: [864, 924.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_multiply_const_vxx_1
   id: blocks_multiply_const_vxx
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    const: scale_const
+    const: '1'
     maxoutbuf: '0'
     minoutbuf: '0'
     type: complex
@@ -613,7 +592,7 @@ blocks:
     bus_structure: null
     coordinate: [424, 28.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -710,7 +689,7 @@ blocks:
     bus_structure: null
     coordinate: [576, 340.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_0_0_0
   id: qtgui_time_sink_x
   parameters:
@@ -824,7 +803,7 @@ blocks:
     bus_structure: null
     coordinate: [728, 156.0]
     rotation: 0
-    state: disabled
+    state: bypassed
 - name: satellites_sync_to_pdu_packed_0_0_1
   id: satellites_sync_to_pdu_packed
   parameters:
@@ -884,7 +863,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    ant0: '"RX2"'
+    ant0: '"TX/RX"'
     ant1: '"RX2"'
     ant10: '"RX2"'
     ant11: '"RX2"'
@@ -1321,7 +1300,6 @@ connections:
 - [blocks_char_to_float_0, '0', fec_extended_decoder_0_0_1, '0']
 - [blocks_char_to_float_1, '0', qtgui_time_sink_x_0_0_0, '0']
 - [blocks_multiply_const_vxx_1, '0', analog_simple_squelch_cc_0, '0']
-- [blocks_multiply_const_vxx_1, '0', digital_costas_loop_cc_1, '0']
 - [blocks_multiply_const_vxx_1, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_multiply_const_vxx_1, '0', qtgui_time_sink_x_0, '0']
 - [blocks_unpack_k_bits_bb_0, '0', digital_map_bb_1, '0']
