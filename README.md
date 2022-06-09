@@ -27,3 +27,6 @@ meson test
     
 ## Build and Test for Hercules
 
+## GNURadio 
+
+/gnuradio contains both flow graphs for deployment and test, along with various test scripts and binary data files for development work. Everything is designed for GNURadio 3.9.4 and the Out of Tree module gr-satellites from Daniel Estevez.
