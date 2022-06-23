@@ -132,7 +132,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '100'
+    value: '32'
   states:
     bus_sink: false
     bus_source: false
@@ -161,7 +161,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    threshold: '-38'
+    threshold: '-35'
   states:
     bus_sink: false
     bus_source: false
@@ -349,7 +349,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     mu: '0.5'
-    omega_relative_limit: '0.005'
+    omega_relative_limit: '0.0001'
     samples_per_symbol: spsym
     sensitivity: sensitivity
     verbose: 'False'
