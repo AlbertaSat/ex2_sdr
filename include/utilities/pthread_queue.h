@@ -37,6 +37,8 @@ extern "C" {
 
 #include "osal.h"
 
+#ifdef OS_POSIX // Only build in Posix environments
+
 /**
    Queue error codes.
    @{
@@ -107,6 +109,8 @@ int pthread_queue_dequeue(pthread_queue_t * queue, void * buf, uint32_t timeout)
    Return number of elements in the queue.
 */
 int pthread_queue_items(pthread_queue_t * queue);
+
+#endif // OS_POSIX
 
 #ifdef __cplusplus
 }

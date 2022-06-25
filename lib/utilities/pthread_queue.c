@@ -1,3 +1,4 @@
+
 /*
 Cubesat Space Protocol - A small network-layer protocol designed for Cubesats
 Copyright (C) 2012 Gomspace ApS (http://www.gomspace.com)
@@ -27,6 +28,8 @@ http://code.google.com/p/c-pthread-queue/
 #include <string.h>
 #include "pthread_queue.h"
 #include <stdint.h>
+
+#ifdef OS_POSIX // only build on posix systems
 
 static inline int get_deadline(struct timespec *ts, uint32_t timeout_ms)
 {
@@ -235,3 +238,5 @@ int pthread_queue_items(pthread_queue_t * queue) {
 	return items;
 	
 }
+
+#endif // OS_POSIX
