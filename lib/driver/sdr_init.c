@@ -14,7 +14,7 @@ static int sdr_uhf_driver_init(sdr_interface_data_t *ifdata, const char *ifname)
         sdr_loopback_open(ifdata);
     }
     else {
-        if ((rc = sdr_lowlevel_init(ifdata))) {
+        if ((rc = sdr_uart_driver_init(sdr_conf))) {
             return rc;
         }
     }

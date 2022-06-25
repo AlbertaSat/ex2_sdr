@@ -15,6 +15,7 @@ typedef enum {
     SDR_UHF_4800_BAUD,
     SDR_UHF_9600_BAUD,
     SDR_UHF_19200_BAUD,
+    SDR_UHF_TEST_BAUD,
     SDR_UHF_END_BAUD,
 } sdr_uhf_baud_rate_t;
 
@@ -47,16 +48,18 @@ typedef int (*sdr_tx_t)(int fd, const void * data, size_t data_length);
 */
 typedef void (*sdr_rx_callback_t) (void *udata, uint8_t *data, size_t len);
 
+struct sdr_interface_data;
 
 typedef struct {
     uint16_t mtu;
     sdr_uhf_baud_rate_t uhf_baudrate;
     int uart_baudrate;
     char *device_file;
+    struct sdr_interface_data *if_data;
     sdr_rx_callback_t rx_callback;
 } sdr_uhf_conf_t;
 
-typedef struct {
+typedef struct sdr_interface_data {
     uintptr_t fd;
     /** Low Level Transmit Function */
     sdr_tx_t tx_func;
@@ -86,7 +89,7 @@ void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken);
 
 os_task_return_t sdr_rx_task(void *param);
 
-int sdr_lowlevel_init(sdr_interface_data_t *ifdata);
+int sdr_uart_driver_init(sdr_uhf_conf_t *sdr_conf);
 
 #ifdef __cplusplus
 }
