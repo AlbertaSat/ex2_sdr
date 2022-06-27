@@ -75,10 +75,10 @@ os_task_return_t sdr_rx_task(void *param) {
         if (os_queue_dequeue(ifdata->rx_queue, mpdu) != true) {
             continue;
         }
-        
+
         int plen = fec_mpdu_to_data(ifdata->mac_data, mpdu, &data, sdr_conf->mtu);
         if (plen) {
-            sdr_conf->rx_callback(ifdata, data, plen);
+            sdr_conf->rx_callback(sdr_conf->rx_callback_data, data, plen);
             os_free(data);
         }
     }

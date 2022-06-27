@@ -55,8 +55,8 @@ typedef struct {
     sdr_uhf_baud_rate_t uhf_baudrate;
     int uart_baudrate;
     char *device_file;
-    struct sdr_interface_data *if_data;
     sdr_rx_callback_t rx_callback;
+    void *rx_callback_data;
 } sdr_uhf_conf_t;
 
 typedef struct sdr_interface_data {
@@ -70,8 +70,6 @@ typedef struct sdr_interface_data {
     /** Low level buffer state */
     uint16_t rx_mpdu_index;
     uint8_t *rx_mpdu;
-    /** For CSP-depdendant code: interface pointer */
-    void *iface;
 } sdr_interface_data_t;
 
 void sdr_uhf_receive(void *udata, uint8_t *data, size_t len);

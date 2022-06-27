@@ -41,7 +41,6 @@ sdr_interface_data_t *sdr_uhf_interface_init(const sdr_uhf_conf_t *conf, const c
     memcpy(sdr_conf, conf, sizeof(sdr_uhf_conf_t));
     memset(ifdata, 0, sizeof(sdr_interface_data_t));
     ifdata->sdr_conf = sdr_conf;
-    sdr_conf->if_data = ifdata;
 
     int rc = sdr_uhf_driver_init(ifdata, ifname);
     if (rc) {
