@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <unistd.h>
+#include <pthread.h>
 #include <time.h>
 #include <errno.h>
 #include "pthread_queue.h"
