@@ -81,15 +81,13 @@ void sdr_uhf_receive(void *udata, uint8_t *data, size_t len);
 #define SDR_IF_LOOPBACK_NAME "LOOPBACK"
 
 sdr_interface_data_t *sdr_uhf_interface_init(const sdr_uhf_conf_t *conf, const char *ifname);
-int sdr_uart_driver_init(sdr_uhf_conf_t *sdr_conf);
+int sdr_uart_driver_init(sdr_interface_data_t *ifdata);
 
 int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len);
 
 void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken);
 
 os_task_return_t sdr_rx_task(void *param);
-
-int sdr_uart_driver_init(sdr_uhf_conf_t *sdr_conf);
 
 #ifdef __cplusplus
 }
