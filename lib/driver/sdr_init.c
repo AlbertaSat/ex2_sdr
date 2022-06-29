@@ -14,7 +14,11 @@ static int sdr_uhf_driver_init(sdr_interface_data_t *ifdata, const char *ifname)
         sdr_loopback_open(ifdata);
     }
     else {
+#ifdef SDR_GNURADIO
+        if ((rc = sdr_gnuradio_driver_init(ifdata))) {
+#else
         if ((rc = sdr_uart_driver_init(ifdata))) {
+#endif
             return rc;
         }
     }
