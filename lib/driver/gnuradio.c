@@ -20,9 +20,12 @@
 #ifdef OS_POSIX
 #include <stdio.h>
 #define ex2_log printf
-#endif // CSP_POSIX
+#endif // OS_POSIX
+
+#include <sdr_driver.h>
 
 #ifdef SDR_GNURADIO
+#include <stdio.h>
 #include <assert.h>
 #include <netdb.h>
 #include <fcntl.h> 
@@ -33,7 +36,6 @@
 #include <unistd.h>
 #include <sys/errno.h>
 #include <osal.h>
-#include <sdr_driver.h>
 
 #define SA struct sockaddr
 
@@ -49,8 +51,6 @@
 #define LEN_ID_LEN 1
 #define RADIO_LEN PREAMBLE_LEN + SYNCWORD_LEN + LEN_ID_LEN + PACKET_LEN + CRC16_LEN + POSTAMBLE_LEN
 //^^radio_len = preamble + sync word + length indicator + data + crc + postamble
-
-static int sockfd;
 
 uint16_t crc16(uint8_t * pData, int length) {
     uint8_t i;
@@ -98,14 +98,14 @@ static int sdr_gnuradio_tx(int fd, const void * data, size_t len) {
     fwrite(radio_command, sizeof(uint8_t), RADIO_LEN, fptr);
     fclose(fptr);
     int status = system("cat output2.bin | nc -w 1 127.0.0.1 1235");
-    if(status == -1){
+    if (status == -1) {
         printf("System call failed\n");
         exit(1);
     }
 #endif
     os_free(crc_command);
 
-    return CSP_ERR_NONE;
+    return 0;
 }
 
 typedef struct gnuradio_context {
@@ -143,7 +143,7 @@ static int gnuradio_tcp_open(const char *host, uint16_t port) {
     struct sockaddr_in servaddr;
    
     // socket create and verification
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
         printf("TCP socket w/ gnuradio creation failed: %d\n", errno);
         return -1;
@@ -168,33 +168,32 @@ static int gnuradio_tcp_open(const char *host, uint16_t port) {
     return sockfd;
 }
 
-int sdr_gnuradio_init(sdr_interface_data_t *ifdata) {
-    int fd;
+int sdr_gnuradio_driver_init(sdr_interface_data_t *ifdata) {
 
-	gnuradio_context_t *ctx = os_malloc(sizeof(gnuradio_context_t));
-	if (ctx == NULL) {
-		printf("%s: Error allocating context\n", __FUNCTION__);
-		return -1;
-	}
+    gnuradio_context_t *ctx = os_malloc(sizeof(gnuradio_context_t));
+    if (ctx == NULL) {
+    	printf("%s: Error allocating context\n", __FUNCTION__);
+    	return -1;
+    }
 
-    int rxfd = gnuradio_tcp_open("localhost", 4321);
+    int rxfd = gnuradio_tcp_open("127.0.0.1", 4321);
 
     ctx->mtu = ifdata->sdr_conf->mtu;
-	ctx->rxfd = fd;
-	ctx->rx_callback = sdr_rx_isr;
-	ctx->user_data = ifdata;
+    ctx->rxfd = rxfd;
+    ctx->rx_callback = sdr_rx_isr;
+    ctx->user_data = ifdata;
 
-    if (rx_callback) {
-		if (os_thread_create(gnuradio_rx_thread, "gnuradio_rx", 0, ctx, 0, 0)) {
-			printf("%s: os_thread_create() failed to create RX thread\n", __FUNCTION__);
-			os_free(ctx);
-			close(rxfd);
-			return -2;
-		}
-	}
+    if (os_task_create(gnuradio_rx_thread, "gnuradio_rx", 0, ctx, 0, 0)) {
+      	printf("%s: os_thread_create() failed to create RX thread\n", __FUNCTION__);
+    	os_free(ctx);
+    	close(rxfd);
+       	return -2;
+    }
 
+#if 0
     int txfd = gnuradio_tcp_open("localhost", 1235);
     ifdata->fd = txfd;
+#endif
     ifdata->tx_func = (sdr_tx_t) sdr_gnuradio_tx;
 
     return 0;
