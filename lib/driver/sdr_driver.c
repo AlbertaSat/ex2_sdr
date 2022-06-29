@@ -78,7 +78,7 @@ os_task_return_t sdr_rx_task(void *param) {
 
         int plen = fec_mpdu_to_data(ifdata->mac_data, mpdu, &data, sdr_conf->mtu);
         if (plen) {
-            sdr_conf->rx_callback(sdr_conf->rx_callback_data, data, plen);
+            sdr_conf->rx_callback(sdr_conf->rx_callback_data, data, plen, 0);
             os_free(data);
         }
     }

@@ -46,7 +46,7 @@ typedef int (*sdr_tx_t)(int fd, const void * data, size_t data_length);
    @param[in] data received data
    @param[in] len length of \a data.
 */
-typedef void (*sdr_rx_callback_t) (void *udata, uint8_t *data, size_t len);
+typedef void (*sdr_rx_callback_t) (void *udata, uint8_t *data, size_t len, void* unused);
 
 struct sdr_interface_data;
 
@@ -71,8 +71,6 @@ typedef struct sdr_interface_data {
     uint16_t rx_mpdu_index;
     uint8_t *rx_mpdu;
 } sdr_interface_data_t;
-
-void sdr_uhf_receive(void *udata, uint8_t *data, size_t len);
 
 #define SDR_IF_UHF_NAME "UHF"
 #define SDR_IF_SBAND_NAME "S-BAND"
