@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-#define SDR_GNURADIO 1
+// #define SDR_GNURADIO 1
 
 typedef enum {
     SDR_UHF_1200_BAUD = 0,
@@ -52,23 +52,34 @@ typedef void (*sdr_rx_callback_t) (void *udata, uint8_t *data, size_t len, void*
 
 struct sdr_interface_data;
 
-typedef struct {
-    uint16_t mtu;
+typedef struct sdr_uhf_conf {
     sdr_uhf_baud_rate_t uhf_baudrate;
     int uart_baudrate;
     char *device_file;
-    sdr_rx_callback_t rx_callback;
-    void *rx_callback_data;
 } sdr_uhf_conf_t;
 
+typedef struct sdr_sband_conf {
+    uint32_t bytes_until_sync;
+    uint32_t filling;
+    uint32_t last_time;
+} sdr_sband_conf_t;
+
+typedef struct sdr_conf {
+    sdr_rx_callback_t rx_callback;
+    void *rx_callback_data;
+    struct sdr_uhf_conf uhf_conf;
+    struct sdr_sband_conf sband_conf;
+} sdr_conf_t;
+
 typedef struct sdr_interface_data {
+    uint16_t mtu;
     uintptr_t fd;
     /** Low Level Transmit Function */
     sdr_tx_t tx_func;
     /** Low level Receive function */
     os_queue_handle_t rx_queue;
     void *mac_data;
-    sdr_uhf_conf_t *sdr_conf;
+    sdr_conf_t *sdr_conf;
     /** Low level buffer state */
     uint16_t rx_mpdu_index;
     uint8_t *rx_mpdu;
@@ -78,11 +89,13 @@ typedef struct sdr_interface_data {
 #define SDR_IF_SBAND_NAME "S-BAND"
 #define SDR_IF_LOOPBACK_NAME "LOOPBACK"
 
-sdr_interface_data_t *sdr_uhf_interface_init(const sdr_uhf_conf_t *conf, const char *ifname);
+sdr_interface_data_t* sdr_interface_init(const sdr_conf_t *conf, const char *ifname);
+
 int sdr_uart_driver_init(sdr_interface_data_t *ifdata);
-int sdr_gnuradio_driver_init(sdr_interface_data_t *ifdata);
+int sdr_sband_driver_init(sdr_interface_data_t *ifdata);
 
 int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len);
+int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len);
 
 void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken);
 
