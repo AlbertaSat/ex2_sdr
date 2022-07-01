@@ -115,4 +115,8 @@ int os_task_create(os_task_func_t routine, const char * const task_name, unsigne
 	return (ret == 1)? 0 : ret;
 }
 
+uint32_t os_get_ms() {
+	return (uint32_t)(xTaskGetTickCount() * (1000/configTICK_RATE_HZ));
+}
+
 #endif // OS_FREERTOS
