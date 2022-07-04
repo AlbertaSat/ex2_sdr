@@ -246,13 +246,14 @@ namespace ex2 {
       std::vector<uint8_t> path_metrics(1 << (_constraint - 1), std::numeric_limits<uint8_t>::max());
       path_metrics.front() = 0;
       const unsigned int poly_len = _poly.size();
-      //printf("i\n");
+printf("poly len = %d\n",poly_len);
       for (unsigned int i = 0; i < bits.size(); i += poly_len) {
         //    printf("%d ",i);
         bitarr_t current_bits((bits.begin() + i), (bits.begin() + i + poly_len));
         // If some bits are missing, fill with trailing zeros.
         // This is not ideal but it is the best we can do.
         if (current_bits.size() < poly_len) {
+          // @TODO will this ever be called? Not for codec based on an even number of polynomials
           int len = poly_len - current_bits.size();
           current_bits.resize(current_bits.size() + len);
         }
