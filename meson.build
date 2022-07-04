@@ -36,27 +36,6 @@ boost_dep = dependency('boost', modules: [
 
 eigen_dep = dependency('eigen3')
 
-csp_dep = dependency('csp', required: false)
-
-if not csp_dep.found()
-    foreach incdir: ['/usr/include/csp', '/usr/local/include/csp']
-        if cpp.has_header('csp.h', args: '-I' + incdir)
-            csp_inc = include_directories(incdir)
-            break
-        endif
-    endforeach
-    
-    csp_dep = declare_dependency(
-        dependencies: cpp.find_library('csp'),
-        include_directories: csp_inc,
-        )
-endif
-
-if not csp_dep.found()
-    error('unable to find csp dependency')
-endif
-
-
 core_source_files = [
     PRJ_DIR / 'lib/error_control/ConvolutionalCodecHD.cpp',
     PRJ_DIR / 'lib/error_control/error_correction.cpp',
@@ -91,7 +70,7 @@ third_party_source_files = [
 
 #executable('ex2_uhf_trx', 'src/ex2_uhf_trx.cpp', core_source_files,
 #    include_directories: incdir,
-#    dependencies: [boost_dep, csp_dep],
+#    dependencies: [boost_dep],
 ##    link_with: ExSDRTxRxlib,
 #    install: true,
 #    )

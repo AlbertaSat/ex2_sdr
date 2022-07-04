@@ -170,7 +170,8 @@ namespace ex2 {
     {
       std::vector<uint8_t> new_path_metrics(path_metrics.size());
       std::vector<uint8_t> new_trellis_column(1 << (_constraint - 1));
-      for (unsigned int i = 0; i < path_metrics.size(); i++) {
+      auto size = path_metrics.size();
+      for (unsigned int i = 0; i < size; i++) {
         std::pair<int, int> p = _path_metric(bits, path_metrics, i);
         new_path_metrics[i] = p.first;
         new_trellis_column[i] = p.second;
