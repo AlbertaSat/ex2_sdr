@@ -17,11 +17,13 @@ static int sdr_driver_init(sdr_interface_data_t *ifdata, const char *ifname) {
             return rc;
         }
     }
+    #ifndef OS_POSIX
     else if (strcmp(ifname, SDR_IF_SBAND_NAME) == 0) {
         if ((rc = sdr_sband_driver_init(ifdata))) {
             return rc;
         }
     }
+    #endif
 
     ifdata->rx_queue = os_queue_create(2, ifdata->mtu);
     ifdata->mac_data = fec_create(RF_MODE_3, NO_FEC);

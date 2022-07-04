@@ -28,6 +28,7 @@ http://code.google.com/p/c-pthread-queue/
 #include <string.h>
 #include "pthread_queue.h"
 #include <stdint.h>
+#include "osal.h"
 
 #ifdef OS_POSIX // only build on posix systems
 
