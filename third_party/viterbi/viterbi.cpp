@@ -19,7 +19,7 @@ namespace ex2 {
     namespace {
       int _hamming_distance(const ViterbiCodec::bitarr_t& x, const ViterbiCodec::bitarr_t& y)
       {
-        assert(x.size() == y.size()); // @todo should not be needed for runtime, only testing
+//        assert(x.size() == y.size()); // @todo should not be needed for runtime, only testing
         int distance = 0;
         for (unsigned int i = 0; i < x.size(); i++) {
           distance += (x[i] != y[i]);
@@ -133,11 +133,23 @@ namespace ex2 {
 
     int ViterbiCodec::_branch_metric(const bitarr_t& bits, int source_state, int target_state) const
     {
-      assert(bits.size() == _poly.size()); // @todo this only needs to be done once! Fix
-      assert((target_state & ((1 << (_constraint - 2)) - 1)) == source_state >> 1);
-      const bitarr_t output = _curr_output(source_state, target_state >> (_constraint - 2));
+//      assert(bits.size() == _poly.size()); // @todo this only needs to be done once! Fix
+//      assert((target_state & ((1 << (_constraint - 2)) - 1)) == source_state >> 1);
+//      const bitarr_t output = _curr_output(source_state, target_state >> (_constraint - 2));
+//
+//      return _hamming_distance(bits, output);
 
-      return _hamming_distance(bits, output);
+      int index = source_state | ((target_state >> (_constraint - 2)) << (_constraint - 1));
+
+      // Calculate the Hamming distance
+      int distance = 0;
+      int numBits = bits.size();
+//      std::vector<uint8_t*> oPtr(_outputs.size());
+      for (unsigned int i = 0; i < numBits; i++) {
+        distance += (bits[i] != (_outputs[index][i]));
+//        distance += (bits[i] != (_outputs.at(index)[i]));
+      }
+      return distance;
     }
 
     std::pair<int, int> ViterbiCodec::_path_metric(const bitarr_t& bits,
