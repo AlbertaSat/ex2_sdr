@@ -31,6 +31,7 @@ void* os_malloc(size_t size);
 void os_free(void *ptr);
 
 void os_sleep_ms(uint32_t time_ms);
+uint32_t os_get_ms(void);
 
 typedef void* os_queue_handle_t;
 

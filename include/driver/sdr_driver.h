@@ -60,7 +60,8 @@ typedef struct sdr_uhf_conf {
 
 typedef struct sdr_sband_conf {
     uint32_t bytes_until_sync;
-    uint32_t filling;
+    uint16_t state;
+    uint16_t fifo_count;
     uint32_t last_time;
 } sdr_sband_conf_t;
 
@@ -100,6 +101,9 @@ int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len);
 void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken);
 
 os_task_return_t sdr_rx_task(void *param);
+
+void sdr_sband_tx_start(sdr_interface_data_t *ifdata);
+void sdr_sband_tx_stop(sdr_interface_data_t *ifdata);
 
 #ifdef __cplusplus
 }
