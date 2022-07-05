@@ -74,25 +74,22 @@ namespace ex2 {
       // It is used for traceback.
       using Trellis = std::vector<std::vector<uint8_t>>;
 
-      void _init_outputs();
       void initPrecomputedShiftRegOutputs();
+
       void freePrecomputedShiftRegOutputs();
+
       int _next_state(int current_state, int input) const;
-      bitarr_t _curr_output(const int current_state, const int input) const;
+
       int _branch_metric(const uint8_t* bits, uint8_t numBits, int source_state, int target_state) const;
 
       // Given len(_poly) received bits, compute and returns path
       // metric and its corresponding previous state.
-//      std::pair<int, int> _path_metric(const bitarr_t& bits,
-//        const std::vector<uint8_t>& prev_path_metrics, int state) const;
       void _path_metric(const uint8_t* bits, uint8_t numBits,
         const std::vector<uint8_t>& prev_path_metrics, int state,
         uint8_t *newPathMetric, uint8_t *previousState) const;
 
       // Given len(_poly) received bits, update path metrics of all states
       // in the current iteration, and append new traceback vector to trellis.
-//      void _update_path_metrics(const bitarr_t& bits, std::vector<uint8_t>& path_metrics,
-//        Trellis& trellis) const;
       void _update_path_metrics(const uint8_t* bits, uint8_t numBits, std::vector<uint8_t>& path_metrics,
         Trellis& trellis) const;
 
@@ -105,7 +102,6 @@ namespace ex2 {
       // convenience, e.g. "10". For example, suppose the shift register contains
       // 0b10 (= 2), and the current input is 0b1 (= 1), then the index is 0b110 (=
       // 6).
-      std::vector<bitarr_t> _outputs;
       uint8_t **m_precomputedShiftRegOutputs;
       uint16_t k_precomputedShiftRegOutputsRows;
       uint16_t k_precomputedShiftRegOutputsCols;

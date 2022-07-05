@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
-//#include <limits>
 #include <limits.h>
 #include <string>
 #include <utility>
@@ -38,14 +37,7 @@ namespace ex2 {
         assert(_poly[i] < (1 << _constraint));
       }
 
-      _init_outputs();
       initPrecomputedShiftRegOutputs();
-
-      for (unsigned int i = 0; i < _outputs.size(); i++) {
-        for (unsigned int j = 0; j < _poly.size(); j++) {
-          assert(_outputs[i][j] == m_precomputedShiftRegOutputs[i][j]);
-        }
-      }
 
       // temp variables to save allocation in loops
       _temp_path_metrics = new std::vector<uint8_t>(1 << (_constraint - 1));
@@ -72,32 +64,28 @@ namespace ex2 {
       return (current_state >> 1) | (input << (_constraint - 2));
     }
 
-    ViterbiCodec::bitarr_t ViterbiCodec::_curr_output(const int current_state, const int input) const
-    {
-      int index = current_state | (input << (_constraint - 1));
-      return _outputs.at(index);
-    }
-
     ViterbiCodec::bitarr_t ViterbiCodec::encode(const bitarr_t& bits) const
     {
       bitarr_t encoded;
       int state = 0;
-      uint8_t t = 0;
-//      uint8_t *encodedBits = new uint8_t[k_precomputedShiftRegOutputsCols];
-
+      int rowIndex;
 
       // Encode the message bits.
       for (unsigned int i = 0; i < bits.size(); i++) {
-        t = bits[i];
-        auto output = _curr_output(state, t);
-        encoded.insert(encoded.end(), output.begin(), output.end());
+        // Calculate the current row in the precomputed shift register output
+        // matrix based on the current state and the input bit
+        rowIndex = state | (bits[i] << (_constraint - 1));
+        // The resulting encoded bits are in the column of the precomputed
+        // shift register output matrix. Save them all in the encoded array
+        for (unsigned int j = 0; j < k_precomputedShiftRegOutputsCols; j++) {
+          encoded.push_back(m_precomputedShiftRegOutputs[rowIndex][j]);
+        }
         state = _next_state(state, bits[i]);
       }
 
-//      delete [] encodedBits;
-
       return encoded;
     }
+
     std::vector<uint8_t> ViterbiCodec::encodePacked(const std::vector<uint8_t>& bits) const
     {
       std::vector<uint8_t> encoded;
@@ -106,48 +94,45 @@ namespace ex2 {
       uint8_t bit = 0;
       uint8_t encodedBits = 0;
       uint8_t encodedBitCount = 0;
+      int rowIndex;
 
       // Encode the message bits.
       for (unsigned int i = 0; i < bits.size(); i++) {
         t = bits[i];
         for (int b = 7; b >= 0; b--) {
           bit = (t >> b) & 0x01;
-          auto output = _curr_output(state, bit);
-          encodedBits <<= 1;
-          encodedBits = encodedBits | output[0];
-          encodedBits <<= 1;
-          encodedBits = encodedBits | output[1];
-          encodedBitCount += 2;
-          if (encodedBitCount >= 8) {
-            encoded.push_back(encodedBits);
-            encodedBitCount = 0;
-            encodedBits = 0;
+          // Calculate the current row in the precomputed shift register output
+          // matrix based on the current state and the input bit
+          rowIndex = state | (bit << (_constraint - 1));
+          // The resulting encoded bits are in the column of the precomputed
+          // shift register output matrix.
+          //
+          // Save each element of the column in the encodedBits byte until a
+          // full byte is available, then save that in the encoded array.
+          for (unsigned int j = 0; j < k_precomputedShiftRegOutputsCols; j++) {
+            encodedBits <<= 1;
+            encodedBits = encodedBits | m_precomputedShiftRegOutputs[rowIndex][j];
+            encodedBitCount++;
+            if (encodedBitCount >= 8) {
+              encoded.push_back(encodedBits);
+              encodedBitCount = 0;
+              encodedBits = 0;
+            }
           }
+
           state = _next_state(state, bit);
         } // for each bit in a message byte
       } // for all message bytes
 
-      return encoded;
-    }
-
-
-    void ViterbiCodec::_init_outputs()
-    {
-      _outputs.resize(1 << _constraint);
-      for (unsigned int i = 0; i < _outputs.size(); i++) {
-        for (unsigned int j = 0; j < _poly.size(); j++) {
-          // Reverse polynomial bits to make the convolution code simpler.
-          int polynomial = ReverseBits(_constraint, _poly[j]);
-          int input = i;
-          int output = 0;
-          for (int k = 0; k < _constraint; k++) {
-            output ^= (input & 1) & (polynomial & 1);
-            polynomial >>= 1;
-            input >>= 1;
-          }
-          _outputs[i].push_back(output);
-        }
+      // check if the number of encoded bits is not an integral multiple of 8
+      if (encodedBitCount != 0) {
+        encodedBits <<= (8 - encodedBitCount);
+        encoded.push_back(encodedBits);
+        encodedBitCount = 0;
+        encodedBits = 0;
       }
+
+      return encoded;
     }
 
     void ViterbiCodec::initPrecomputedShiftRegOutputs()
@@ -174,14 +159,12 @@ namespace ex2 {
           m_precomputedShiftRegOutputs[i][j] = output;
         }
       }
-
-
     }
 
     void ViterbiCodec::freePrecomputedShiftRegOutputs()
     {
       if (m_precomputedShiftRegOutputs) {
-        for (unsigned int i = 0; i < k_precomputedShiftRegOutputsCols; i++) {
+        for (unsigned int i = 0; i < k_precomputedShiftRegOutputsRows; i++) {
           delete [] m_precomputedShiftRegOutputs[i];
         }
         delete [] m_precomputedShiftRegOutputs;
@@ -190,16 +173,11 @@ namespace ex2 {
 
     int ViterbiCodec::_branch_metric(const uint8_t* bits, uint8_t numBits, int source_state, int target_state) const
     {
-      // @TODO The asserts are needed only during development
-//      assert(bits.size() == _poly.size()); // @todo this only needs to be done once! Fix
-//      assert((target_state & ((1 << (_constraint - 2)) - 1)) == source_state >> 1);
-
       int index = source_state | ((target_state >> (_constraint - 2)) << (_constraint - 1));
 
       // Calculate the Hamming distance
       int distance = 0;
       for (unsigned int i = 0; i < numBits; i++) {
-//        distance += (bits[i] != (_outputs[index][i]));
         distance += (bits[i] != (m_precomputedShiftRegOutputs[index][i]));
       }
       return distance;
@@ -261,7 +239,6 @@ namespace ex2 {
       // @p poly_len bits
       encodedBits = &bits[0];
       for (unsigned int i = 0; i < bits.size(); i += poly_len) {
-//        bitarr_t current_bits((bits.begin() + i), (bits.begin() + i + poly_len));
         _update_path_metrics(encodedBits, poly_len, path_metrics, trellis);
         encodedBits += poly_len;
       }
@@ -300,7 +277,6 @@ namespace ex2 {
       // @p poly_len bits
       encodedBits = &bits[0];
       for (unsigned int i = 0; i < bits.size(); i += poly_len) {
-//        bitarr_t current_bits((bits.begin() + i), (bits.begin() + i + poly_len));
         _update_path_metrics(encodedBits, poly_len, path_metrics, trellis);
         if (trellis.size() >= trellis.capacity()) {
           int state = std::min_element(path_metrics.begin(), path_metrics.end()) - path_metrics.begin();
