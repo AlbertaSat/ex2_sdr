@@ -84,13 +84,18 @@ namespace ex2 {
 
       // Given len(_poly) received bits, compute and returns path
       // metric and its corresponding previous state.
+//      void _path_metric(const uint8_t* bits, uint8_t numBits,
+//        const std::vector<uint8_t>& prev_path_metrics, int state,
+//        uint8_t *newPathMetric, uint8_t *previousState) const;
       void _path_metric(const uint8_t* bits, uint8_t numBits,
-        const std::vector<uint8_t>& prev_path_metrics, int state,
+        const uint8_t *prev_path_metrics, int state,
         uint8_t *newPathMetric, uint8_t *previousState) const;
 
       // Given len(_poly) received bits, update path metrics of all states
       // in the current iteration, and append new traceback vector to trellis.
-      void _update_path_metrics(const uint8_t* bits, uint8_t numBits, std::vector<uint8_t>& path_metrics,
+//      void _update_path_metrics(const uint8_t* bits, uint8_t numBits, std::vector<uint8_t>& path_metrics,
+//        Trellis& trellis) const;
+      void _update_path_metrics(const uint8_t* bits, uint8_t numBits, uint8_t *path_metrics, uint16_t path_metrics_length,
         Trellis& trellis) const;
 
       const int _constraint = 0;
@@ -107,7 +112,8 @@ namespace ex2 {
       uint16_t k_precomputedShiftRegOutputsCols;
 
       // some working variables
-      std::vector<uint8_t> *_temp_path_metrics;
+//      std::vector<uint8_t> *_temp_path_metrics;
+      uint8_t *_temp_path_metrics;
       std::vector<uint8_t> *_temp_trellis_column;
     };
 

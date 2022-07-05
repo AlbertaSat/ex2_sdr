@@ -40,7 +40,8 @@ namespace ex2 {
       initPrecomputedShiftRegOutputs();
 
       // temp variables to save allocation in loops
-      _temp_path_metrics = new std::vector<uint8_t>(1 << (_constraint - 1));
+//      _temp_path_metrics = new std::vector<uint8_t>(1 << (_constraint - 1));
+      _temp_path_metrics = new uint8_t[(1 << (_constraint - 1))];
       _temp_trellis_column = new std::vector<uint8_t>(1 << (_constraint - 1));
       assert(_temp_path_metrics != NULL);
       assert(_temp_trellis_column != NULL);
@@ -50,7 +51,7 @@ namespace ex2 {
     ViterbiCodec::~ViterbiCodec ()
     {
       if (_temp_path_metrics) {
-        delete _temp_path_metrics;
+        delete [] _temp_path_metrics;
       }
       if (_temp_trellis_column) {
         delete _temp_trellis_column;
@@ -183,8 +184,11 @@ namespace ex2 {
       return distance;
     }
 
+//    void ViterbiCodec::_path_metric(const uint8_t* bits, uint8_t numBits,
+//      const std::vector<uint8_t>& prev_path_metrics, int state,
+//      uint8_t *newPathMetric, uint8_t *previousState) const
     void ViterbiCodec::_path_metric(const uint8_t* bits, uint8_t numBits,
-      const std::vector<uint8_t>& prev_path_metrics, int state,
+      const uint8_t *prev_path_metrics, int state,
       uint8_t *newPathMetric, uint8_t *previousState) const
     {
       int s = (state & ((1 << (_constraint - 2)) - 1)) << 1;
@@ -210,18 +214,23 @@ namespace ex2 {
       }
     }
 
-    void ViterbiCodec::_update_path_metrics(const uint8_t* bits, uint8_t numBits, std::vector<uint8_t>& path_metrics,
+//    void ViterbiCodec::_update_path_metrics(const uint8_t* bits, uint8_t numBits, std::vector<uint8_t>& path_metrics,
+//      Trellis& trellis) const
+    void ViterbiCodec::_update_path_metrics(const uint8_t* bits, uint8_t numBits, uint8_t *path_metrics, uint16_t path_metrics_length,
       Trellis& trellis) const
     {
       uint8_t newPathMetric;
       uint8_t previousState;
-      for (unsigned int i = 0; i < path_metrics.size(); i++) {
+      for (unsigned int i = 0; i < path_metrics_length; i++) {
         _path_metric(bits, numBits, path_metrics, i, &newPathMetric, &previousState);
-        (*_temp_path_metrics)[i] = newPathMetric;
+        _temp_path_metrics[i] = newPathMetric;
         (*_temp_trellis_column)[i] = previousState;
       }
 
-      path_metrics = (*_temp_path_metrics);
+//      path_metrics = (*_temp_path_metrics);
+      for (unsigned int i = 0; i < path_metrics_length; i++) {
+        path_metrics[i] = _temp_path_metrics[i];
+      }
       trellis.push_back((*_temp_trellis_column));
     }
 
@@ -229,8 +238,14 @@ namespace ex2 {
     {
       // Compute path metrics and generate trellis.
       Trellis trellis;
-      std::vector<uint8_t> path_metrics(1 << (_constraint - 1), UCHAR_MAX);
-      path_metrics.front() = 0;
+//      std::vector<uint8_t> path_metrics(1 << (_constraint - 1), UCHAR_MAX);
+//      path_metrics.front() = 0;
+      uint16_t path_metrics_length = (1 << (_constraint - 1));
+      uint8_t *path_metrics = new uint8_t[path_metrics_length];
+      for (unsigned int i = 0; i < path_metrics_length; i++) {
+        path_metrics[i] = UCHAR_MAX;
+      }
+      path_metrics[0] = 0;
       const unsigned int poly_len = _poly.size();
       const uint8_t* encodedBits;
       // @note we never need to worry that stepping throught the encodedBits array
@@ -239,18 +254,27 @@ namespace ex2 {
       // @p poly_len bits
       encodedBits = &bits[0];
       for (unsigned int i = 0; i < bits.size(); i += poly_len) {
-        _update_path_metrics(encodedBits, poly_len, path_metrics, trellis);
+        _update_path_metrics(encodedBits, poly_len, path_metrics, path_metrics_length, trellis);
         encodedBits += poly_len;
       }
 
       // Traceback.
       bitarr_t decoded;
-      int state = std::min_element(path_metrics.begin(), path_metrics.end()) - path_metrics.begin();
+//      int state = std::min_element(path_metrics.begin(), path_metrics.end()) - path_metrics.begin();
+      // Find the first index of the minimum element in the path_metrics
+      int state = 0;
+      for (unsigned int i = 0; i < path_metrics_length; i++) {
+        if (path_metrics[i] < path_metrics[state]) {
+          state = i;
+        }
+      }
       for (int i = trellis.size() - 1; i >= 0; i--) {
         decoded.push_back(state >> (_constraint - 2));
         state = trellis[i][state];
       }
       std::reverse(decoded.begin(), decoded.end());
+
+      delete [] path_metrics;
 
       return decoded;
     } // decode
@@ -267,8 +291,15 @@ namespace ex2 {
       Trellis trellis;
       trellis.reserve(_constraint*5);
 
-      std::vector<uint8_t> path_metrics(1 << (_constraint - 1), UCHAR_MAX);
-      path_metrics.front() = 0;
+//      std::vector<uint8_t> path_metrics(1 << (_constraint - 1), UCHAR_MAX);
+//      path_metrics.front() = 0;
+      uint16_t path_metrics_length = (1 << (_constraint - 1));
+      uint8_t *path_metrics = new uint8_t[path_metrics_length];
+      for (unsigned int i = 0; i < path_metrics_length; i++) {
+        path_metrics[i] = UCHAR_MAX;
+      }
+      path_metrics[0] = 0;
+
       const unsigned int poly_len = _poly.size();
       const uint8_t* encodedBits;
       // @note we never need to worry that stepping throught the encodedBits array
@@ -277,10 +308,17 @@ namespace ex2 {
       // @p poly_len bits
       encodedBits = &bits[0];
       for (unsigned int i = 0; i < bits.size(); i += poly_len) {
-        _update_path_metrics(encodedBits, poly_len, path_metrics, trellis);
+        _update_path_metrics(encodedBits, poly_len, path_metrics, path_metrics_length, trellis);
         if (trellis.size() >= trellis.capacity()) {
-          int state = std::min_element(path_metrics.begin(), path_metrics.end()) - path_metrics.begin();
-          for (int i = trellis.size() -1; i >= 0; i--) {
+//          int state = std::min_element(path_metrics.begin(), path_metrics.end()) - path_metrics.begin();
+          // Find the first index of the minimum element in the path_metrics
+          int state = 0;
+          for (unsigned int i = 0; i < path_metrics_length; i++) {
+            if (path_metrics[i] < path_metrics[state]) {
+              state = i;
+            }
+          }
+          for (int i = trellis.size() - 1; i >= 0; i--) {
             decoded[i + truncLength] = (state >> (_constraint - 2));
             state = trellis[i][state];
             trellis.pop_back();
@@ -291,13 +329,22 @@ namespace ex2 {
 
       }
       if (trellis.size() > 0) {
-        int state = std::min_element(path_metrics.begin(), path_metrics.end()) - path_metrics.begin();
+//        int state = std::min_element(path_metrics.begin(), path_metrics.end()) - path_metrics.begin();
+        // Find the first index of the minimum element in the path_metrics
+        int state = 0;
+        for (unsigned int i = 0; i < path_metrics_length; i++) {
+          if (path_metrics[i] < path_metrics[state]) {
+            state = i;
+          }
+        }
         for (int i = trellis.size() -1; i >= 0; i--) {
           decoded[i + truncLength] = (state >> (_constraint - 2));
           state = trellis[i][state];
           trellis.pop_back();
         }
       }
+
+      delete [] path_metrics;
 
       return decoded;
     } // decodeTruncated
