@@ -12,6 +12,13 @@
 #include <errno.h>
 #include "pthread_queue.h"
 
+OS_TickType os_get_ms(void) {
+    struct timespec spec;
+    clock_gettime(1, &spec);
+
+    return spec.tv_sec * 1000 + spec.tv_nsec / 1e6;
+}
+
 void* os_malloc(size_t size) {
 	return malloc(size);
 }
@@ -79,10 +86,6 @@ int os_task_create(os_task_func_t routine, const char * const task_name, unsigne
 #include <os_task.h>
 #include "osal.h"
 
-OS_TickType os_get_tick(void) {
-    return xTaskGetTickCount();
-}
-
 void* os_malloc(size_t size) {
 	return pvPortMalloc(size);
 }
@@ -119,8 +122,8 @@ int os_task_create(os_task_func_t routine, const char * const task_name, unsigne
 	return (ret == 1)? 0 : ret;
 }
 
-uint32_t os_get_ms() {
-	return (uint32_t)(xTaskGetTickCount() * (1000/configTICK_RATE_HZ));
+OS_TickType os_get_ms() {
+	return (OS_TickType)(xTaskGetTickCount() * (1000/configTICK_RATE_HZ));
 }
 
 #endif // OS_FREERTOS
