@@ -8,7 +8,8 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
-#include <limits>
+//#include <limits>
+#include <limits.h>
 #include <string>
 #include <utility>
 #include <vector>
@@ -38,6 +39,13 @@ namespace ex2 {
       }
 
       _init_outputs();
+      initPrecomputedShiftRegOutputs();
+
+      for (unsigned int i = 0; i < _outputs.size(); i++) {
+        for (unsigned int j = 0; j < _poly.size(); j++) {
+          assert(_outputs[i][j] == m_precomputedShiftRegOutputs[i][j]);
+        }
+      }
 
       // temp variables to save allocation in loops
       _temp_path_metrics = new std::vector<uint8_t>(1 << (_constraint - 1));
@@ -55,6 +63,8 @@ namespace ex2 {
       if (_temp_trellis_column) {
         delete _temp_trellis_column;
       }
+
+      freePrecomputedShiftRegOutputs();
     }
 
     int ViterbiCodec::_next_state(int current_state, int input) const
@@ -73,6 +83,8 @@ namespace ex2 {
       bitarr_t encoded;
       int state = 0;
       uint8_t t = 0;
+//      uint8_t *encodedBits = new uint8_t[k_precomputedShiftRegOutputsCols];
+
 
       // Encode the message bits.
       for (unsigned int i = 0; i < bits.size(); i++) {
@@ -81,6 +93,8 @@ namespace ex2 {
         encoded.insert(encoded.end(), output.begin(), output.end());
         state = _next_state(state, bits[i]);
       }
+
+//      delete [] encodedBits;
 
       return encoded;
     }
@@ -136,6 +150,44 @@ namespace ex2 {
       }
     }
 
+    void ViterbiCodec::initPrecomputedShiftRegOutputs()
+    {
+      k_precomputedShiftRegOutputsRows = (1 << _constraint);
+      k_precomputedShiftRegOutputsCols = _poly.size();
+
+      // allocate the storage
+      m_precomputedShiftRegOutputs = new uint8_t*[k_precomputedShiftRegOutputsRows];
+      for (unsigned int i = 0; i < k_precomputedShiftRegOutputsRows; i++) {
+        m_precomputedShiftRegOutputs[i] = new uint8_t[k_precomputedShiftRegOutputsCols];
+      }
+      for (unsigned int i = 0; i < k_precomputedShiftRegOutputsRows; i++) {
+        for (unsigned int j = 0; j < k_precomputedShiftRegOutputsCols; j++) {
+          // Reverse polynomial bits to make the convolution code simpler.
+          int polynomial = ReverseBits(_constraint, _poly[j]);
+          int input = i;
+          int output = 0;
+          for (int k = 0; k < _constraint; k++) {
+            output ^= (input & 1) & (polynomial & 1);
+            polynomial >>= 1;
+            input >>= 1;
+          }
+          m_precomputedShiftRegOutputs[i][j] = output;
+        }
+      }
+
+
+    }
+
+    void ViterbiCodec::freePrecomputedShiftRegOutputs()
+    {
+      if (m_precomputedShiftRegOutputs) {
+        for (unsigned int i = 0; i < k_precomputedShiftRegOutputsCols; i++) {
+          delete [] m_precomputedShiftRegOutputs[i];
+        }
+        delete [] m_precomputedShiftRegOutputs;
+      }
+    }
+
     int ViterbiCodec::_branch_metric(const uint8_t* bits, uint8_t numBits, int source_state, int target_state) const
     {
       // @TODO The asserts are needed only during development
@@ -147,14 +199,12 @@ namespace ex2 {
       // Calculate the Hamming distance
       int distance = 0;
       for (unsigned int i = 0; i < numBits; i++) {
-        distance += (bits[i] != (_outputs[index][i]));
+//        distance += (bits[i] != (_outputs[index][i]));
+        distance += (bits[i] != (m_precomputedShiftRegOutputs[index][i]));
       }
       return distance;
     }
 
-//    std::pair<int, int> ViterbiCodec::_path_metric(const bitarr_t& bits,
-//      const std::vector<uint8_t>& prev_path_metrics,
-//      int state) const
     void ViterbiCodec::_path_metric(const uint8_t* bits, uint8_t numBits,
       const std::vector<uint8_t>& prev_path_metrics, int state,
       uint8_t *newPathMetric, uint8_t *previousState) const
@@ -164,11 +214,11 @@ namespace ex2 {
       int source_state2 = s | 1;
 
       int pm1 = prev_path_metrics[source_state1];
-      if (pm1 < std::numeric_limits<int>::max()) {
+      if (pm1 < INT_MAX) {
         pm1 += _branch_metric(bits, numBits, source_state1, state);
       }
       int pm2 = prev_path_metrics[source_state2];
-      if (pm2 < std::numeric_limits<int>::max()) {
+      if (pm2 < INT_MAX) {
         pm2 += _branch_metric(bits, numBits, source_state2, state);
       }
 
@@ -187,15 +237,10 @@ namespace ex2 {
     {
       uint8_t newPathMetric;
       uint8_t previousState;
-//      std::vector<uint8_t> new_path_metrics(path_metrics.size());
-//      std::vector<uint8_t> new_trellis_column(1 << (_constraint - 1));
       for (unsigned int i = 0; i < path_metrics.size(); i++) {
         _path_metric(bits, numBits, path_metrics, i, &newPathMetric, &previousState);
-//        new_path_metrics[i] = newPathMetric;
-//        new_trellis_column[i] = previousState;
         (*_temp_path_metrics)[i] = newPathMetric;
         (*_temp_trellis_column)[i] = previousState;
-        //    printf("[%ld] first %ld second %ld\n",i,p.first,p.second);
       }
 
       path_metrics = (*_temp_path_metrics);
@@ -206,7 +251,7 @@ namespace ex2 {
     {
       // Compute path metrics and generate trellis.
       Trellis trellis;
-      std::vector<uint8_t> path_metrics(1 << (_constraint - 1), std::numeric_limits<uint8_t>::max());
+      std::vector<uint8_t> path_metrics(1 << (_constraint - 1), UCHAR_MAX);
       path_metrics.front() = 0;
       const unsigned int poly_len = _poly.size();
       const uint8_t* encodedBits;
@@ -245,7 +290,7 @@ namespace ex2 {
       Trellis trellis;
       trellis.reserve(_constraint*5);
 
-      std::vector<uint8_t> path_metrics(1 << (_constraint - 1), std::numeric_limits<uint8_t>::max());
+      std::vector<uint8_t> path_metrics(1 << (_constraint - 1), UCHAR_MAX);
       path_metrics.front() = 0;
       const unsigned int poly_len = _poly.size();
       const uint8_t* encodedBits;

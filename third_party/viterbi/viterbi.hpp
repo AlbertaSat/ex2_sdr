@@ -75,6 +75,8 @@ namespace ex2 {
       using Trellis = std::vector<std::vector<uint8_t>>;
 
       void _init_outputs();
+      void initPrecomputedShiftRegOutputs();
+      void freePrecomputedShiftRegOutputs();
       int _next_state(int current_state, int input) const;
       bitarr_t _curr_output(const int current_state, const int input) const;
       int _branch_metric(const uint8_t* bits, uint8_t numBits, int source_state, int target_state) const;
@@ -104,6 +106,9 @@ namespace ex2 {
       // 0b10 (= 2), and the current input is 0b1 (= 1), then the index is 0b110 (=
       // 6).
       std::vector<bitarr_t> _outputs;
+      uint8_t **m_precomputedShiftRegOutputs;
+      uint16_t k_precomputedShiftRegOutputsRows;
+      uint16_t k_precomputedShiftRegOutputsCols;
 
       // some working variables
       std::vector<uint8_t> *_temp_path_metrics;
