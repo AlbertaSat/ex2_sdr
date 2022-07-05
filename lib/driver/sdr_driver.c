@@ -100,6 +100,10 @@ void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken) {
     sdr_interface_data_t *ifdata = (sdr_interface_data_t *)cb_data;
 
     uint8_t *ptr = buf;
+    if (os_get_tick() - ifdata->last_rx > 10) {
+        ifdata->rx_mpdu_index = 0;
+    }
+    ifdata->last_rx = os_get_tick();
     for (size_t i=0; i<len; i++) {
         ifdata->rx_mpdu[ifdata->rx_mpdu_index] = ptr[i];
         ifdata->rx_mpdu_index++;
@@ -135,7 +139,7 @@ os_task_return_t sdr_rx_task(void *param) {
     uint8_t *data = 0;
 
     while (1) {
-        if (os_queue_dequeue(ifdata->rx_queue, mpdu) != true) {
+        if (os_queue_dequeue(ifdata->rx_queue, mpdu, OS_MAX_TIMEOUT) != true) {
             continue;
         }
 

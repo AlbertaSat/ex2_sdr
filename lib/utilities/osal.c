@@ -38,8 +38,8 @@ int os_queue_enqueue(os_queue_handle_t handle, const void *value) {
 	return pthread_queue_enqueue(handle, value, 0);
 }
 
-int os_queue_dequeue(os_queue_handle_t handle, void *buf) {
-  return pthread_queue_dequeue(handle, buf, (uint32_t) -1);
+int os_queue_dequeue(os_queue_handle_t handle, void *buf, uint32_t timeout) {
+  return pthread_queue_dequeue(handle, buf, timeout);
 }
 
 int os_task_create(os_task_func_t routine, const char * const task_name, unsigned int stack_size, void * parameters, unsigned int priority, os_task_handle_t * return_handle) {
@@ -79,6 +79,10 @@ int os_task_create(os_task_func_t routine, const char * const task_name, unsigne
 #include <os_task.h>
 #include "osal.h"
 
+OS_TickType os_get_tick(void) {
+    return xTaskGetTickCount();
+}
+
 void* os_malloc(size_t size) {
 	return pvPortMalloc(size);
 }
@@ -101,8 +105,8 @@ int os_queue_enqueue(os_queue_handle_t handle, const void* value) {
 	return xQueueSendToBack(handle, value, QUEUE_NO_WAIT);
 }
 
-int os_queue_dequeue(os_queue_handle_t handle, void* buf) {
-	return xQueueReceive(handle, buf, (uint32_t) -1);
+int os_queue_dequeue(os_queue_handle_t handle, void* buf, uint32_t timeout) {
+	return xQueueReceive(handle, buf, timeout);
 }
 
 int os_task_create(os_task_func_t routine, const char * const task_name, unsigned int stack_size, void * parameters, unsigned int priority, os_task_handle_t * return_handle) {
