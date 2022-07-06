@@ -3,6 +3,7 @@
 #include "sdr_driver.h"
 #include "fec.h"
 #include "osal.h"
+#include <logger/logger.h>
 
 #define PIPE_ENTER_MSG_LEN 15
 #define PIPE_EXIT_MSG_LEN 16
@@ -60,6 +61,14 @@ void sdr_sband_tx_stop(sdr_interface_data_t *ifdata) {
     }
     os_sleep_ms(delay);
     sband_enter_conf_mode();
+
+    int i;
+    for (i=0; i<16; i++) {
+        if (++(sband_conf->fillx) >= 16) sband_conf->fillx = 0;
+        if (++(sband_conf->drainx) >= 16) sband_conf->drainx = 0;
+        ex2_log("high %s low %s", sband_conf->fill_cnt[sband_conf->fillx],
+                sband_conf->drain_cnt[sband_conf->drainx]);
+    }
 }
 
 int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
@@ -83,11 +92,16 @@ int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
                 if (sband_conf->state == SBAND_FIRST_FILL)
                     sband_enter_data_mode();
 
+                sband_buffer_count(&(sband_conf->fill_cnt[sband_conf->fillx]));
+                if (++(sband_conf->fillx) >= 16) sband_conf->fillx = 0;
+
                 /* Manual says a full drain takes about 41ms */
                 os_sleep_ms(30);
 
                 sband_conf->state = SBAND_FILL;
                 sband_buffer_count(&(sband_conf->fifo_count));
+                sband_conf->drain_cnt[sband_conf->drainx] = sband_conf->fifo_count;
+                if (++(sband_conf->drainx) >= 16) sband_conf->drainx = 0;
             }
             mtu = fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
         }

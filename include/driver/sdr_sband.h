@@ -33,6 +33,8 @@ typedef struct sdr_sband_conf {
     uint32_t bytes_until_sync;
     uint16_t state;
     uint16_t fifo_count;
+    uint8_t  fillx;
+    uint8_t  drainx;
     uint16_t fill_cnt[16];
     uint16_t drain_cnt[16];
 } sdr_sband_conf_t;
