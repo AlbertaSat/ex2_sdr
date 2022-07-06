@@ -57,7 +57,6 @@ void sdr_sband_tx_stop(sdr_interface_data_t *ifdata) {
     if (sband_buffer_count(&fifo_level)) {
         // The manual says the radio transmits at 512 bytes/msec
         delay = (fifo_level + SBAND_DRAIN_RATE/2)/(SBAND_DRAIN_RATE);
-        printf("%s: fifo %d", __FUNCTION__, fifo_level);
     }
     os_sleep_ms(delay);
     sband_enter_conf_mode();

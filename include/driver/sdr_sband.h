@@ -1,21 +1,25 @@
 #ifndef SDR_SBAND_H_
 #define SDR_SBAND_H_
 
+#include <osal.h>
+
 #ifdef OS_POSIX
+#include <stdbool.h>
+
 // These don't exist (and aren't needed) on Linux
-static bool sband_enter_conf_mode() { return true; }
-static bool sband_enter_sync_mode() { return true; }
-static bool sband_enter_data_mode() { return true; }
+bool sband_enter_conf_mode(void);
+bool sband_enter_sync_mode(void);
+bool sband_enter_data_mode(void);
 
-static void sband_sync() {}
+void sband_sync(void);
 
-static int sband_transmit_ready(void) { return 1; }
+int sband_transmit_ready(void);
 
-static bool sband_buffer_count(uint16_t *cnt) { return true; }
+bool sband_buffer_count(uint16_t *cnt);
 
 #else
 #include <sband.h>
-#endif
+#endif // OS_POSIX
 
 /* Send an S-Band Sync word every sync interval bytes */
 #define SBAND_SYNC_INTERVAL 8*1024

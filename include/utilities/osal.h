@@ -1,6 +1,8 @@
 #ifndef OSAL_H_
 #define OSAL_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
