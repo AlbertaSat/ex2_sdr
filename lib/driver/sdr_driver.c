@@ -1,5 +1,5 @@
 #include <string.h>
-#include <sband.h>
+#include <sdr_sband.h>
 #include "sdr_driver.h"
 #include "fec.h"
 #include "osal.h"
@@ -48,8 +48,18 @@ void sdr_sband_tx_start(sdr_interface_data_t *ifdata) {
 
 void sdr_sband_tx_stop(sdr_interface_data_t *ifdata) {
     sdr_sband_conf_t *sband_conf = &ifdata->sdr_conf->sband_conf;
+    uint16_t fifo_level;
+    int delay = 50;
 
     sband_conf->state = SBAND_IDLE;
+
+    // We should let the FIFO drain before turning off the radio
+    if (sband_buffer_count(&fifo_level)) {
+        // The manual says the radio transmits at 512 bytes/msec
+        delay = (fifo_level + SBAND_DRAIN_RATE/2)/(SBAND_DRAIN_RATE);
+        printf("%s: fifo %d", __FUNCTION__, fifo_level);
+    }
+    os_sleep_ms(delay);
     sband_enter_conf_mode();
 }
 
