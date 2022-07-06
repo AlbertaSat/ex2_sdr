@@ -1,6 +1,8 @@
 #ifndef OSAL_H_
 #define OSAL_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,6 +33,7 @@ void* os_malloc(size_t size);
 void os_free(void *ptr);
 
 void os_sleep_ms(uint32_t time_ms);
+uint32_t os_get_ms(void);
 
 typedef void* os_queue_handle_t;
 
@@ -48,6 +51,8 @@ typedef os_task_return_t (*os_task_func_t)(void* parameter);
 #if defined(OS_POSIX)
 #define OS_MAX_TIMEOUT (UINT32_MAX)
 #define OS_RX_TASK_STACK_SIZE 1024
+
+#define ex2_log printf
 #elif defined(OS_FREERTOS)
 #include "FreeRTOS.h"
 #define OS_MAX_TIMEOUT portMAX_DELAY

@@ -1,4 +1,5 @@
 #include <string.h>
+#include <sdr_sband.h>
 #include "sdr_driver.h"
 #include "fec.h"
 #include "osal.h"
@@ -33,14 +34,62 @@ int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
     return 0;
 }
 
+#define SBAND_IDLE 0
+#define SBAND_FIRST_FILL 1
+#define SBAND_FILL 2
+#define SBAND_DRAIN 3
+
+void sdr_sband_tx_start(sdr_interface_data_t *ifdata) {
+    sdr_sband_conf_t *sband_conf = &(ifdata->sdr_conf->sband_conf);
+
+    sband_conf->state = SBAND_FIRST_FILL;
+    sband_enter_sync_mode();
+}
+
+void sdr_sband_tx_stop(sdr_interface_data_t *ifdata) {
+    sdr_sband_conf_t *sband_conf = &ifdata->sdr_conf->sband_conf;
+    uint16_t fifo_level;
+    int delay = 50;
+
+    sband_conf->state = SBAND_IDLE;
+
+    // We should let the FIFO drain before turning off the radio
+    if (sband_buffer_count(&fifo_level)) {
+        // The manual says the radio transmits at 512 bytes/msec
+        delay = (fifo_level + SBAND_DRAIN_RATE/2)/(SBAND_DRAIN_RATE);
+    }
+    os_sleep_ms(delay);
+    sband_enter_conf_mode();
+}
+
 int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
+    sdr_sband_conf_t *sband_conf = &ifdata->sdr_conf->sband_conf;
+
     if (fec_data_to_mpdu(ifdata->mac_data, data, len)) {
         uint8_t *buf;
         size_t mtu = (size_t)fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
         while (mtu != 0) {
+            if (sband_conf->bytes_until_sync == 0) {
+                sband_sync();
+                sband_conf->bytes_until_sync = SBAND_SYNC_INTERVAL;
+            }
+
             (ifdata->tx_func)(ifdata->fd, buf, mtu);
+
+            sband_conf->bytes_until_sync -= mtu;
+            sband_conf->fifo_count += mtu;
+
+            if (sband_conf->fifo_count >= (SBAND_FIFO_DEPTH - 1024)) {
+                if (sband_conf->state == SBAND_FIRST_FILL)
+                    sband_enter_data_mode();
+
+                /* Manual says a full drain takes about 41ms */
+                os_sleep_ms(30);
+
+                sband_conf->state = SBAND_FILL;
+                sband_buffer_count(&(sband_conf->fifo_count));
+            }
             mtu = fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
-            os_sleep_ms(100);
         }
     }
 
