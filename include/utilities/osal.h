@@ -49,6 +49,8 @@ typedef os_task_return_t (*os_task_func_t)(void* parameter);
 #if defined(OS_POSIX)
 #define OS_MAX_TIMEOUT (UINT32_MAX)
 #define OS_RX_TASK_STACK_SIZE 1024
+
+#define ex2_log printf
 #elif defined(OS_FREERTOS)
 #include "FreeRTOS.h"
 #define OS_MAX_TIMEOUT portMAX_DELAY
