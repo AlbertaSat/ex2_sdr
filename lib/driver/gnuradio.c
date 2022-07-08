@@ -17,12 +17,12 @@
  * @date 2022-05-12
  */
 
+#include <sdr_config.h>
+
 #ifdef OS_POSIX
 #include <stdio.h>
 #define ex2_log printf
 #endif // OS_POSIX
-
-#include <sdr_driver.h>
 
 #ifdef SDR_GNURADIO
 #include <stdio.h>
@@ -36,6 +36,7 @@
 #include <unistd.h>
 #include <sys/errno.h>
 #include <osal.h>
+#include <sdr_driver.h>
 
 #define SA struct sockaddr
 

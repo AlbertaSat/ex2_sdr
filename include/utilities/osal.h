@@ -2,6 +2,7 @@
 #define OSAL_H_
 
 #include <stdint.h>
+#include <sdr_config.h>
 
 #ifdef __cplusplus
 extern "C" {
