@@ -13,17 +13,29 @@ static int sdr_driver_init(sdr_interface_data_t *ifdata, const char *ifname) {
         sdr_loopback_open(ifdata);
     }
     else if (strcmp(ifname, SDR_IF_UHF_NAME) == 0) {
+        /* For UHF we can receive using either gnuradio or uart */
+#ifdef SDR_GNURADIO
+        if ((rc = sdr_gnuradio_driver_init(ifdata))) {
+            return rc;
+        }
+#else
         if ((rc = sdr_uart_driver_init(ifdata))) {
             return rc;
         }
+#endif
     }
-    #ifndef OS_POSIX
     else if (strcmp(ifname, SDR_IF_SBAND_NAME) == 0) {
+        /* For S-Band we receive on Linux and transmit on FreeRTOS */
+#ifdef OS_POSIX
+        if ((rc = sdr_gnuradio_driver_init(ifdata))) {
+            return rc;
+        }
+#else
         if ((rc = sdr_sband_driver_init(ifdata))) {
             return rc;
         }
+#endif
     }
-    #endif
 
     ifdata->rx_queue = os_queue_create(2, ifdata->mtu);
     ifdata->mac_data = fec_create(RF_MODE_3, NO_FEC);
