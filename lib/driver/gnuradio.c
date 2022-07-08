@@ -17,14 +17,12 @@
  * @date 2022-05-12
  */
 
+#include <sdr_config.h>
+
 #ifdef OS_POSIX
 #include <stdio.h>
 #define ex2_log printf
-#endif // OS_POSIX
 
-#include <sdr_driver.h>
-
-#ifdef SDR_GNURADIO
 #include <stdio.h>
 #include <assert.h>
 #include <netdb.h>
@@ -36,6 +34,7 @@
 #include <unistd.h>
 #include <sys/errno.h>
 #include <osal.h>
+#include <sdr_driver.h>
 
 #define SA struct sockaddr
 
@@ -178,7 +177,7 @@ int sdr_gnuradio_driver_init(sdr_interface_data_t *ifdata) {
 
     int rxfd = gnuradio_tcp_open("127.0.0.1", 4321);
 
-    ctx->mtu = ifdata->sdr_conf->mtu;
+    ctx->mtu = ifdata->mtu;
     ctx->rxfd = rxfd;
     ctx->rx_callback = sdr_rx_isr;
     ctx->user_data = ifdata;
@@ -199,4 +198,4 @@ int sdr_gnuradio_driver_init(sdr_interface_data_t *ifdata) {
     return 0;
 }
 
-#endif /* SDR_GNURADIO */
+#endif /* OS_POSIX */

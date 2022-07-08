@@ -10,8 +10,6 @@
 extern "C" {
 #endif
 
-// #define SDR_GNURADIO 1
-
 typedef enum {
     SDR_UHF_1200_BAUD = 0,
     SDR_UHF_2400_BAUD,
@@ -87,6 +85,7 @@ typedef struct sdr_interface_data {
 sdr_interface_data_t* sdr_interface_init(const sdr_conf_t *conf, const char *ifname);
 
 int sdr_uart_driver_init(sdr_interface_data_t *ifdata);
+int sdr_gnuradio_driver_init(sdr_interface_data_t *ifdata);
 
 int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len);
 
