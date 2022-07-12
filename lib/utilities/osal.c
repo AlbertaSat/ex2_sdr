@@ -12,6 +12,13 @@
 #include <errno.h>
 #include "pthread_queue.h"
 
+OS_TickType os_get_ms(void) {
+    struct timespec spec;
+    clock_gettime(1, &spec);
+
+    return spec.tv_sec * 1000 + spec.tv_nsec / 1e6;
+}
+
 void* os_malloc(size_t size) {
 	return malloc(size);
 }
@@ -38,8 +45,8 @@ int os_queue_enqueue(os_queue_handle_t handle, const void *value) {
 	return pthread_queue_enqueue(handle, value, 0);
 }
 
-int os_queue_dequeue(os_queue_handle_t handle, void *buf) {
-  return pthread_queue_dequeue(handle, buf, (uint32_t) -1);
+int os_queue_dequeue(os_queue_handle_t handle, void *buf, uint32_t timeout) {
+  return pthread_queue_dequeue(handle, buf, timeout);
 }
 
 int os_task_create(os_task_func_t routine, const char * const task_name, unsigned int stack_size, void * parameters, unsigned int priority, os_task_handle_t * return_handle) {
@@ -101,8 +108,8 @@ int os_queue_enqueue(os_queue_handle_t handle, const void* value) {
 	return xQueueSendToBack(handle, value, QUEUE_NO_WAIT);
 }
 
-int os_queue_dequeue(os_queue_handle_t handle, void* buf) {
-	return xQueueReceive(handle, buf, (uint32_t) -1);
+int os_queue_dequeue(os_queue_handle_t handle, void* buf, uint32_t timeout) {
+	return xQueueReceive(handle, buf, timeout);
 }
 
 int os_task_create(os_task_func_t routine, const char * const task_name, unsigned int stack_size, void * parameters, unsigned int priority, os_task_handle_t * return_handle) {
@@ -115,8 +122,8 @@ int os_task_create(os_task_func_t routine, const char * const task_name, unsigne
 	return (ret == 1)? 0 : ret;
 }
 
-uint32_t os_get_ms() {
-	return (uint32_t)(xTaskGetTickCount() * (1000/configTICK_RATE_HZ));
+OS_TickType os_get_ms() {
+	return (OS_TickType)(xTaskGetTickCount() * (1000/configTICK_RATE_HZ));
 }
 
 #endif // OS_FREERTOS

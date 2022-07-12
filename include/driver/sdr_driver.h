@@ -76,6 +76,7 @@ typedef struct sdr_interface_data {
     /** Low level buffer state */
     uint16_t rx_mpdu_index;
     uint8_t *rx_mpdu;
+    OS_TickType last_rx;
 } sdr_interface_data_t;
 
 #define SDR_IF_UHF_NAME "UHF"
