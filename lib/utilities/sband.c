@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <sdr_driver.h>
 
-#ifdef OS_POSIX
+#if SBAND_IS_STUBBED == 1 || defined(OS_POSIX)
 
 // These don't exist (and aren't needed) on Linux
 bool sband_enter_conf_mode() { return true; }

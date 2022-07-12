@@ -18,7 +18,6 @@ int sband_transmit_ready(void);
 bool sband_buffer_count(uint16_t *cnt);
 
 #else
-#include <sband.h>
 #endif // OS_POSIX
 
 /* Send an S-Band Sync word every sync interval bytes */
