@@ -116,10 +116,12 @@ typedef struct gnuradio_context {
 
 static void * gnuradio_rx_thread(void * arg) {
 	gnuradio_context_t *ctx = arg;
-	uint8_t *data = os_malloc(ctx->mtu);
+    uint8_t length_field_size = 1;
+    uint8_t buflen = ctx->mtu + length_field_size;//capture "length" field (first byte)
+	uint8_t *data = os_malloc(buflen);
 
 	while (1) {
-		int length = read(ctx->rxfd, data, ctx->mtu);
+		int length = read(ctx->rxfd, data, buflen);
         if (length == 0) {
 			printf("%s: connection closed\n", __FUNCTION__);
             return NULL;
@@ -128,10 +130,12 @@ static void * gnuradio_rx_thread(void * arg) {
 			printf("%s: read() failed: %d", __FUNCTION__, errno);
             return NULL;
 		}
-        if (length < ctx->mtu) {
-			printf("%s: short read %d<%d", __FUNCTION__, length, ctx->mtu);
+        if (length < buflen) {
+			printf("%s: short read %d<%d", __FUNCTION__, length, buflen);
 		}
-        ctx->rx_callback(ctx->user_data, data, length, NULL);
+        if(data[0] == ctx->mtu){//length indicator byte signifying full-length packet
+            ctx->rx_callback(ctx->user_data, data + length_field_size, length - length_field_size, NULL);
+        }
 	}
 	return NULL;
 }
