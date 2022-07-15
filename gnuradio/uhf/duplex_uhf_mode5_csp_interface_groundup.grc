@@ -92,6 +92,18 @@ blocks:
     coordinate: [192, 92.0]
     rotation: 0
     state: enabled
+- name: nfilts
+  id: variable
+  parameters:
+    comment: ''
+    value: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [712, 76.0]
+    rotation: 0
+    state: enabled
 - name: out_len
   id: variable
   parameters:
@@ -144,7 +156,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '64'
+    value: '32'
   states:
     bus_sink: false
     bus_source: false
@@ -152,6 +164,18 @@ blocks:
     coordinate: [840, 12.0]
     rotation: 0
     state: enabled
+- name: taps
+  id: variable
+  parameters:
+    comment: ''
+    value: firdes.root_raised_cosine(nfilts,nfilts,1/float(spsym),0.35,11*spsym*nfilts)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [920, 12.0]
+    rotation: 0
+    state: true
 - name: tx_gain
   id: variable
   parameters:
@@ -164,6 +188,42 @@ blocks:
     coordinate: [680, 12.0]
     rotation: 0
     state: enabled
+- name: analog_pwr_squelch_xx_0
+  id: analog_pwr_squelch_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: 1e-4
+    comment: ''
+    gate: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ramp: '0'
+    threshold: '-50'
+    type: complex
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [336, 640.0]
+    rotation: 0
+    state: disabled
+- name: analog_quadrature_demod_cf_0
+  id: analog_quadrature_demod_cf
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    gain: samp_rate/(2*math.pi*fsk_dev)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [480, 492.0]
+    rotation: 0
+    state: true
 - name: analog_simple_squelch_cc_0
   id: analog_simple_squelch_cc
   parameters:
@@ -173,12 +233,12 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    threshold: '-30'
+    threshold: '-22'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [272, 492.0]
+    coordinate: [296, 484.0]
     rotation: 0
     state: enabled
 - name: blocks_message_strobe_0
@@ -269,7 +329,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1144, 500.0]
+    coordinate: [1656, 480.0]
     rotation: 0
     state: enabled
 - name: blocks_socket_pdu_1
@@ -349,29 +409,21 @@ blocks:
     coordinate: [264, 364.0]
     rotation: 0
     state: disabled
-- name: digital_gfsk_demod_0
-  id: digital_gfsk_demod
+- name: digital_binary_slicer_fb_0
+  id: digital_binary_slicer_fb
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    freq_error: '0.0'
-    gain_mu: '0.0001'
-    log: 'False'
     maxoutbuf: '0'
     minoutbuf: '0'
-    mu: '0'
-    omega_relative_limit: '0.005'
-    samples_per_symbol: spsym
-    sensitivity: sensitivity
-    verbose: 'False'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [496, 460.0]
+    coordinate: [968, 472.0]
     rotation: 0
-    state: enabled
+    state: true
 - name: digital_gfsk_mod_0
   id: digital_gfsk_mod
   parameters:
@@ -393,6 +445,29 @@ blocks:
     coordinate: [696, 148.0]
     rotation: 0
     state: enabled
+- name: digital_pfb_clock_sync_xxx_0
+  id: digital_pfb_clock_sync_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    filter_size: nfilts
+    init_phase: nfilts/2
+    loop_bw: '0.01'
+    max_dev: '0.1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    osps: '1'
+    sps: spsym
+    taps: taps
+    type: fff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [712, 468.0]
+    rotation: 0
+    state: true
 - name: note_0
   id: note
   parameters:
@@ -403,7 +478,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 564.0]
+    coordinate: [1120, 548.0]
     rotation: 0
     state: enabled
 - name: note_0_0
@@ -732,7 +807,7 @@ blocks:
     bus_structure: null
     coordinate: [256, 596.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_1_0
   id: qtgui_time_sink_x
   parameters:
@@ -827,32 +902,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [544, 708.0]
+    coordinate: [488, 788.0]
     rotation: 0
-    state: enabled
-- name: root_raised_cosine_filter_0
-  id: root_raised_cosine_filter
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha: '0.35'
-    comment: ''
-    decim: '1'
-    gain: '1'
-    interp: '1'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    ntaps: 11*samp_rate
-    samp_rate: samp_rate
-    sym_rate: samp_rate/spsym
-    type: fir_filter_ccf
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [440, 332.0]
-    rotation: 0
-    state: true
+    state: disabled
 - name: satellites_ax25_deframer_0
   id: satellites_ax25_deframer
   parameters:
@@ -867,7 +919,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [736, 628.0]
+    coordinate: [1248, 616.0]
     rotation: 0
     state: disabled
 - name: satellites_fsk_demodulator_0
@@ -901,7 +953,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1136, 616.0]
+    coordinate: [1648, 600.0]
     rotation: 0
     state: enabled
 - name: satellites_sync_to_pdu_packed_0_0
@@ -919,7 +971,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [720, 484.0]
+    coordinate: [1232, 472.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_sink_0
@@ -1675,9 +1727,9 @@ blocks:
     state: disabled
 
 connections:
-- [analog_simple_squelch_cc_0, '0', qtgui_time_sink_x_1_0, '0']
-- [analog_simple_squelch_cc_0, '0', root_raised_cosine_filter_0, '0']
-- [analog_simple_squelch_cc_0, '0', satellites_fsk_demodulator_0, '0']
+- [analog_pwr_squelch_xx_0, '0', analog_quadrature_demod_cf_0, '0']
+- [analog_quadrature_demod_cf_0, '0', digital_pfb_clock_sync_xxx_0, '0']
+- [analog_simple_squelch_cc_0, '0', analog_quadrature_demod_cf_0, '0']
 - [blocks_message_strobe_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0_0, strobe, uhd_usrp_sink_0, command]
@@ -1686,18 +1738,20 @@ connections:
 - [blocks_socket_pdu_1_0, pdus, blocks_pdu_to_tagged_stream_0, pdus]
 - [blocks_unpacked_to_packed_xx_0, '0', digital_gfsk_mod_0, '0']
 - [blocks_vector_to_stream_0, '0', blocks_unpacked_to_packed_xx_0, '0']
-- [digital_gfsk_demod_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
+- [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_freq_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_time_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', uhd_usrp_sink_0, '0']
-- [root_raised_cosine_filter_0, '0', digital_gfsk_demod_0, '0']
+- [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
 - [satellites_ax25_deframer_0, out, blocks_socket_pdu_0, pdus]
 - [satellites_ax25_deframer_0, out, satellites_hexdump_sink_0, in]
 - [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
 - [satellites_sync_to_pdu_packed_0_0, out, blocks_socket_pdu_0, pdus]
 - [satellites_sync_to_pdu_packed_0_0, out, satellites_hexdump_sink_0, in]
+- [uhd_usrp_source_0_0, '0', analog_pwr_squelch_xx_0, '0']
 - [uhd_usrp_source_0_0, '0', analog_simple_squelch_cc_0, '0']
 - [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1, '0']
+- [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1_0, '0']
 - [zeromq_sub_source_0, '0', blocks_vector_to_stream_0, '0']
 
 metadata:
