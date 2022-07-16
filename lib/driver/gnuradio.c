@@ -92,16 +92,11 @@ static int sdr_gnuradio_tx(int fd, const void * data, size_t len) {
     radio_command[PREAMBLE_LEN + SYNCWORD_LEN + LEN_ID_LEN + len + 1] = ((uint16_t)crc_res >> 0) & 0xFF;
     
     //send to radio via tcp
-#if 1
-    FILE *fptr = fopen("output2.bin","w");
-    fwrite(radio_command, sizeof(uint8_t), RADIO_LEN, fptr);
-    fclose(fptr);
-    int status = system("cat output2.bin | nc -w 1 127.0.0.1 1235");
-    if (status == -1) {
-        printf("System call failed\n");
+    if(send(fd, radio_command, RADIO_LEN, 0) == -1){
+        printf("sdr_gnuradio_tx send() failed\n");
         exit(1);
     }
-#endif
+
     os_free(crc_command);
 
     return 0;
@@ -110,6 +105,7 @@ static int sdr_gnuradio_tx(int fd, const void * data, size_t len) {
 typedef struct gnuradio_context {
     int mtu;
 	int rxfd;
+    int fd;
 	sdr_rx_callback_t rx_callback;
 	void *user_data;
 } gnuradio_context_t;
@@ -131,6 +127,7 @@ static void * gnuradio_rx_thread(void * arg) {
         if (length < ctx->mtu) {
 			printf("%s: short read %d<%d", __FUNCTION__, length, ctx->mtu);
 		}
+
         ctx->rx_callback(ctx->user_data, data, length, NULL);
 	}
 	return NULL;
@@ -176,9 +173,11 @@ int sdr_gnuradio_driver_init(sdr_interface_data_t *ifdata) {
     }
 
     int rxfd = gnuradio_tcp_open("127.0.0.1", 4321);
+    int txfd = gnuradio_tcp_open("127.0.0.1", 1235);
 
     ctx->mtu = ifdata->mtu;
     ctx->rxfd = rxfd;
+    ifdata->fd = txfd;
     ctx->rx_callback = sdr_rx_isr;
     ctx->user_data = ifdata;
 
@@ -189,10 +188,6 @@ int sdr_gnuradio_driver_init(sdr_interface_data_t *ifdata) {
        	return -2;
     }
 
-#if 0
-    int txfd = gnuradio_tcp_open("localhost", 1235);
-    ifdata->fd = txfd;
-#endif
     ifdata->tx_func = (sdr_tx_t) sdr_gnuradio_tx;
 
     return 0;
