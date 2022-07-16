@@ -830,29 +830,6 @@ blocks:
     coordinate: [544, 708.0]
     rotation: 0
     state: enabled
-- name: root_raised_cosine_filter_0
-  id: root_raised_cosine_filter
-  parameters:
-    affinity: ''
-    alias: ''
-    alpha: '0.35'
-    comment: ''
-    decim: '1'
-    gain: '1'
-    interp: '1'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    ntaps: 11*samp_rate
-    samp_rate: samp_rate
-    sym_rate: samp_rate/spsym
-    type: fir_filter_ccf
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [440, 332.0]
-    rotation: 0
-    state: true
 - name: satellites_ax25_deframer_0
   id: satellites_ax25_deframer
   parameters:
@@ -1675,8 +1652,8 @@ blocks:
     state: disabled
 
 connections:
+- [analog_simple_squelch_cc_0, '0', digital_gfsk_demod_0, '0']
 - [analog_simple_squelch_cc_0, '0', qtgui_time_sink_x_1_0, '0']
-- [analog_simple_squelch_cc_0, '0', root_raised_cosine_filter_0, '0']
 - [analog_simple_squelch_cc_0, '0', satellites_fsk_demodulator_0, '0']
 - [blocks_message_strobe_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0, strobe, uhd_usrp_sink_0, command]
@@ -1690,7 +1667,6 @@ connections:
 - [digital_gfsk_mod_0, '0', qtgui_freq_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_time_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', uhd_usrp_sink_0, '0']
-- [root_raised_cosine_filter_0, '0', digital_gfsk_demod_0, '0']
 - [satellites_ax25_deframer_0, out, blocks_socket_pdu_0, pdus]
 - [satellites_ax25_deframer_0, out, satellites_hexdump_sink_0, in]
 - [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']

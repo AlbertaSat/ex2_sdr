@@ -134,6 +134,57 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
             threshold=0,
         )
         self.satellites_hexdump_sink_0 = satellites.components.datasinks.hexdump_sink(options="")
+        self.qtgui_time_sink_x_1 = qtgui.time_sink_c(
+            baud_bit*spsym*5, #size
+            baud_bit*spsym*5, #samp_rate
+            "", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_time_sink_x_1.set_update_time(5)
+        self.qtgui_time_sink_x_1.set_y_axis(-1, 1)
+
+        self.qtgui_time_sink_x_1.set_y_label('Raw', "")
+
+        self.qtgui_time_sink_x_1.enable_tags(True)
+        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_1.enable_autoscale(False)
+        self.qtgui_time_sink_x_1.enable_grid(False)
+        self.qtgui_time_sink_x_1.enable_axis_labels(True)
+        self.qtgui_time_sink_x_1.enable_control_panel(False)
+        self.qtgui_time_sink_x_1.enable_stem_plot(False)
+
+
+        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(2):
+            if len(labels[i]) == 0:
+                if (i % 2 == 0):
+                    self.qtgui_time_sink_x_1.set_line_label(i, "Re{{Data {0}}}".format(i/2))
+                else:
+                    self.qtgui_time_sink_x_1.set_line_label(i, "Im{{Data {0}}}".format(i/2))
+            else:
+                self.qtgui_time_sink_x_1.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_1.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_1.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_1.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_1.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_1.set_line_alpha(i, alphas[i])
+
+        self._qtgui_time_sink_x_1_win = sip.wrapinstance(self.qtgui_time_sink_x_1.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_time_sink_x_1_win)
         self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
             spsym*50, #size
             spsym*50, #samp_rate
@@ -227,7 +278,7 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
-        self.digital_pfb_clock_sync_xxx_0 = digital.pfb_clock_sync_fff(spsym, 0.01, taps, nfilts, nfilts/2, 0.1, 1)
+        self.digital_pfb_clock_sync_xxx_0 = digital.pfb_clock_sync_fff(spsym, 0.5, taps, nfilts, nfilts/2, 0.005, 1)
         self.digital_gfsk_mod_0 = digital.gfsk_mod(
             samples_per_symbol=spsym,
             sensitivity=sensitivity,
@@ -244,7 +295,7 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.blocks_message_strobe_0_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'DDR', 'value': 1, 'mask': ((1 << 11) - 1)})), 8500)
         self.blocks_message_strobe_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'CTRL', 'value': 1, 'mask': ((1 << 11) - 1)})), 7000)
         self.blocks_message_strobe_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_TX', 'value': 1, 'mask': ((1 << 11) - 1)})), 10000)
-        self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(-22, 1)
+        self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(-30, 1)
         self.analog_quadrature_demod_cf_0 = analog.quadrature_demod_cf(samp_rate/(2*math.pi*fsk_dev))
 
 
@@ -269,6 +320,7 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.connect((self.digital_gfsk_mod_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.digital_pfb_clock_sync_xxx_0, 0), (self.digital_binary_slicer_fb_0, 0))
         self.connect((self.uhd_usrp_source_0_0, 0), (self.analog_simple_squelch_cc_0, 0))
+        self.connect((self.uhd_usrp_source_0_0, 0), (self.qtgui_time_sink_x_1, 0))
 
 
     def closeEvent(self, event):
@@ -289,6 +341,7 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.set_taps(firdes.root_raised_cosine(self.nfilts,self.nfilts,1/float(self.spsym),0.35,11*self.spsym*self.nfilts))
         self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, 2*self.baud_bit*self.spsym)
         self.qtgui_time_sink_x_0.set_samp_rate(self.spsym*50)
+        self.qtgui_time_sink_x_1.set_samp_rate(self.baud_bit*self.spsym*5)
         self.uhd_usrp_sink_0.set_samp_rate(self.baud_bit*self.spsym)
 
     def get_nfilts(self):
@@ -315,6 +368,7 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.set_samp_rate(self.baud_bit*self.spsym)
         self.set_sensitivity(2*3.14159265358979323846*(self.fsk_dev/(self.baud_bit*self.spsym)))
         self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, 2*self.baud_bit*self.spsym)
+        self.qtgui_time_sink_x_1.set_samp_rate(self.baud_bit*self.spsym*5)
         self.uhd_usrp_sink_0.set_samp_rate(self.baud_bit*self.spsym)
 
     def get_tx_gain(self):

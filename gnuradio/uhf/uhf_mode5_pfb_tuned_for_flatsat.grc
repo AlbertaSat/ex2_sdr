@@ -233,7 +233,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    threshold: '-22'
+    threshold: '-30'
   states:
     bus_sink: false
     bus_source: false
@@ -453,8 +453,8 @@ blocks:
     comment: ''
     filter_size: nfilts
     init_phase: nfilts/2
-    loop_bw: '0.01'
-    max_dev: '0.1'
+    loop_bw: '0.5'
+    max_dev: '0.005'
     maxoutbuf: '0'
     minoutbuf: '0'
     osps: '1'
@@ -807,7 +807,7 @@ blocks:
     bus_structure: null
     coordinate: [256, 596.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: qtgui_time_sink_x_1_0
   id: qtgui_time_sink_x
   parameters:
