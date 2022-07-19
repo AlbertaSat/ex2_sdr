@@ -180,7 +180,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '0.7'
+    value: '0.9'
   states:
     bus_sink: false
     bus_source: false
@@ -613,7 +613,7 @@ blocks:
     bus_structure: null
     coordinate: [832, 88.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:

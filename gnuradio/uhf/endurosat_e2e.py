@@ -85,7 +85,7 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.nfilts = nfilts = 16
         self.fsk_dev = fsk_dev = 4800
         self.baud_bit = baud_bit = 19200
-        self.tx_gain = tx_gain = 0.7
+        self.tx_gain = tx_gain = 0.9
         self.taps = taps = firdes.root_raised_cosine(nfilts,nfilts,1/float(spsym),0.35,11*spsym*nfilts)
         self.sensitivity = sensitivity = 2*3.14159265358979323846*(fsk_dev/(baud_bit*spsym))
         self.samp_rate = samp_rate = baud_bit*spsym
@@ -236,48 +236,6 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
 
         self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
-        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
-            10*1024, #size
-            window.WIN_BLACKMAN_hARRIS, #wintype
-            center_freq, #fc
-            2*baud_bit*spsym, #bw
-            "", #name
-            1,
-            None # parent
-        )
-        self.qtgui_freq_sink_x_0.set_update_time(0.10)
-        self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
-        self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
-        self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
-        self.qtgui_freq_sink_x_0.enable_autoscale(False)
-        self.qtgui_freq_sink_x_0.enable_grid(False)
-        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
-        self.qtgui_freq_sink_x_0.enable_axis_labels(True)
-        self.qtgui_freq_sink_x_0.enable_control_panel(False)
-        self.qtgui_freq_sink_x_0.set_fft_window_normalized(False)
-
-
-
-        labels = ['', '', '', '', '',
-            '', '', '', '', '']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ["blue", "red", "green", "black", "cyan",
-            "magenta", "yellow", "dark red", "dark green", "dark blue"]
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_freq_sink_x_0.set_line_label(i, labels[i])
-            self.qtgui_freq_sink_x_0.set_line_width(i, widths[i])
-            self.qtgui_freq_sink_x_0.set_line_color(i, colors[i])
-            self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
         self.digital_pfb_clock_sync_xxx_0 = digital.pfb_clock_sync_fff(spsym, 0.5, taps, nfilts, nfilts/2, 0.005, 1)
         self.digital_gfsk_mod_0 = digital.gfsk_mod(
             samples_per_symbol=spsym,
@@ -315,7 +273,6 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.connect((self.blocks_pdu_to_tagged_stream_0, 0), (self.blocks_unpacked_to_packed_xx_0, 0))
         self.connect((self.blocks_unpacked_to_packed_xx_0, 0), (self.digital_gfsk_mod_0, 0))
         self.connect((self.digital_binary_slicer_fb_0, 0), (self.satellites_sync_to_pdu_packed_0_0, 0))
-        self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.digital_gfsk_mod_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.digital_pfb_clock_sync_xxx_0, 0), (self.digital_binary_slicer_fb_0, 0))
@@ -339,7 +296,6 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.set_samp_rate(self.baud_bit*self.spsym)
         self.set_sensitivity(2*3.14159265358979323846*(self.fsk_dev/(self.baud_bit*self.spsym)))
         self.set_taps(firdes.root_raised_cosine(self.nfilts,self.nfilts,1/float(self.spsym),0.35,11*self.spsym*self.nfilts))
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, 2*self.baud_bit*self.spsym)
         self.qtgui_time_sink_x_0.set_samp_rate(self.spsym*50)
         self.qtgui_time_sink_x_1.set_samp_rate(self.baud_bit*self.spsym*5)
         self.uhd_usrp_sink_0.set_samp_rate(self.baud_bit*self.spsym)
@@ -367,7 +323,6 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.set_baud_byte(self.baud_bit/8)
         self.set_samp_rate(self.baud_bit*self.spsym)
         self.set_sensitivity(2*3.14159265358979323846*(self.fsk_dev/(self.baud_bit*self.spsym)))
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, 2*self.baud_bit*self.spsym)
         self.qtgui_time_sink_x_1.set_samp_rate(self.baud_bit*self.spsym*5)
         self.uhd_usrp_sink_0.set_samp_rate(self.baud_bit*self.spsym)
 
@@ -423,7 +378,6 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
 
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, 2*self.baud_bit*self.spsym)
         self.uhd_usrp_sink_0.set_center_freq(self.center_freq, 0)
         self.uhd_usrp_source_0_0.set_center_freq(self.center_freq, 0)
 
