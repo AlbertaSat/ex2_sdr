@@ -91,7 +91,7 @@ int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
             if (sband_conf->fifo_count >= (SBAND_FIFO_DEPTH - 1024)) {
                 if (sband_conf->state == SBAND_FIRST_FILL)
                     sband_enter_data_mode();
-
+#if 0
                 sband_buffer_count(&(sband_conf->fill_cnt[sband_conf->fillx]));
                 if (++(sband_conf->fillx) >= 16) sband_conf->fillx = 0;
 
@@ -102,6 +102,14 @@ int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
                 sband_buffer_count(&(sband_conf->fifo_count));
                 sband_conf->drain_cnt[sband_conf->drainx] = sband_conf->fifo_count;
                 if (++(sband_conf->drainx) >= 16) sband_conf->drainx = 0;
+#else
+                while (!sband_transmit_ready()) {
+                    os_sleep_ms(30);
+                }
+
+                sband_conf->state = SBAND_FILL;
+                sband_conf->fifo_count = 2048;
+#endif
             }
             mtu = fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
         }
