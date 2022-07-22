@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <netdb.h>
-#include <fcntl.h> 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -51,48 +51,48 @@
 #define RADIO_LEN PREAMBLE_LEN + SYNCWORD_LEN + LEN_ID_LEN + PACKET_LEN + CRC16_LEN + POSTAMBLE_LEN
 //^^radio_len = preamble + sync word + length indicator + data + crc + postamble
 
-uint16_t crc16(uint8_t * pData, int length) {
+uint16_t crc16(uint8_t *pData, int length) {
     uint8_t i;
     uint16_t wCrc = 0xffff;
     while (length--) {
         wCrc ^= *(unsigned char *)pData++ << 8;
-        for (i=0; i < 8; i++)
+        for (i = 0; i < 8; i++)
             wCrc = wCrc & 0x8000 ? (wCrc << 1) ^ 0x1021 : wCrc << 1;
     }
     return wCrc & 0xffff;
 }
 
-static int sdr_gnuradio_tx(int fd, const void * data, size_t len) {
-    //apply framing according to UHF user manual protocol
-    uint8_t * crc_command = os_malloc(LEN_ID_LEN + len);
+static int sdr_gnuradio_tx(int fd, const void *data, size_t len) {
+    // apply framing according to UHF user manual protocol
+    uint8_t *crc_command = os_malloc(LEN_ID_LEN + len);
     crc_command[0] = (uint8_t)len;
 
-    for(size_t i = 0; i < len; i++) {
-        crc_command[LEN_ID_LEN+i] = ((uint8_t *)data)[i];
+    for (size_t i = 0; i < len; i++) {
+        crc_command[LEN_ID_LEN + i] = ((uint8_t *)data)[i];
     }
 
     uint16_t crc_res = crc16(crc_command, LEN_ID_LEN + len);
 
     uint8_t radio_command[RADIO_LEN] = {0};
-    for(int i = 0; i < PREAMBLE_LEN; i++){
+    for (int i = 0; i < PREAMBLE_LEN; i++) {
         radio_command[i] = PREAMBLE_B;
     }
 
-    for(int i = POSTAMBLE_LEN; i > 0; i--){
+    for (int i = POSTAMBLE_LEN; i > 0; i--) {
         radio_command[RADIO_LEN - i] = PREAMBLE_B;
     }
 
     radio_command[PREAMBLE_LEN] = SYNCWORD;
     radio_command[PREAMBLE_LEN + SYNCWORD_LEN] = len;
-    for(size_t i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         radio_command[PREAMBLE_LEN + SYNCWORD_LEN + LEN_ID_LEN + i] = ((uint8_t *)data)[i];
     }
 
     radio_command[PREAMBLE_LEN + SYNCWORD_LEN + LEN_ID_LEN + len] = ((uint16_t)crc_res >> 8) & 0xFF;
     radio_command[PREAMBLE_LEN + SYNCWORD_LEN + LEN_ID_LEN + len + 1] = ((uint16_t)crc_res >> 0) & 0xFF;
-    
-    //send to radio via tcp
-    if(send(fd, radio_command, RADIO_LEN, 0) == -1){
+
+    // send to radio via tcp
+    if (send(fd, radio_command, RADIO_LEN, 0) == -1) {
         printf("sdr_gnuradio_tx send() failed\n");
         exit(1);
     }
@@ -104,61 +104,59 @@ static int sdr_gnuradio_tx(int fd, const void * data, size_t len) {
 
 typedef struct gnuradio_context {
     int mtu;
-	int rxfd;
+    int rxfd;
     int fd;
-	sdr_rx_callback_t rx_callback;
-	void *user_data;
+    sdr_rx_callback_t rx_callback;
+    void *user_data;
 } gnuradio_context_t;
 
-static void * gnuradio_rx_thread(void * arg) {
-	gnuradio_context_t *ctx = arg;
-	uint8_t *data = os_malloc(ctx->mtu);
+static void *gnuradio_rx_thread(void *arg) {
+    gnuradio_context_t *ctx = arg;
+    uint8_t *data = os_malloc(ctx->mtu);
 
-	while (1) {
-		int length = read(ctx->rxfd, data, ctx->mtu);
+    while (1) {
+        int length = read(ctx->rxfd, data, ctx->mtu);
         if (length == 0) {
-			printf("%s: connection closed\n", __FUNCTION__);
+            printf("%s: connection closed\n", __FUNCTION__);
             return NULL;
         }
-		if (length == -1) {
-			printf("%s: read() failed: %d", __FUNCTION__, errno);
+        if (length == -1) {
+            printf("%s: read() failed: %d", __FUNCTION__, errno);
             return NULL;
-		}
+        }
         if (length < ctx->mtu) {
-			printf("%s: short read %d<%d", __FUNCTION__, length, ctx->mtu);
-		}
+            printf("%s: short read %d<%d", __FUNCTION__, length, ctx->mtu);
+        }
 
         ctx->rx_callback(ctx->user_data, data, length, NULL);
-	}
-	return NULL;
+    }
+    return NULL;
 }
 
-//Inits tcp tx and rx
-//starts rx thread
+// Inits tcp tx and rx
+// starts rx thread
 static int gnuradio_tcp_open(const char *host, uint16_t port) {
     struct sockaddr_in servaddr;
-   
+
     // socket create and verification
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1) {
         printf("TCP socket w/ gnuradio creation failed: %d\n", errno);
         return -1;
-    }
-    else
+    } else
         printf("TCP socket w/ gnuradio successfully created..\n");
     memset(&servaddr, 0, sizeof(servaddr));
-   
+
     // assign IP, PORT
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = inet_addr(host);
     servaddr.sin_port = htons(port);
-   
+
     // connect the client socket to server socket
-    if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) {
+    if (connect(sockfd, (SA *)&servaddr, sizeof(servaddr)) != 0) {
         printf("connection to port %d failed: %d\n", port, errno);
         return -2;
-    }
-    else
+    } else
         printf("Connected to the gnuradio TCP server..\n");
 
     return sockfd;
@@ -168,8 +166,8 @@ int sdr_gnuradio_driver_init(sdr_interface_data_t *ifdata) {
 
     gnuradio_context_t *ctx = os_malloc(sizeof(gnuradio_context_t));
     if (ctx == NULL) {
-    	printf("%s: Error allocating context\n", __FUNCTION__);
-    	return -1;
+        printf("%s: Error allocating context\n", __FUNCTION__);
+        return -1;
     }
 
     int rxfd = gnuradio_tcp_open("127.0.0.1", 4321);
@@ -182,13 +180,13 @@ int sdr_gnuradio_driver_init(sdr_interface_data_t *ifdata) {
     ctx->user_data = ifdata;
 
     if (os_task_create(gnuradio_rx_thread, "gnuradio_rx", 0, ctx, 0, 0)) {
-      	printf("%s: os_thread_create() failed to create RX thread\n", __FUNCTION__);
-    	os_free(ctx);
-    	close(rxfd);
-       	return -2;
+        printf("%s: os_thread_create() failed to create RX thread\n", __FUNCTION__);
+        os_free(ctx);
+        close(rxfd);
+        return -2;
     }
 
-    ifdata->tx_func = (sdr_tx_t) sdr_gnuradio_tx;
+    ifdata->tx_func = (sdr_tx_t)sdr_gnuradio_tx;
 
     return 0;
 }
