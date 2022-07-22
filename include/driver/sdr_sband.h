@@ -25,18 +25,19 @@ bool sband_buffer_count(uint16_t *cnt);
 #define SBAND_SYNC_INTERVAL 8*1024
 
 #define SBAND_FIFO_DEPTH 20*1024
+#define SBAND_FIFO_READY_COUNT 2561
 
-/* The manual says the radio drains in about 41msec, or about 512bytes/msec */
+/* The manual says the radio drains in about 41msec, or about 512bytes/msec
+ * at full data rate. Half data rate drains in 82msec, etc.
+ */
 #define SBAND_DRAIN_RATE 512
 
 typedef struct sdr_sband_conf {
     uint32_t bytes_until_sync;
     uint16_t state;
     uint16_t fifo_count;
-    uint8_t  fillx;
-    uint8_t  drainx;
-    uint16_t fill_cnt[16];
-    uint16_t drain_cnt[16];
+    uint16_t too_slow;   // Incremented when we are filling too slowly
+    uint16_t too_fast;   // Incremented when we are draining too slowly 
 } sdr_sband_conf_t;
 
 struct sdr_interface_data;

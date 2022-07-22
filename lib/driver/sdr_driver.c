@@ -47,28 +47,46 @@ void sdr_sband_tx_start(sdr_interface_data_t *ifdata) {
     sband_enter_sync_mode();
 }
 
+/* S-band drain tunables. The manual says that the 20KB FIFO should drain in
+ * 41msec at full data rate. We have observed the transmitter become ready in
+ * approximately 120msec at 1/4 data rate. The retry count and the sleep time
+ * per retry can be adjusted so we never overflow or underflow the FIFO.
+ */
+#define SBAND_DRAIN_RETRIES 80
+#define SBAND_DRAIN_MSEC 2
+
+
+inline static void sband_drain_fifo(sdr_sband_conf_t *sband_conf) {
+    int retries = 0;
+    while (!sband_transmit_ready() && retries<SBAND_DRAIN_RETRIES) {
+        os_sleep_ms(SBAND_DRAIN_MSEC);
+        ++retries;
+    }
+    if (retries == 0) {
+        /* s-band transmit was immediately ready. That means we're filling too
+         * slowly.
+         */
+        sband_conf->too_slow++;
+    }
+    else if (retries >= SBAND_DRAIN_RETRIES) {
+        /* s-band transmit never signalled ready. That means we're not waiting
+         * long enough or we're filling too much too fast.
+         */
+        sband_conf->too_fast++;
+    }
+}                      
+                                                                 
 void sdr_sband_tx_stop(sdr_interface_data_t *ifdata) {
     sdr_sband_conf_t *sband_conf = &ifdata->sdr_conf->sband_conf;
-    uint16_t fifo_level;
-    int delay = 50;
 
     sband_conf->state = SBAND_IDLE;
 
     // We should let the FIFO drain before turning off the radio
-    if (sband_buffer_count(&fifo_level)) {
-        // The manual says the radio transmits at 512 bytes/msec
-        delay = (fifo_level + SBAND_DRAIN_RATE/2)/(SBAND_DRAIN_RATE);
-    }
-    os_sleep_ms(delay);
-    sband_enter_conf_mode();
+    sband_drain_fifo(sband_conf);
+    // The transmitter signals ready when there is still 2KB in the FIFO.
+    os_sleep_ms(20);
 
-    int i;
-    for (i=0; i<16; i++) {
-        if (++(sband_conf->fillx) >= 16) sband_conf->fillx = 0;
-        if (++(sband_conf->drainx) >= 16) sband_conf->drainx = 0;
-        ex2_log("high %s low %s", sband_conf->fill_cnt[sband_conf->fillx],
-                sband_conf->drain_cnt[sband_conf->drainx]);
-    }
+    sband_enter_conf_mode();
 }
 
 int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
@@ -89,27 +107,14 @@ int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
             sband_conf->fifo_count += mtu;
 
             if (sband_conf->fifo_count >= (SBAND_FIFO_DEPTH - 1024)) {
-                if (sband_conf->state == SBAND_FIRST_FILL)
+                if (sband_conf->state == SBAND_FIRST_FILL) {
                     sband_enter_data_mode();
-#if 0
-                sband_buffer_count(&(sband_conf->fill_cnt[sband_conf->fillx]));
-                if (++(sband_conf->fillx) >= 16) sband_conf->fillx = 0;
-
-                /* Manual says a full drain takes about 41ms */
-                os_sleep_ms(30);
-
-                sband_conf->state = SBAND_FILL;
-                sband_buffer_count(&(sband_conf->fifo_count));
-                sband_conf->drain_cnt[sband_conf->drainx] = sband_conf->fifo_count;
-                if (++(sband_conf->drainx) >= 16) sband_conf->drainx = 0;
-#else
-                while (!sband_transmit_ready()) {
-                    os_sleep_ms(30);
                 }
 
+                sband_drain_fifo(sband_conf);
+ 
                 sband_conf->state = SBAND_FILL;
-                sband_conf->fifo_count = 2048;
-#endif
+                sband_conf->fifo_count = SBAND_FIFO_READY_COUNT;
             }
             mtu = fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
         }
