@@ -43,6 +43,29 @@ int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
 void sdr_sband_tx_start(sdr_interface_data_t *ifdata) {
     sdr_sband_conf_t *sband_conf = &(ifdata->sdr_conf->sband_conf);
 
+    /* The S-band transmit rate is converted to a bandwidth multiplier.
+     * Specifically, full Tx rate is 512 bytes/msec, and given the multiplier 1.
+     * Half rate is 256 bytes/msec, so the multiplier is 2 (i.e. divide by 2).
+     */
+    int rate = sband_get_rate();
+    switch(rate) {
+    case S_RATE_FULL:
+        sband_conf->ratex = 1;
+        break;
+    case S_RATE_HALF:
+        sband_conf->ratex = 2;
+        break;
+    case S_RATE_QUARTER:
+        sband_conf->ratex = 4;
+        break;
+    default:
+        /* Of course, this shouldn't happen but it did :-(
+         * The error should have been logged in sband_get_rate() so we'll just
+         * give it a bit of extra time here (although it's likely broken).
+         */
+        sband_conf->ratex = 5;
+        break;
+    }
     sband_conf->state = SBAND_FIRST_FILL;
     sband_enter_sync_mode();
 }
@@ -52,13 +75,15 @@ void sdr_sband_tx_start(sdr_interface_data_t *ifdata) {
  * approximately 120msec at 1/4 data rate. The retry count and the sleep time
  * per retry can be adjusted so we never overflow or underflow the FIFO.
  */
-#define SBAND_DRAIN_RETRIES 80
+#define SBAND_DRAIN_RATE 512
 #define SBAND_DRAIN_MSEC 2
 
 
 inline static void sband_drain_fifo(sdr_sband_conf_t *sband_conf) {
     int retries = 0;
-    while (!sband_transmit_ready() && retries<SBAND_DRAIN_RETRIES) {
+    int drain_rate = SBAND_DRAIN_RATE/sband_conf->ratex;
+    int drain_count = (sband_conf->fifo_count/drain_rate)/SBAND_DRAIN_MSEC;
+    while (!sband_transmit_ready() && retries<drain_count) {
         os_sleep_ms(SBAND_DRAIN_MSEC);
         ++retries;
     }
@@ -68,12 +93,14 @@ inline static void sband_drain_fifo(sdr_sband_conf_t *sband_conf) {
          */
         sband_conf->too_slow++;
     }
-    else if (retries >= SBAND_DRAIN_RETRIES) {
+    else if (retries >= drain_count) {
         /* s-band transmit never signalled ready. That means we're not waiting
          * long enough or we're filling too much too fast.
          */
         sband_conf->too_fast++;
     }
+
+    sband_conf->fifo_count = SBAND_FIFO_READY_COUNT;
 }                      
                                                                  
 void sdr_sband_tx_stop(sdr_interface_data_t *ifdata) {
@@ -114,7 +141,6 @@ int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
                 sband_drain_fifo(sband_conf);
  
                 sband_conf->state = SBAND_FILL;
-                sband_conf->fifo_count = SBAND_FIFO_READY_COUNT;
             }
             mtu = fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
         }
