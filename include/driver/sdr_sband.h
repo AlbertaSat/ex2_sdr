@@ -7,6 +7,8 @@
 #include <stdbool.h>
 
 // These don't exist (and aren't needed) on Linux
+int sband_get_rate(void);
+
 bool sband_enter_conf_mode(void);
 bool sband_enter_sync_mode(void);
 bool sband_enter_data_mode(void);
@@ -21,12 +23,6 @@ bool sband_buffer_count(uint16_t *cnt);
 #include <sband.h>
 #endif // OS_POSIX
 
-/* Send an S-Band Sync word every sync interval bytes */
-#define SBAND_SYNC_INTERVAL 8*1024
-
-#define SBAND_FIFO_DEPTH 20*1024
-#define SBAND_FIFO_READY_COUNT 2561
-
 /* The manual says the radio drains in about 41msec, or about 512bytes/msec
  * at full data rate. Half data rate drains in 82msec, etc.
  */
@@ -34,7 +30,8 @@ bool sband_buffer_count(uint16_t *cnt);
 
 typedef struct sdr_sband_conf {
     uint32_t bytes_until_sync;
-    uint16_t state;
+    uint8_t state;
+    uint8_t ratex;        // transmit rate multiplier: full, half, or quarter
     uint16_t fifo_count;
     uint16_t too_slow;   // Incremented when we are filling too slowly
     uint16_t too_fast;   // Incremented when we are draining too slowly 
