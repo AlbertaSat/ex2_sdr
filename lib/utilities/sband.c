@@ -17,4 +17,8 @@ int sband_transmit_ready(void) { return 1; }
 
 bool sband_buffer_count(uint16_t *cnt) { return true; }
 
+int sdr_sband_tx(struct sdr_interface_data *ifdata, uint8_t *data, uint16_t len) {
+    return 0;
+}
+
 #endif
