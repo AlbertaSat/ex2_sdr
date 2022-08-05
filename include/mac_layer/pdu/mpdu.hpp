@@ -136,9 +136,12 @@ namespace ex2
        * valid, an MPDU will be made. If there is not enough data past the
        * MPDUHeader in @p rawMPDU, bytes will be added to the codeword
        *
+       * @param[in] currentErrorCorrection The current ErrorCorrection scheme in
+       * use by the MAC.
        * @param[in] rawMPDU The received transparent mode Data Field 2 as a byte vector
        */
       MPDU (
+        const ErrorCorrection &currentErrorCorrection,
         std::vector<uint8_t> &rawMPDU);
 
       ~MPDU ();

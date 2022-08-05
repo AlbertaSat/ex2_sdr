@@ -97,7 +97,7 @@ namespace ex2 {
       std::vector<uint8_t> p;
       p.assign(uhfPayload, uhfPayload+payloadLength);
       try {
-        MPDU mpdu(p);
+        MPDU mpdu(*m_errorCorrection, p);
 
         // @todo Could do some header checks in case we are unlucky. Check packet length is >= 0, for example
 
@@ -120,10 +120,15 @@ namespace ex2 {
           }
           else {
             // The received raw MPDU index is not what we expected, which implies
-            // that a transparent mode packet got dropped somehow, so the index
-            // should be greater than what we expected. If it is, we need to
-            // pad m_codewordBuffer to catch things up
-            if (mpdu.getMpduHeader()->getCodewordFragmentIndex() > m_mpduCount) {
+            // that a transparent mode packet got dropped somehow
+            // There are two cases to consider.
+            // a) the index is 0 and somehow we have started to receive a new packet, or
+            // b) the index is greater than what we expected, or
+            // c) the index is less than what we expected
+            //
+            // If it is, we need to pad m_codewordBuffer to catch things up
+            if ((mpdu.getMpduHeader()->getCodewordFragmentIndex() > m_mpduCount) &&
+                (mpdu.getMpduHeader()->getCodewordFragmentIndex() <= m_expectedMPDUs)) {
               uint32_t numMissingMPDUs = mpdu.getMpduHeader()->getCodewordFragmentIndex() - m_mpduCount;
               // We need to first zero-fill the numMissingMPDUs, then insert
               // the payload from the one just received.
@@ -344,7 +349,7 @@ namespace ex2 {
             // only possible error would be from a bad ErrorCorrection, but that
             // would have been caught when m_errorCorrection was made.
             MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
-              mpduCount++, len, 0);
+              mpduCount++, packetLength, 0);
             // Make an MPDU.
             // Just the same as for the MPDUHeader, there is no way for this
             // constructor to generate an exception because the only check that
@@ -390,7 +395,7 @@ namespace ex2 {
         // only possible error would be from a bad ErrorCorrection, but that
         // would have been caught when m_errorCorrection was made.
         MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
-          mpduCount++, len, 0);
+          mpduCount++, packetLength, 0);
         // Make an MPDU.
         // Just the same as for the MPDUHeader, there is no way for this
         // constructor to generate an exception because the only check that

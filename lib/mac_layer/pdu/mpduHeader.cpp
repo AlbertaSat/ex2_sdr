@@ -1,9 +1,11 @@
 /*!
- * @file frameheader.cpp
+ * @file mpduHeader.cpp
  * @author Steven Knudsen
  * @date April 30, 2021
  *
- * @details
+ * @details Represents the MPDU header, which contains information about the
+ * radio RF Mode, Error Correction scheme, which codeword fragment and packet
+ * fragment this is, and the original payload length.
  *
  * @copyright AlbertaSat 2021
  *
@@ -15,6 +17,8 @@
 #include "mpduHeader.hpp"
 #include "mpdu.hpp"
 #include "rfMode.hpp"
+
+#define MPDU_HEADER_DEBUG 0 // set to 1 to enable debug output
 
 namespace ex2 {
   namespace sdr {
@@ -43,29 +47,33 @@ namespace ex2 {
       m_headerValid = true;
     }
 
-    MPDUHeader::MPDUHeader (std::vector<uint8_t> &rawHeader){
+    MPDUHeader::MPDUHeader (const ErrorCorrection &currentErrorCorrection,
+      std::vector<uint8_t> &rawHeader){
 
       if (rawHeader.size() < (k_MACHeaderLength / 8)) {
         throw MPDUHeaderException("MPDUHeader: Raw header too short");
 
       }
       try {
-      if (decodeMACHeader(rawHeader)) {
-        // The header may be valid, but if there were more than 4 errors in the
-        // Golay codewords, we will have a false positive result. We can check
-        // a little more by making sure the FEC scheme is possible
+        if (decodeMACHeader(rawHeader)) {
+          // The header may be valid, but if there were more than 4 errors in the
+          // Golay codewords, we will have a false positive result. We can check
+          // a little more by making sure the FEC scheme is possible
 
-        // Any rfMode value is valid, so not worth checking.
+          // @TODO Any rfMode value is valid, and we really don't do anything with
+          // rfMode yet, so not worth checking.
 
-        if (m_errorCorrection->getErrorCorrectionScheme() != ErrorCorrection::ErrorCorrectionScheme::NO_FEC &&
-            m_errorCorrection->getErrorCorrectionScheme() >= ErrorCorrection::ErrorCorrectionScheme::LAST) {
-          // The header is bad
-          throw MPDUHeaderException("MPDUHeader: Bad transparent mode packet data; ErrorCorrectionScheme not allowed.");
+          // It's possible that the check for a valid error correction scheme in
+          // decodeMACHeader passes, but it's still the wrong scheme, not the
+          // one in actual use.
+          if (m_errorCorrection->getErrorCorrectionScheme() != currentErrorCorrection.getErrorCorrectionScheme()){
+            // The header is bad
+            throw MPDUHeaderException("MPDUHeader: Bad transparent mode packet data; ErrorCorrectionScheme not allowed.");
+          }
         }
-      }
-      else {
-        throw MPDUHeaderException("MPDUHeader: Too many bit errors.");
-      }
+        else {
+          throw MPDUHeaderException("MPDUHeader: Too many bit errors.");
+        }
       }
       catch (MPDUHeaderException& e) {
         // Just propagate this to the invoker
@@ -109,6 +117,9 @@ namespace ex2 {
 
       if (decodedFirst < 0) {
         // there were 4 errors in the codeword, so we know it's bad
+#if MPDU_HEADER_DEBUG
+        printf("----------GOLAY first 24 bits in error\n");
+#endif
         return false;
       }
 
@@ -120,6 +131,9 @@ namespace ex2 {
 
       if (decodedSecond < 0) {
         // there were 4 errors in the codeword, so we know it's bad
+#if MPDU_HEADER_DEBUG
+        printf("----------GOLAY second 24 bits in error\n");
+#endif
         return false;
       }
 
@@ -131,6 +145,9 @@ namespace ex2 {
 
       if (decodedThird < 0) {
         // there were 4 errors in the codeword, so we know it's bad
+#if MPDU_HEADER_DEBUG
+        printf("----------GOLAY third 24 bits in error");
+#endif
         return false;
       }
 
@@ -168,7 +185,7 @@ namespace ex2 {
       // boudaries, so a bit of bit shifting is needed to get things right.
       uint16_t msgBits = ((uint16_t) m_rfModeNumber << 9) & 0x0E00; // 3 bits
       msgBits = msgBits | (((uint16_t) m_errorCorrection->getErrorCorrectionScheme() << 3) & 0x01F8); // 6 bits
-      msgBits = msgBits | ((m_codewordFragmentIndex >> 4) & 0x0007); // top 3 bits
+      msgBits = msgBits | ((m_codewordFragmentIndex >> 4) & 0x0007); // bottom 3 bits
 
       uint32_t codeword = golay_encode(msgBits);
 
@@ -177,8 +194,8 @@ namespace ex2 {
       m_headerPayload[0] = (uint8_t)((codeword & 0x00FF0000) >> 16);
 
       msgBits = 0;
-      msgBits = (m_codewordFragmentIndex << 8) & 0x00000F00;        // bottom 4 bits
-      msgBits = msgBits | ((m_userPacketPayloadLength >> 4) & 0x000000FF); // top 8 bits
+      msgBits = (m_codewordFragmentIndex << 8) & 0x00000F00;        // top 4 bits
+      msgBits = msgBits | ((m_userPacketPayloadLength >> 4) & 0x000000FF); // bottom 8 bits
 
       codeword = golay_encode(msgBits);
 
