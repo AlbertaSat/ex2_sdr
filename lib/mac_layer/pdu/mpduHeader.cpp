@@ -52,7 +52,6 @@ namespace ex2 {
 
       if (rawHeader.size() < (k_MACHeaderLength / 8)) {
         throw MPDUHeaderException("MPDUHeader: Raw header too short");
-
       }
       try {
         if (decodeMACHeader(rawHeader)) {
