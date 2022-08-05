@@ -28,7 +28,8 @@ using namespace ex2::sdr;
 
 #include "gtest/gtest.h"
 
-#define QA_MAC_DEBUG 0 // set to 1 for debugging output
+#define QA_MAC_DEBUG 0         // set to 1 for debugging output
+#define QA_MAC_VERBOSE_DEBUG 0 // set to 1 for verbose debugging output
 
 // @todo should be 14
 #define NUM_ERROR_CORRECTION_SCHEMES_TO_TEST 14
@@ -285,8 +286,6 @@ TEST(mac, PacketLoopbackNoDroppedPackets) {
                 ASSERT_TRUE(same) << "decoded packet does not match original";
               }
               break;
-              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
-                break;
               case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
                 break;
               default:
@@ -491,8 +490,6 @@ TEST(mac, PacketLoopbackDroppedPackets) {
                 FAIL() << "a packet was made without the first MPDU; this cannot happen";
               }
               break;
-              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
-                break;
               case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
                 break;
               default:
@@ -521,8 +518,6 @@ TEST(mac, PacketLoopbackDroppedPackets) {
                   ASSERT_FALSE(same) << "decoded packet matches original even though an MPDU was dropped";
                 }
                 break;
-                case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
-                  break;
                 case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
                   break;
                 default:
@@ -555,8 +550,6 @@ TEST(mac, PacketLoopbackDroppedPackets) {
                 ASSERT_FALSE(same) << "decoded packet matches original even though an MPDU was mangled";
               }
               break;
-              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
-                break;
               case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
                 break;
               default:
