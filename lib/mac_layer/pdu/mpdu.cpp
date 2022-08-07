@@ -13,6 +13,7 @@
 
 #include "mpdu.hpp"
 
+#define MPDU_DEBUG 0 // set to 1 for debug output
 namespace ex2
 {
   namespace sdr
@@ -93,7 +94,9 @@ namespace ex2
       }
       catch (MPDUHeaderException& e) {
         // @todo should log this
+//#if MPDU_DEBUG
         printf("MPDUHeader exception : %s\n", e.what());
+//#endif
         throw MPDUException("MPDU: Bad raw MPDUHeader.");
       }
 

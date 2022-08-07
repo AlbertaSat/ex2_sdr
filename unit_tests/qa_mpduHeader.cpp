@@ -221,7 +221,9 @@ TEST(mpduHeader, Accessors )
 TEST(mpduHeader, RawReconstruction )
 {
   /* ---------------------------------------------------------------------
-   * Check all accessors for both constructors
+   * Inject header errors and check expected results. In general, Golay
+   * (24,12,8) can correct up to 3 bit errors, and detect 4. Any more and
+   * the results are inconsistent, so essentially false positives.
    * ---------------------------------------------------------------------
    */
 
@@ -310,13 +312,13 @@ TEST(mpduHeader, RawReconstruction )
   // passed to the raw header constructor
   payload1.resize(UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH + 1);
 
-  // Now, let's mangle the 1 bit of the MPDUHeader error correction enum. The
-  // MSB of that value is bit 4 of the first payload byte.
-  uint8_t temp = payload1[0] ^ 0x01; // flip bit 2 of the 6-bit error correction scheme
+  // Now, let's mangle the MSB of the MPDUHeader error correction enum. The MSB
+  // is actually bit 0 of byte 2 of the payload (the first 12 bits are Golay parity).
+  uint8_t temp = payload1[1] ^ 0x01; // flip bit 6 of the 6-bit error correction scheme
 #if QA_MPDUHEADER_DEBUG
-  printf("payload1[0] 0x%02X temp 0x%02X\n",payload1[0],temp);
+  printf("payload1[1] 0x%02X temp 0x%02X\n",payload1[1],temp);
 #endif
-  payload1[0] = temp;
+  payload1[1] = temp;
 
   // We expect no problems...
   try {
@@ -342,13 +344,14 @@ TEST(mpduHeader, RawReconstruction )
   // passed to the raw header constructor
   payload1.resize(UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH + 1);
 
-  // Now, let's mangle the 5 MSBs of the 6-bit MPDUHeader error correction enum.
-  temp = ~payload1[0];
-  temp = (temp & 0x1F) | (payload1[0] & 0xE0);
+  // Now, let's mangle the 5 LSBs of the 6-bit MPDUHeader error correction enum.
+  // The MSB is the last bit in the 2nd byte, the top MSBs of the 3rd byte
+  // correspond to the 5 LSBs of the error correction scheme.
+  temp = payload1[2] ^ 0xF8;
 #if QA_MPDUHEADER_DEBUG
-  printf("payload1[0] 0x%02X temp  0x%02X\n",payload1[0], temp);
+  printf("payload1[2] 0x%02X temp  0x%02X\n",payload1[2], temp);
 #endif
-  payload1[0] = temp;
+  payload1[2] = temp;
 
   // We expect problems...
   try {

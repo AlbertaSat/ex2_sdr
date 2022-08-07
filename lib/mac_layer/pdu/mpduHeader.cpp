@@ -184,7 +184,7 @@ namespace ex2 {
       // boudaries, so a bit of bit shifting is needed to get things right.
       uint16_t msgBits = ((uint16_t) m_rfModeNumber << 9) & 0x0E00; // 3 bits
       msgBits = msgBits | (((uint16_t) m_errorCorrection->getErrorCorrectionScheme() << 3) & 0x01F8); // 6 bits
-      msgBits = msgBits | ((m_codewordFragmentIndex >> 4) & 0x0007); // bottom 3 bits
+      msgBits = msgBits | ((m_codewordFragmentIndex >> 4) & 0x0007); // top, MSB 3 bits
 
       uint32_t codeword = golay_encode(msgBits);
 
@@ -193,8 +193,8 @@ namespace ex2 {
       m_headerPayload[0] = (uint8_t)((codeword & 0x00FF0000) >> 16);
 
       msgBits = 0;
-      msgBits = (m_codewordFragmentIndex << 8) & 0x00000F00;        // top 4 bits
-      msgBits = msgBits | ((m_userPacketPayloadLength >> 4) & 0x000000FF); // bottom 8 bits
+      msgBits = (m_codewordFragmentIndex << 8) & 0x00000F00;               // bottom, LSB 4 bits
+      msgBits = msgBits | ((m_userPacketPayloadLength >> 4) & 0x000000FF); // top, MSB 8 bits
 
       codeword = golay_encode(msgBits);
 
@@ -203,8 +203,8 @@ namespace ex2 {
       m_headerPayload[3] = (uint8_t)((codeword & 0x00FF0000) >> 16);
 
       msgBits = 0;
-      msgBits = (m_userPacketPayloadLength << 8) & 0x00000F00;
-      msgBits = msgBits | (m_userPacketFragmentIndex & 0x000000FF);
+      msgBits = (m_userPacketPayloadLength << 8) & 0x00000F00;      // bottom, LSB 4 bits
+      msgBits = msgBits | (m_userPacketFragmentIndex & 0x000000FF); // all 8 bits
 
       codeword = golay_encode(msgBits);
 

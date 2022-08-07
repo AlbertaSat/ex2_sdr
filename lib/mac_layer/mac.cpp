@@ -19,6 +19,10 @@
 #include "QCLDPC.hpp"
 #include "radio.h"
 
+// The user packet fragmentation index is not used currently. We can use it
+// to detect false positive Golay decoding since it should always be set to zero.
+#define MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT 0
+
 #define MAC_DEBUG 0 // Set to one to turn on debugging messages
 
 namespace ex2 {
@@ -99,6 +103,29 @@ namespace ex2 {
       try {
         MPDU mpdu(*m_errorCorrection, p);
 
+        // Since we do not use the userPacketFragmentIndex field of the MPDU
+        // header (we set to 0 always), we can check it and catch cases where
+        // the Golay decoder provides a false positive (i.e., when there are
+        // more than 4 bit errors in 12 bits.
+        //
+        // When there is a false positive, we can't trust anything about the MPDU.
+        //
+        // If we have the first MPDU fragment already, this might be the MPDU
+        // we are expecting. If it's not the last fragment, we can wait for
+        // another to arrive and let the logic below pad things out. If it is
+        // the last fragment, either a new packet will send a new first MPDU
+        // fragement and the current one will complete, or it will timeout
+        // and complete. Either way, here we do nothing, just return.
+        //
+        // If we don't have the first MPDU fragement already, this might be it,
+        // but we can't trust it. So we ignore it.
+        if (mpdu.getMpduHeader()->getUserPacketFragmentIndex() != MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT) {
+#if MAC_DEBUG
+            printf("Received an MPDU with user packet fragment index not zero\n");
+#endif
+          return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
+        }
+
         // A common reason making an MPDU will fail and throw an exception is
         // that the packet header information is corrupt. We rely on the
         // MPDUHeader class to check that, including that the error correction
@@ -107,6 +134,34 @@ namespace ex2 {
         // If we already have the first MPDU, we are looking for more...
         if (m_firstFragmentReceived) {
           // If we are here, we expected more raw MPDUs.
+
+          // We already have the user packet length and since it's in every
+          // MPDU header, let's check to see if the current one is consistent
+          // with the first one we received.
+          if (mpdu.getMpduHeader()->getUserPacketPayloadLength() != m_currentPacketLength) {
+            // Ooops, we must have missed all the MPDUs that match the first
+            // MPDU fragment. This is similar to the scenario where we have the
+            // first fragment, then get another first fragment. Best we can do is
+            // dump the current packet processing.
+#if MAC_DEBUG
+            printf("Received an MPDU with user packet length that does not match the current length\n");
+#endif
+            m_firstFragmentReceived = false;
+            m_mpduCodewordFragmentCount = 0;
+            // if it happens to be the first fragment, then let's start processing for a new packet.
+            if (mpdu.getMpduHeader()->getCodewordFragmentIndex() == 0) {
+              m_processFirstMPDU(mpdu);
+
+              // If only one MPDU is expected for this packet, decode the codeword(s) in the buffer
+              if (m_mpduCodewordFragmentCount == m_numExpectedMpduCodewordFragments) {
+                m_decodePacket();
+                return MAC_UHFPacketProcessingStatus::PACKET_READY;
+              }
+              // Otherwise there must be more MPDUs to come...
+              m_firstFragmentReceived = true;
+            }
+            return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
+          } // MPDU user packet lengths don't match
 
           // If the received raw MPDU index matches the current count, this is
           // the next MPDU we expected.
@@ -140,6 +195,8 @@ namespace ex2 {
               // one needed to complete a packet, we'd then have two packets in
               // hand and no way to return them both, so just ditch the current
               // packet and start a new one based on the current MPDU.
+              m_firstFragmentReceived = false;
+              m_mpduCodewordFragmentCount = 0;
               m_processFirstMPDU(mpdu);
 
               // If only one MPDU is expected for this packet, decode the codeword(s) in the buffer
@@ -229,8 +286,9 @@ namespace ex2 {
       } // try to make a good MPDU
       catch (const MPDUException& e) {
         // @todo log this exception
+#if MAC_DEBUG
         printf("MPDU packet exception %s\n", e.what());
-
+#endif
         // We are here because the data just received did not result in a valid
         // MPDU. That means that none of our tracking variables has been updated,
         // which means there is not much we can do if, for example, the data
@@ -415,7 +473,7 @@ namespace ex2 {
             // only possible error would be from a bad ErrorCorrection, but that
             // would have been caught when m_errorCorrection was made.
             MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
-              mpduCodewordFragmentCount++, packetLength, 0);
+              mpduCodewordFragmentCount++, packetLength, MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT);
             // Make an MPDU.
             // Just the same as for the MPDUHeader, there is no way for this
             // constructor to generate an exception because the only check that
@@ -461,7 +519,7 @@ namespace ex2 {
         // only possible error would be from a bad ErrorCorrection, but that
         // would have been caught when m_errorCorrection was made.
         MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
-          mpduCodewordFragmentCount++, packetLength, 0);
+          mpduCodewordFragmentCount++, packetLength, MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT);
         // Make an MPDU.
         // Just the same as for the MPDUHeader, there is no way for this
         // constructor to generate an exception because the only check that
