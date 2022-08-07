@@ -133,11 +133,22 @@ TEST(golay, CheckManyUncorrectableErrors )
       // Apply the bit error tothe codeword to get received codeword
       uint32_t recd = codeword ^ pattern;
 #if QA_GLOAY_DEBUG
-      printf("pattern 0x%08x codeword 0x%08x recd 0x%08x\n", pattern, codeword, recd);
+      printf("numBitErrors %d pattern 0x%08x codeword 0x%08x recd 0x%08x\n", numBitErrors, pattern, codeword, recd);
 #endif
       // Decode
       int16_t decoded = golay_decode(recd);
 #if QA_GLOAY_DEBUG
+      if (decoded < 0) {
+        printf("detected 4 errors for numBitErrors = %d\n",numBitErrors);
+      }
+      int32_t errors = golay_errors(recd);
+      if (errors < 0) {
+        printf("golay_errors returned < 0 0x%04x for numBitErrors = %d\n",errors, numBitErrors);
+      }
+      else {
+        printf("golay_errors returned 0x%04x for numBitErrors = %d\n",errors, numBitErrors);
+      }
+
       printf(" lots errors decoded = %d\n",decoded);
 #endif
       // Check decoded is same as data
