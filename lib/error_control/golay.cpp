@@ -57,36 +57,36 @@
 
    I've seen cunning implementations of this which only use one table. That
    technique doesn't seem to work with these numbers though.
-*/
+ */
 
 static const uint16_t golay_encode_matrix[12] = {
-    0xC75,
-    0x49F,
-    0xD4B,
-    0x6E3,
-    0x9B3,
-    0xB66,
-    0xECC,
-    0x1ED,
-    0x3DA,
-    0x7B4,
-    0xB1D,
-    0xE3A,
+  0xC75,
+  0x49F,
+  0xD4B,
+  0x6E3,
+  0x9B3,
+  0xB66,
+  0xECC,
+  0x1ED,
+  0x3DA,
+  0x7B4,
+  0xB1D,
+  0xE3A,
 };
 
 static const uint16_t golay_decode_matrix[12] = {
-   0x49F,
-   0x93E,
-   0x6E3,
-   0xDC6,
-   0xF13,
-   0xAB9,
-   0x1ED,
-   0x3DA,
-   0x7B4,
-   0xF68,
-   0xA4F,
-   0xC75,
+  0x49F,
+  0x93E,
+  0x6E3,
+  0xDC6,
+  0xF13,
+  0xAB9,
+  0x1ED,
+  0x3DA,
+  0x7B4,
+  0xF68,
+  0xA4F,
+  0xC75,
 };
 
 
@@ -94,31 +94,31 @@ static const uint16_t golay_decode_matrix[12] = {
 /* Function to compute the Hamming weight of a 12-bit integer */
 static uint16_t weight12(uint16_t vector)
 {
-    uint16_t w=0;
-    uint16_t i;
-    for( i=0; i<12; i++ )
-	if( vector & 1<<i )
-	    w++;
-    return w;
+  uint16_t w=0;
+  uint16_t i;
+  for( i=0; i<12; i++ )
+    if( vector & 1<<i )
+      w++;
+  return w;
 }
 
 /* returns the golay coding of the given 12-bit word */
 static uint16_t golay_coding(uint16_t w)
 {
-    uint16_t out=0;
-    uint16_t i;
+  uint16_t out=0;
+  uint16_t i;
 
-    for( i = 0; i<12; i++ ) {
-	if( w & 1<<i )
-	    out ^= golay_encode_matrix[i];
-    }
-    return out;
+  for( i = 0; i<12; i++ ) {
+    if( w & 1<<i )
+      out ^= golay_encode_matrix[i];
+  }
+  return out;
 }
 
 /* encodes a 12-bit word to a 24-bit codeword */
-uint32_t golay_encode(uint16_t w)
+uint32_t golay_encode(uint16_t message)
 {
-    return ((uint32_t)w) | ((uint32_t)golay_coding(w))<<12;
+  return ((uint32_t)message) | ((uint32_t)golay_coding(message))<<12;
 }
 
 
@@ -126,14 +126,14 @@ uint32_t golay_encode(uint16_t w)
 /* returns the golay coding of the given 12-bit word */
 static uint16_t golay_decoding(uint16_t w)
 {
-    uint16_t out=0;
-    uint16_t i;
+  uint16_t out=0;
+  uint16_t i;
 
-    for( i = 0; i<12; i++ ) {
-	if( w & 1<<(i) )
-	    out ^= golay_decode_matrix[i];
-    }
-    return out;
+  for( i = 0; i<12; i++ ) {
+    if( w & 1<<(i) )
+      out ^= golay_decode_matrix[i];
+  }
+  return out;
 }
 
 
@@ -142,115 +142,115 @@ static uint16_t golay_decoding(uint16_t w)
  */
 int32_t golay_errors(uint32_t codeword)
 {
-    uint16_t received_data, received_parity;
-    uint16_t syndrome;
-    uint16_t w,i;
-    uint16_t inv_syndrome = 0;
+  uint16_t received_data, received_parity;
+  uint16_t syndrome;
+  uint16_t w,i;
+  uint16_t inv_syndrome = 0;
 
-    received_parity = (uint16_t)(codeword>>12);
-    received_data   = (uint16_t)codeword & 0xfff;
+  received_parity = (uint16_t)(codeword>>12);
+  received_data   = (uint16_t)codeword & 0xfff;
 
-    /* We use the C notation ^ for XOR to represent addition modulo 2.
-     *
-     * Model the received codeword (r) as the transmitted codeword (u)
-     * plus an error vector (e).
-     *
-     *   r = e ^ u
-     *
-     * Then we calculate a syndrome (s):
-     *
-     *   s = r * H, where H = [ P   ], where I12 is the identity matrix
-     *                        [ I12 ]
-     *
-     * (In other words, we calculate the parity check for the received
-     * data bits, and add them to the received parity bits)
-     */
+  /* We use the C notation ^ for XOR to represent addition modulo 2.
+   *
+   * Model the received codeword (r) as the transmitted codeword (u)
+   * plus an error vector (e).
+   *
+   *   r = e ^ u
+   *
+   * Then we calculate a syndrome (s):
+   *
+   *   s = r * H, where H = [ P   ], where I12 is the identity matrix
+   *                        [ I12 ]
+   *
+   * (In other words, we calculate the parity check for the received
+   * data bits, and add them to the received parity bits)
+   */
 
-    syndrome = received_parity ^ (golay_coding(received_data));
-    w = weight12(syndrome);
-    
-    /*
-     * The properties of the golay code are such that the Hamming distance (ie,
-     * the minimum distance between codewords) is 8; that means that one bit of
-     * error in the data bits will cause 7 errors in the parity bits.
-     *
-     * In particular, if we find 3 or fewer errors in the parity bits, either:
-     *  - there are no errors in the data bits, or
-     *  - there are at least 5 errors in the data bits
-     * we hope for the former (we don't profess to deal with the
-     * latter).
-     */
-    if( w <= 3 ) {
-	return ((int32_t) syndrome)<<12;
+  syndrome = received_parity ^ (golay_coding(received_data));
+  w = weight12(syndrome);
+
+  /*
+   * The properties of the golay code are such that the Hamming distance (ie,
+   * the minimum distance between codewords) is 8; that means that one bit of
+   * error in the data bits will cause 7 errors in the parity bits.
+   *
+   * In particular, if we find 3 or fewer errors in the parity bits, either:
+   *  - there are no errors in the data bits, or
+   *  - there are at least 5 errors in the data bits
+   * we hope for the former (we don't profess to deal with the
+   * latter).
+   */
+  if( w <= 3 ) {
+    return ((int32_t) syndrome)<<12;
+  }
+
+  /* the next thing to try is one error in the data bits.
+   * we try each bit in turn and see if an error in that bit would have given
+   * us anything like the parity bits we got. At this point, we tolerate two
+   * errors in the parity bits, but three or more errors would give a total
+   * error weight of 4 or more, which means it's actually uncorrectable or
+   * closer to another codeword. */
+
+  for( i = 0; i<12; i++ ) {
+    uint16_t error = 1<<i;
+    uint16_t coding_error = golay_encode_matrix[i];
+    if( weight12(syndrome^coding_error) <= 2 ) {
+      return (int32_t)((((uint32_t)(syndrome^coding_error))<<12) | (uint32_t)error) ;
     }
-    
-    /* the next thing to try is one error in the data bits.
-     * we try each bit in turn and see if an error in that bit would have given
-     * us anything like the parity bits we got. At this point, we tolerate two
-     * errors in the parity bits, but three or more errors would give a total
-     * error weight of 4 or more, which means it's actually uncorrectable or
-     * closer to another codeword. */
-     
-    for( i = 0; i<12; i++ ) {
-	uint16_t error = 1<<i;
-	uint16_t coding_error = golay_encode_matrix[i];
-	if( weight12(syndrome^coding_error) <= 2 ) {
-	    return (int32_t)((((uint32_t)(syndrome^coding_error))<<12) | (uint32_t)error) ;
-	}
+  }
+
+  /* okay then, let's see whether the parity bits are error free, and all the
+   * errors are in the data bits. model this as follows:
+   *
+   * [r | pr] = [u | pu] + [e | 0]
+   *
+   * pr = pu
+   * pu = H * u => u = H' * pu = H' * pr , where H' is inverse of H
+   *
+   * we already have s = H*r + pr, so pr = s - H*r = s ^ H*r
+   * e = u ^ r
+   *   = (H' * ( s ^ H*r )) ^ r
+   *   = H'*s ^ r ^ r
+   *   = H'*s
+   *
+   * Once again, we accept up to three error bits...
+   */
+
+  inv_syndrome = golay_decoding(syndrome);
+  w = weight12(inv_syndrome);
+  if( w <=3 ) {
+    return (int32_t)inv_syndrome;
+  }
+
+  /* Final shot: try with 2 errors in the data bits, and 1 in the parity
+   * bits; as before we try each of the bits in the parity in turn */
+  for( i = 0; i<12; i++ ) {
+    uint16_t error = 1<<i;
+    uint16_t coding_error = golay_decode_matrix[i];
+    if( weight12(inv_syndrome^coding_error) <= 2 ) {
+      uint32_t error_word = ((uint32_t)(inv_syndrome^coding_error)) | ((uint32_t)error)<<12;
+      return (int32_t)error_word;
     }
+  }
 
-    /* okay then, let's see whether the parity bits are error free, and all the
-     * errors are in the data bits. model this as follows:
-     *
-     * [r | pr] = [u | pu] + [e | 0]
-     *
-     * pr = pu
-     * pu = H * u => u = H' * pu = H' * pr , where H' is inverse of H
-     *
-     * we already have s = H*r + pr, so pr = s - H*r = s ^ H*r
-     * e = u ^ r
-     *   = (H' * ( s ^ H*r )) ^ r
-     *   = H'*s ^ r ^ r
-     *   = H'*s
-     *
-     * Once again, we accept up to three error bits...
-     */
-
-    inv_syndrome = golay_decoding(syndrome);
-    w = weight12(inv_syndrome);
-    if( w <=3 ) {
-	return (int32_t)inv_syndrome;
-    }
-
-    /* Final shot: try with 2 errors in the data bits, and 1 in the parity
-     * bits; as before we try each of the bits in the parity in turn */
-    for( i = 0; i<12; i++ ) {
-	uint16_t error = 1<<i;
-	uint16_t coding_error = golay_decode_matrix[i];
-	if( weight12(inv_syndrome^coding_error) <= 2 ) {
-	    uint32_t error_word = ((uint32_t)(inv_syndrome^coding_error)) | ((uint32_t)error)<<12;
-	    return (int32_t)error_word;
-	}
-    }
-
-    /* uncorrectable error */
-    return -1;
+  /* uncorrectable error */
+  return -1;
 }
-    
+
 
 
 /* decode a received codeword. Up to 3 errors are corrected for; 4
    errors are detected as uncorrectable (return -1); 5 or more errors
    cause an incorrect correction.
-*/
-int16_t golay_decode(uint32_t w)
+ */
+int16_t golay_decode(uint32_t codeword)
 {
-    uint16_t data = (uint16_t)w & 0xfff;
-    int32_t errors = golay_errors(w);
-    uint16_t data_errors;
-    
-    if( errors == -1 )
-	return -1;
-    data_errors = (uint16_t)errors & 0xfff;
-    return (int16_t)(data ^ data_errors);
+  uint16_t data = (uint16_t)codeword & 0xfff;
+  int32_t errors = golay_errors(codeword);
+  uint16_t data_errors;
+
+  if( errors == -1 )
+    return -1;
+  data_errors = (uint16_t)errors & 0xfff;
+  return (int16_t)(data ^ data_errors);
 }
