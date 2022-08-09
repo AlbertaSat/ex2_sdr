@@ -2,6 +2,7 @@
 #include "sdr_driver.h"
 #include "fec.h"
 #include "osal.h"
+#include <stdio.h>
 
 #define PIPE_ENTER_MSG_LEN 15
 #define PIPE_EXIT_MSG_LEN 16
@@ -37,7 +38,7 @@ void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken) {
     sdr_interface_data_t *ifdata = (sdr_interface_data_t *)cb_data;
 
     uint8_t *ptr = buf;
-    if (os_get_ms() - ifdata->last_rx > 10) {
+    if (os_get_ms() - ifdata->last_rx > 100) {
         ifdata->rx_mpdu_index = 0;
     }
     ifdata->last_rx = os_get_ms();
