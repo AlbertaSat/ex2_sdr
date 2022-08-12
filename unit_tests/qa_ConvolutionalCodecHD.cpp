@@ -83,9 +83,23 @@ check_decoder_ber (
     }
   }
 
-  ConvolutionalCodecHD ccHDCodec(errorCorrectionScheme);
+  ConvolutionalCodecHD *ccHDCodec;
+  try {
+    ccHDCodec = new ConvolutionalCodecHD(errorCorrectionScheme);
+  }
+  catch (FECException &ex) {
+    string exStr(ex.what());
+    FAIL() << "In qa_ConvolutionalCodecHD ConvolutionalCodecHD constructor threw "+exStr;
+  }
 
-  ErrorCorrection ec(errorCorrectionScheme, MPDU::maxMTU()*8);
+  ErrorCorrection *ec;
+  try {
+    ec = new ErrorCorrection(errorCorrectionScheme, MPDU::maxMTU()*8);
+  }
+  catch (ECException &ex) {
+    string exStr(ex.what());
+    FAIL() << "In qa_ConvolutionalCodecHD ErrorCorrection constructor threw "+exStr;
+  }
 
   // Get ready for simulating noise at the input SNR
   float sigma2 = 0.5 / pow (10.0, snr / 10.0); // noise variance
@@ -97,7 +111,7 @@ check_decoder_ber (
   // Deal with data in unpacked format, i.e., 1 bit per byte.
   // The message length is returned in bits. It's easiest to handle the data as
   // being 1 bit per 8-bit symbol, aka unpacked
-  unsigned int payloadBitCount = ec.getMessageLen();
+  unsigned int payloadBitCount = ec->getMessageLen();
   unsigned int payloadByteCount = payloadBitCount/8;
   std::vector<uint8_t> packedMessage(payloadByteCount);
 
@@ -125,7 +139,7 @@ check_decoder_ber (
 #endif
 
     // Encode the packet
-    std::vector<uint8_t> payload = ccHDCodec.encode (packedMessage);
+    std::vector<uint8_t> payload = ccHDCodec->encode (packedMessage);
 #if QA_CC_HD_DEBUG
     printf("codeword : ");
     for (int i = 0; i < 10; i++) {
@@ -172,7 +186,7 @@ check_decoder_ber (
 
     // Try to decode the noisy codeword
     std::vector<uint8_t> decodedMessage;
-    ccHDCodec.decode(payloadPlusNoise, snr, decodedMessage);
+    ccHDCodec->decode(payloadPlusNoise, snr, decodedMessage);
 #if QA_CC_HD_DEBUG
     printf("dmessage : ");
     for (int i = 0; i < 10; i++) {
@@ -192,7 +206,7 @@ check_decoder_ber (
     numBits += payloadBitCount;
   } // while not enough bits for BER
 
-  std::string ecn = ec.ErrorCorrectionName(errorCorrectionScheme);
+  std::string ecn = ec->ErrorCorrectionName(errorCorrectionScheme);
   double calcBER = (double) numErrors / (double) numBits;
 #if QA_CC_HD_DEBUG
   printf("@%g dB, numbBits %d numErrors %d ber %g\n", snr, numBits, numErrors, calcBER);
