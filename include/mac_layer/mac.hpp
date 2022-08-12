@@ -112,11 +112,6 @@ namespace ex2
         // All the necessary UHF packets have been received and an application
         // packet was formed and must be removed.
         PACKET_READY = 0x0000,
-        // Not all the necessary UHF packets have been received, but there are
-        // no more expected. An application packet was formed and must be
-        // removed. Then the last UHF packet must be resubmitted.
-        PACKET_READY_RESUBMIT_PREVIOUS_PACKET = 0x0001,
-        // @todo this is not used at this point, eliminate?
         // Not all the necessary UHF packets have been received, waiting for
         // the next one.
         READY_FOR_NEXT_UHF_PACKET = 0x0002
@@ -213,6 +208,8 @@ namespace ex2
       void m_updateErrorCorrection(
         ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
 
+      void m_processFirstMPDU(MPDU &firstMPDU);
+
       void m_decodePacket();
 
       // member vars that define the MAC operation
@@ -222,10 +219,6 @@ namespace ex2
 
       RF_Mode::RF_ModeNumber m_rfModeNumber;
 
-      // Mutexs to ensure that in progress packet processing is not corrupted
-      // by an inadvertant change in FEC parameters
-//      std::mutex m_ecSchemeMutex;
-
       // buffers needed to fragment a packet prior to transmission
       std::vector<uint8_t> m_codewordBuffer;
       std::vector<uint8_t> m_transparentModePayloads;
@@ -233,8 +226,8 @@ namespace ex2
       // member vars to track received packet fragments
       bool m_firstFragmentReceived;
       uint16_t m_currentPacketLength;
-      uint16_t m_expectedMPDUs;
-      uint16_t m_mpduCount;
+      uint16_t m_numExpectedMpduCodewordFragments;
+      uint16_t m_mpduCodewordFragmentCount;
 
       float m_SNREstimate;
 

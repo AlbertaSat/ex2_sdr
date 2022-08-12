@@ -32,15 +32,15 @@ using namespace ex2::sdr;
 
 #include "gtest/gtest.h"
 
-#define QA_MPDUHEADER_DEBUG 0 // set to 1 for debugging output
+#define QA_MPDUHEADER_DEBUG 0         // set to 1 for debugging output
+#define QA_MPDUHEADER_DEBUG_VERBOSE 0 // set to 1 for verbose debugging output
 
 bool headersSame(MPDUHeader *h1, MPDUHeader *h2) {
   bool same = true;
 
-#if QA_MPDUHEADER_DEBUG
-  /*printf(" 0x%04x 0x%04x\n",h1->getUhfPacketLength(), h2->getUhfPacketLength());*/
-  printf(" 0x%04x 0x%04x\n",h1->getRfModeNumber(), h2->getRfModeNumber());
-  printf(" 0x%04x 0x%04x\n",h1->getErrorCorrectionScheme(), h2->getErrorCorrectionScheme());
+#if QA_MPDUHEADER_DEBUG_VERBOSE
+  printf(" 0x%04x 0x%04x\n",(unsigned int) h1->getRfModeNumber(), (unsigned int) h2->getRfModeNumber());
+  printf(" 0x%04x 0x%04x\n",(unsigned int) h1->getErrorCorrectionScheme(), (unsigned int) h2->getErrorCorrectionScheme());
   printf(" 0x%04x 0x%04x\n",h1->getCodewordFragmentIndex(), h2->getCodewordFragmentIndex());
   printf(" 0x%04x 0x%04x\n",h1->getUserPacketPayloadLength(), h2->getUserPacketPayloadLength());
   printf(" 0x%04x 0x%04x\n",h1->getUserPacketFragmentIndex(), h2->getUserPacketFragmentIndex());
@@ -107,7 +107,7 @@ TEST(mpduHeader, ConstructorParemeterized )
               std::vector<uint8_t> payload1 = header1->getHeaderPayload();
 
               try {
-                header2 = new MPDUHeader(payload1);
+                header2 = new MPDUHeader(errorCorrection, payload1);
               }
               catch (MPDUHeaderException &e) {
                 FAIL() << e.what();
@@ -178,32 +178,193 @@ TEST(mpduHeader, Accessors )
   uint16_t headerLength = header1->MACHeaderLength();
   ASSERT_TRUE(headerLength == MPDUHeader::MACHeaderLength()) << "Header length is wrong!";
 
-
+  // Get the raw header payload
   std::vector<uint8_t> payload1 = header1->getHeaderPayload();
 
-  // Make the payload long enough
+  // Turned it into a full packet payload since that is what we expect will be
+  // passed to the raw header constructor
   payload1.resize(UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH + 1);
-  header2 = new MPDUHeader(payload1);
+  try {
+    header2 = new MPDUHeader(ec, payload1);
 
-  modulationAccess = header2->getRfModeNumber();
-  ASSERT_TRUE(modulationAccess == modulation) << "modulation aka RF_Mode doesn't match!";
+    modulationAccess = header2->getRfModeNumber();
+    ASSERT_TRUE(modulationAccess == modulation) << "modulation aka RF_Mode doesn't match!";
 
-  ecScheme = header2->getErrorCorrectionScheme();
-  ASSERT_TRUE(errorCorrectionScheme == ecScheme) << "ErrorCorrectionScheme doesn't match!";
+    ecScheme = header2->getErrorCorrectionScheme();
+    ASSERT_TRUE(errorCorrectionScheme == ecScheme) << "ErrorCorrectionScheme doesn't match!";
 
-  cwFragmentIndex = header2->getCodewordFragmentIndex();
-  ASSERT_TRUE(codewordFragmentIndex == cwFragmentIndex) << "codeword fragment indices don't match!";
+    cwFragmentIndex = header2->getCodewordFragmentIndex();
+    ASSERT_TRUE(codewordFragmentIndex == cwFragmentIndex) << "codeword fragment indices don't match!";
 
-  uPacketLen = header2->getUserPacketPayloadLength();
-  ASSERT_TRUE(userPacketPayloadLength == uPacketLen) << "User packet lenghts don't match!";
+    uPacketLen = header2->getUserPacketPayloadLength();
+    ASSERT_TRUE(userPacketPayloadLength == uPacketLen) << "User packet lenghts don't match!";
 
-  uPacketFragIndex = header2->getUserPacketFragmentIndex();
-  ASSERT_TRUE(userPacketFragmentIndex == uPacketFragIndex) << "user packet fragment indices don't match!";
+    uPacketFragIndex = header2->getUserPacketFragmentIndex();
+    ASSERT_TRUE(userPacketFragmentIndex == uPacketFragIndex) << "user packet fragment indices don't match!";
 
-  headerLength = header2->MACHeaderLength();
-  ASSERT_TRUE(headerLength == MPDUHeader::MACHeaderLength()) << "Header length is wrong!";
+    headerLength = header2->MACHeaderLength();
+    ASSERT_TRUE(headerLength == MPDUHeader::MACHeaderLength()) << "Header length is wrong!";
 
-  delete(header2);
+  }
+  catch(MPDUHeaderException &e) {
+
+  };
+  if (!header2)
+    delete(header2);
   delete(header1);
 }
 
+/*!
+ * @brief Test raw header reconstruction including with bad data (bit errors
+ * were introduced)
+ */
+TEST(mpduHeader, RawReconstruction )
+{
+  /* ---------------------------------------------------------------------
+   * Inject header errors and check expected results. In general, Golay
+   * (24,12,8) can correct up to 3 bit errors, and detect 4. Any more and
+   * the results are inconsistent, so essentially false positives.
+   * ---------------------------------------------------------------------
+   */
+
+// @todo do this for all supported FEC schemes, maybe in combination with RF modes?
+// @todo should really break into multiple unit tests...
+
+  RF_Mode::RF_ModeNumber modulation = RF_Mode::RF_ModeNumber::RF_MODE_3; // 0b011
+  ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme =
+      ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2; // 0b000000
+  ErrorCorrection ec(errorCorrectionScheme, MPDU::maxMTU() * 8);
+  uint8_t codewordFragmentIndex = 0x55;
+  uint16_t userPacketPayloadLength = 1234; // 0x04d2
+  uint8_t userPacketFragmentIndex = 0xAA;
+
+  MPDUHeader *header1, *header2;
+
+  // header1 is the reference, good header.
+  header1 = new MPDUHeader(
+    modulation,
+    ec,
+    codewordFragmentIndex,
+    userPacketPayloadLength,
+    userPacketFragmentIndex);
+
+  // Being really redundant, check all the accessors for header1 return the
+  // right values.
+  RF_Mode::RF_ModeNumber modulationAccess = header1->getRfModeNumber();
+  ASSERT_TRUE(modulationAccess == modulation) << "modulation aka RF_Mode doesn't match!";
+
+  ErrorCorrection::ErrorCorrectionScheme ecScheme = header1->getErrorCorrectionScheme();
+  ASSERT_TRUE(errorCorrectionScheme == ecScheme) << "ErrorCorrectionScheme doesn't match!";
+
+  uint8_t cwFragmentIndex = header1->getCodewordFragmentIndex();
+  ASSERT_TRUE(codewordFragmentIndex == cwFragmentIndex) << "codeword fragment indices don't match!";
+
+  uint16_t uPacketLen = header1->getUserPacketPayloadLength();
+  ASSERT_TRUE(userPacketPayloadLength == uPacketLen) << "User packet lenghts don't match!";
+
+  uint8_t uPacketFragIndex = header1->getUserPacketFragmentIndex();
+  ASSERT_TRUE(userPacketFragmentIndex == uPacketFragIndex) << "user packet fragment indices don't match!";
+
+  uint16_t headerLength = header1->MACHeaderLength();
+  ASSERT_TRUE(headerLength == MPDUHeader::MACHeaderLength()) << "Header length is wrong!";
+
+  //
+  // First test, very bad header
+  //
+
+  // Get the raw header payload
+  std::vector<uint8_t> payload1 = header1->getHeaderPayload();
+
+  // Turned it into a full packet payload since that is what we expect will be
+  // passed to the raw header constructor
+  payload1.resize(UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH + 1);
+
+  // Now, let's mangle the whole raw header
+  for (unsigned int i = 0; i < MPDUHeader::MACHeaderLength(); i++) {
+    payload1[i] = payload1[i] ^ 0x55;
+  }
+
+  // @Note we could use the Google Test "EXPECT_THROW", but I don't seem able
+  // to embedded blocks properly, so we do it the old way.
+
+  // We expect problems...
+  try {
+    header2 = new MPDUHeader(ec, payload1);
+    EXPECT_TRUE(false) << "The corrupted raw header should have caused an exception";
+  }
+  catch(MPDUHeaderException &e) {
+#if QA_MPDUHEADER_DEBUG
+    printf("With the entire MPDUHeader mangled, exception is ... %s\n",e.what());
+#endif
+  };
+  if (!header2)
+    delete(header2);
+
+  //
+  // Second test, only the error correction scheme enum is twiddled, but not
+  // enough to prevent the packet from working
+  //
+
+  // Get the raw header payload
+  payload1 = header1->getHeaderPayload();
+
+  // Turned it into a full packet payload since that is what we expect will be
+  // passed to the raw header constructor
+  payload1.resize(UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH + 1);
+
+  // Now, let's mangle the MSB of the MPDUHeader error correction enum. The MSB
+  // is actually bit 0 of byte 2 of the payload (the first 12 bits are Golay parity).
+  uint8_t temp = payload1[1] ^ 0x01; // flip bit 6 of the 6-bit error correction scheme
+#if QA_MPDUHEADER_DEBUG
+  printf("payload1[1] 0x%02X temp 0x%02X\n",payload1[1],temp);
+#endif
+  payload1[1] = temp;
+
+  // We expect no problems...
+  try {
+    header2 = new MPDUHeader(ec, payload1);
+  }
+  catch(MPDUHeaderException &e) {
+    EXPECT_TRUE(false) << "The corrupted raw header should not have caused an exception";
+#if QA_MPDUHEADER_DEBUG
+    printf("With the 1 bit of MPDUHeader mangled, exception is ... %s\n",e.what());
+#endif
+  };
+  if (!header2)
+    delete(header2);
+
+  //
+  // third test, 5 of 6 bits in the error correction scheme enum are flipped
+  //
+
+  // Get the raw header payload
+  payload1 = header1->getHeaderPayload();
+
+  // Turned it into a full packet payload since that is what we expect will be
+  // passed to the raw header constructor
+  payload1.resize(UHF_TRANSPARENT_MODE_DATA_FIELD_2_MAX_LENGTH + 1);
+
+  // Now, let's mangle the 5 LSBs of the 6-bit MPDUHeader error correction enum.
+  // The MSB is the last bit in the 2nd byte, the top MSBs of the 3rd byte
+  // correspond to the 5 LSBs of the error correction scheme.
+  temp = payload1[2] ^ 0xF8;
+#if QA_MPDUHEADER_DEBUG
+  printf("payload1[2] 0x%02X temp  0x%02X\n",payload1[2], temp);
+#endif
+  payload1[2] = temp;
+
+  // We expect problems...
+  try {
+    header2 = new MPDUHeader(ec, payload1);
+    EXPECT_TRUE(false) << "The corrupted raw header should not have caused an exception";
+  }
+  catch(MPDUHeaderException &e) {
+#if QA_MPDUHEADER_DEBUG
+    printf("With the 5 of 6 error correction enum bits mangled, exception is ... %s\n",e.what());
+#endif
+  };
+  if (!header2)
+    delete(header2);
+
+  delete(header1);
+}

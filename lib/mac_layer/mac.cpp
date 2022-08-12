@@ -19,6 +19,10 @@
 #include "QCLDPC.hpp"
 #include "radio.h"
 
+// The user packet fragmentation index is not used currently. We can use it
+// to detect false positive Golay decoding since it should always be set to zero.
+#define MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT 0
+
 #define MAC_DEBUG 0 // Set to one to turn on debugging messages
 
 namespace ex2 {
@@ -64,8 +68,8 @@ namespace ex2 {
       m_firstFragmentReceived = false;
 
       m_currentPacketLength = 0;
-      m_mpduCount = 0;
-      m_expectedMPDUs = 0;
+      m_mpduCodewordFragmentCount = 0;
+      m_numExpectedMpduCodewordFragments = 0;
 
       // @todo clear buffers?
       m_codewordBuffer.resize(0);
@@ -97,21 +101,73 @@ namespace ex2 {
       std::vector<uint8_t> p;
       p.assign(uhfPayload, uhfPayload+payloadLength);
       try {
-        MPDU mpdu(p);
+        MPDU mpdu(*m_errorCorrection, p);
 
-        // @todo Could do some header checks in case we are unlucky. Check packet length is >= 0, for example
+        // Since we do not use the userPacketFragmentIndex field of the MPDU
+        // header (we set to 0 always), we can check it and catch cases where
+        // the Golay decoder provides a false positive (i.e., when there are
+        // more than 4 bit errors in 12 bits.
+        //
+        // When there is a false positive, we can't trust anything about the MPDU.
+        //
+        // If we have the first MPDU fragment already, this might be the MPDU
+        // we are expecting. If it's not the last fragment, we can wait for
+        // another to arrive and let the logic below pad things out. If it is
+        // the last fragment, either a new packet will send a new first MPDU
+        // fragement and the current one will complete, or it will timeout
+        // and complete. Either way, here we do nothing, just return.
+        //
+        // If we don't have the first MPDU fragement already, this might be it,
+        // but we can't trust it. So we ignore it.
+        if (mpdu.getMpduHeader()->getUserPacketFragmentIndex() != MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT) {
+#if MAC_DEBUG
+            printf("Received an MPDU with user packet fragment index not zero\n");
+#endif
+          return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
+        }
 
-        // The first MPDU transmitted may have a header in it, which is
-        // necessary to make the full packet. Without it, there is no point
-        // in making an application packet so we keep track of its reception.
+        // A common reason making an MPDU will fail and throw an exception is
+        // that the packet header information is corrupt. We rely on the
+        // MPDUHeader class to check that, including that the error correction
+        // scheme in the header is consistent with the current one in use.
+
+        // If we already have the first MPDU, we are looking for more...
         if (m_firstFragmentReceived) {
           // If we are here, we expected more raw MPDUs.
 
+          // We already have the user packet length and since it's in every
+          // MPDU header, let's check to see if the current one is consistent
+          // with the first one we received.
+          if (mpdu.getMpduHeader()->getUserPacketPayloadLength() != m_currentPacketLength) {
+            // Ooops, we must have missed all the MPDUs that match the first
+            // MPDU fragment. This is similar to the scenario where we have the
+            // first fragment, then get another first fragment. Best we can do is
+            // dump the current packet processing.
+#if MAC_DEBUG
+            printf("Received an MPDU with user packet length that does not match the current length\n");
+#endif
+            m_firstFragmentReceived = false;
+            m_mpduCodewordFragmentCount = 0;
+            // if it happens to be the first fragment, then let's start processing for a new packet.
+            if (mpdu.getMpduHeader()->getCodewordFragmentIndex() == 0) {
+              m_processFirstMPDU(mpdu);
+
+              // If only one MPDU is expected for this packet, decode the codeword(s) in the buffer
+              if (m_mpduCodewordFragmentCount == m_numExpectedMpduCodewordFragments) {
+                m_decodePacket();
+                return MAC_UHFPacketProcessingStatus::PACKET_READY;
+              }
+              // Otherwise there must be more MPDUs to come...
+              m_firstFragmentReceived = true;
+            }
+            return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
+          } // MPDU user packet lengths don't match
+
           // If the received raw MPDU index matches the current count, this is
-          // the next raw MPDU we expected.
-          if (mpdu.getMpduHeader()->getCodewordFragmentIndex() == m_mpduCount) {
-            m_expectedMPDUs = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
-            m_mpduCount++;
+          // the next MPDU we expected.
+          if (mpdu.getMpduHeader()->getCodewordFragmentIndex() == m_mpduCodewordFragmentCount) {
+            m_numExpectedMpduCodewordFragments = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
+            m_mpduCodewordFragmentCount++;
 
             // append to the codewordBuffer this MPDU payload, which may contain
             // some part of a codeword or multiple codewords (remembering
@@ -119,32 +175,84 @@ namespace ex2 {
             m_codewordBuffer.insert(m_codewordBuffer.end(),mpdu.getPayload().begin(),mpdu.getPayload().end());
           }
           else {
-            // The received raw MPDU index is not what we expected, which implies
-            // that a transparent mode packet got dropped somehow, so the index
-            // should be greater than what we expected. If it is, we need to
-            // pad m_codewordBuffer to catch things up
-            if (mpdu.getMpduHeader()->getCodewordFragmentIndex() > m_mpduCount) {
-              uint32_t numMissingMPDUs = mpdu.getMpduHeader()->getCodewordFragmentIndex() - m_mpduCount;
-              // We need to first zero-fill the numMissingMPDUs, then insert
-              // the payload from the one just received.
-              m_codewordBuffer.insert(m_codewordBuffer.end(), numMissingMPDUs * MPDU::maxMTU(), 0);
-              m_codewordBuffer.insert(m_codewordBuffer.end(),mpdu.getPayload().begin(),mpdu.getPayload().end());
-              m_mpduCount = mpdu.getMpduHeader()->getCodewordFragmentIndex() + 1;
-            }
-            else {
-              // Ack, the raw MPDUs are out of order, which should not happen
-              // unless we missed several transparent mode packets. All we can
-              // do is reset
+            // The received MPDU index is not what we expected, which implies
+            // that a one or more MPDUs got dropped somehow.
+            //
+            // There are 4 cases to consider.
+            // 1) the index is 0 and somehow we have started to receive a new packet, or
+            // 2) the index is greater than expected, but less than or equal the total expected, or
+            // 3) the index is less than expected, or
+            // 4) the index is more than the total expected
+            //
+
+            //
+            // Case 1) The fragment index is 0, but we already have the first fragment
+            //
+            if (mpdu.getMpduHeader()->getCodewordFragmentIndex() == 0) {
+              //
+              // There is a current packet being built up from MPDUs, so we could
+              // pad it out and decode it, but if the current MPDU is the only
+              // one needed to complete a packet, we'd then have two packets in
+              // hand and no way to return them both, so just ditch the current
+              // packet and start a new one based on the current MPDU.
               m_firstFragmentReceived = false;
-              m_mpduCount = 0;
+              m_mpduCodewordFragmentCount = 0;
+              m_processFirstMPDU(mpdu);
+
+              // If only one MPDU is expected for this packet, decode the codeword(s) in the buffer
+              if (m_mpduCodewordFragmentCount == m_numExpectedMpduCodewordFragments) {
+                m_decodePacket();
+                return MAC_UHFPacketProcessingStatus::PACKET_READY;
+              }
+              // Otherwise there must be more MPDUs to come...
+              m_firstFragmentReceived = true;
               return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
             }
-          }
+
+            //
+            // Case 2) The fragment index greater than expected, but less than the total expected
+            //
+            // We need to pad m_codewordBuffer to catch things up
+            if ((mpdu.getMpduHeader()->getCodewordFragmentIndex() > m_mpduCodewordFragmentCount) &&
+                (mpdu.getMpduHeader()->getCodewordFragmentIndex() <= m_numExpectedMpduCodewordFragments)) {
+              uint32_t numMissingMPDUs = mpdu.getMpduHeader()->getCodewordFragmentIndex() - m_mpduCodewordFragmentCount;
+              // We need to first zero-fill the numMissingMPDUs, then insert
+              // the payload from the MPDU just received.
+              m_codewordBuffer.insert(m_codewordBuffer.end(), numMissingMPDUs * MPDU::maxMTU(), 0);
+              m_codewordBuffer.insert(m_codewordBuffer.end(), mpdu.getPayload().begin(), mpdu.getPayload().end());
+              // Don't forget to update the count of fragments...
+              m_mpduCodewordFragmentCount = mpdu.getMpduHeader()->getCodewordFragmentIndex() + 1;
+            }
+            else if ((mpdu.getMpduHeader()->getCodewordFragmentIndex() < m_mpduCodewordFragmentCount) ||
+                (mpdu.getMpduHeader()->getCodewordFragmentIndex() > m_numExpectedMpduCodewordFragments)) {
+              //
+              // Case 3) The fragment index less than we expected
+              //
+              // Ack, the raw MPDUs are out of order, which should not happen
+              // unless we also missed the first MPDU of the next packet.
+              // The best we can do is zero-pad the current packet and return it.
+              //
+              // Case 4) The fragment index is more than the total expected
+              //
+              // We have a current packet in progress so we might as well
+              // pad it out, decode, and return it. Clearly the current MPDU
+              // can't be matched up with anything we know about, so we'll
+              // just start looking for a new, first MPDU
+
+              // Calculate the numMissingMPDUs
+              uint32_t numMissingMPDUs = m_numExpectedMpduCodewordFragments - m_mpduCodewordFragmentCount;
+              m_codewordBuffer.insert(m_codewordBuffer.end(), numMissingMPDUs * MPDU::maxMTU(), 0);
+
+              m_decodePacket();
+              return MAC_UHFPacketProcessingStatus::PACKET_READY;
+            }
+
+          } // MPDU fragement index is not what was expected
 
           // Do we have enough raw MPDUs?
           // @todo refactor to avoid duplicate code
-          m_expectedMPDUs = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
-          if (m_mpduCount == m_expectedMPDUs) {
+          m_numExpectedMpduCodewordFragments = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
+          if (m_mpduCodewordFragmentCount == m_numExpectedMpduCodewordFragments) {
             m_decodePacket();
             return MAC_UHFPacketProcessingStatus::PACKET_READY;
           } // Have all the MPDUs?
@@ -152,43 +260,21 @@ namespace ex2 {
         }
         else {
 
-          // Check if the first application packet fragment
+          // Check if the first MPDU
           if (mpdu.getMpduHeader()->getCodewordFragmentIndex() == 0) {
-            // Make note of the FEC scheme and check against current.
-            // @todo Not sure this is a great idea since it could lead to being locked out.
-            // For example, satellite is set to one FEC method, ground station tries to
-            // command using a different one and never hears back...
-            if (mpdu.getMpduHeader()->getErrorCorrectionScheme() != m_errorCorrection->getErrorCorrectionScheme()) {
-              // Don't update any counters and such as we are still waiting for
-              // a first fragment with the right FEC scheme
-              return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
+
+            m_processFirstMPDU(mpdu);
+
+            // If only one MPDU is expected for this packet, decode the codeword(s) in the buffer
+            if (m_mpduCodewordFragmentCount == m_numExpectedMpduCodewordFragments) {
+              m_decodePacket();
+              return MAC_UHFPacketProcessingStatus::PACKET_READY;
             }
-            else {
-              // We keep in mind that the MPDU header only has the user payload
-              // length when we set the current packet length
-              // @todo what if the header decoded with errors? Need to do subsequent checking!
-              m_currentPacketLength = mpdu.getMpduHeader()->getUserPacketPayloadLength();
-
-              m_expectedMPDUs = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
-              m_mpduCount++;
-
-              // save this MPDU payload that may contain some part of a codeword
-              // or multiple codewords (remembering codewords are packed into
-              // one or more consecutive MPDUs)
-              m_codewordBuffer.reserve(m_expectedMPDUs*MPDU::maxMTU());
-              m_codewordBuffer.assign(mpdu.getPayload().begin(),mpdu.getPayload().end());
-
-              // If only one MPDU is expected for this packet, decode the codeword(s) in the buffer
-              if (m_mpduCount == m_expectedMPDUs) {
-                m_decodePacket();
-                return MAC_UHFPacketProcessingStatus::PACKET_READY;
-              }
-              m_firstFragmentReceived = true;
-              return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
-            }
-
-          }
-          else {
+            // Otherwise there must be more MPDUs to come...
+            m_firstFragmentReceived = true;
+            return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
+          } // if first MPDU codeword fragment
+          else { // @note empty else is so we can show the MPDU reconstruction logic
             // If we don't receive the first MPDU for a user packet, we have to
             // wait for the next MPDU. If we have already received the first
             // MPDU for a user packet, we should not be here...
@@ -197,34 +283,77 @@ namespace ex2 {
           return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
         }
 
-      }
+      } // try to make a good MPDU
       catch (const MPDUException& e) {
         // @todo log this exception
+#if MAC_DEBUG
         printf("MPDU packet exception %s\n", e.what());
+#endif
+        // We are here because the data just received did not result in a valid
+        // MPDU. That means that none of our tracking variables has been updated,
+        // which means there is not much we can do if, for example, the data
+        // just received was a "middle" MPDU.
 
         // If we already have the first fragment, then continue even if the
-        // header was bad
+        // most recent raw MPDU was bad
         if (m_firstFragmentReceived) {
-          // we did receive a codeword  or codeword fragment, but it's junk since
+          // We did receive a codeword fragment, but it's junk since
           // there was a problem making the MPDU. Increment the count of received
           // MPDUs.
-          m_mpduCount++;
+          m_mpduCodewordFragmentCount++;
           // Maybe this is the final expected MPDU? Better check.
-          if (m_mpduCount == m_expectedMPDUs) {
+          if (m_mpduCodewordFragmentCount == m_numExpectedMpduCodewordFragments) {
+            // We have to pad out the current buffer of received MPDUs and
+            // can't use the MPDU that was supposed to correspond to the just
+            // received data.
+            // Calculate the numMissingMPDUs, which should be 1, but let's be explicit.
+            uint32_t numMissingMPDUs = m_numExpectedMpduCodewordFragments - (m_mpduCodewordFragmentCount - 1);
+            m_codewordBuffer.insert(m_codewordBuffer.end(), numMissingMPDUs * MPDU::maxMTU(), 0);
+
             m_decodePacket();
             return MAC_UHFPacketProcessingStatus::PACKET_READY;
           } // Have all the MPDUs?
+
+          // If it was not the final fragment expected, just continue...
         }
-        else {
-          // If the first user packet fragment has not yet been received, then
-          // we can't tell if this failed MPDU was supposed to be it, so all
-          // we can do is continue to look for a first MPDU
-          return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
-        }
-      }
+
+        // If the first user packet fragment has not yet been received, then
+        // we can't tell if this failed MPDU was supposed to be it, so all
+        // we can do is continue to look for a first MPDU; fall through
+
+      } // catch
 
       return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
     } // processUHFPacket
+
+    void
+    MAC::m_processFirstMPDU(MPDU &firstMPDU) {
+      // The first MPDU transmitted may have a user packet header in it, which
+      // is necessary at the application layer to make the full packet.
+      // Without it, there is no point in making an application packet so we
+      // keep track of its reception.
+
+      // Assume the first MPDU has correct information in its header.
+      // Save it so we can keep track of the remaining MPDUs needed to
+      // complete the user packet and do some error handling for things
+      // like missing packets.
+      //
+      // @todo what if the header decoded with errors we don't catch?
+      // @todo We could to more checking!? However, chances are a
+      // subsequent packet will have the right information and cause one
+      // of the error handling mechanisms to terminate the current packet
+      // reconstruction.
+
+      m_currentPacketLength = firstMPDU.getMpduHeader()->getUserPacketPayloadLength();
+      m_numExpectedMpduCodewordFragments = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
+      m_mpduCodewordFragmentCount = 1;
+
+      // save this MPDU payload that may contain some part of a codeword
+      // or multiple codewords (remembering codewords are packed into
+      // one or more consecutive MPDUs)
+      m_codewordBuffer.reserve(m_numExpectedMpduCodewordFragments*MPDU::maxMTU());
+      m_codewordBuffer.assign(firstMPDU.getPayload().begin(),firstMPDU.getPayload().end());
+    }
 
     void
     MAC::m_decodePacket() {
@@ -243,7 +372,7 @@ namespace ex2 {
       }
       m_rawPacket.resize(m_currentPacketLength);
       m_firstFragmentReceived = false;
-      m_mpduCount = 0;
+      m_mpduCodewordFragmentCount = 0;
     }
 
     bool
@@ -287,7 +416,7 @@ namespace ex2 {
       std::vector<uint8_t> mpduPayload;
       mpduPayload.resize(0); // ensure it's empty
       uint32_t mpduPayloadBytesRemaining = MPDU::maxMTU();
-      uint32_t mpduCount = 0;
+      uint32_t mpduCodewordFragmentCount = 0;
 
       m_transparentModePayloads.resize(0);
 
@@ -344,7 +473,7 @@ namespace ex2 {
             // only possible error would be from a bad ErrorCorrection, but that
             // would have been caught when m_errorCorrection was made.
             MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
-              mpduCount++, len, 0);
+              mpduCodewordFragmentCount++, packetLength, MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT);
             // Make an MPDU.
             // Just the same as for the MPDUHeader, there is no way for this
             // constructor to generate an exception because the only check that
@@ -390,7 +519,7 @@ namespace ex2 {
         // only possible error would be from a bad ErrorCorrection, but that
         // would have been caught when m_errorCorrection was made.
         MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
-          mpduCount++, len, 0);
+          mpduCodewordFragmentCount++, packetLength, MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT);
         // Make an MPDU.
         // Just the same as for the MPDUHeader, there is no way for this
         // constructor to generate an exception because the only check that

@@ -28,10 +28,84 @@ using namespace ex2::sdr;
 
 #include "gtest/gtest.h"
 
-#define QA_MAC_DEBUG 0 // set to 1 for debugging output
+#define QA_MAC_DEBUG 0         // set to 1 for debugging output
+#define QA_MAC_VERBOSE_DEBUG 0 // set to 1 for verbose debugging output
 
 // @todo should be 14
 #define NUM_ERROR_CORRECTION_SCHEMES_TO_TEST 14
+
+ErrorCorrection::ErrorCorrectionScheme getScheme(int ecScheme) {
+  ErrorCorrection::ErrorCorrectionScheme ecs;
+  switch(ecScheme) {
+    case 0:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
+      break;
+    case 1:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2;
+      break;
+    case 2:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3;
+      break;
+    case 3:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4;
+      break;
+    case 4:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6;
+      break;
+    case 5:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2;
+      break;
+    case 6:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3;
+      break;
+    case 7:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4;
+      break;
+    case 8:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6;
+      break;
+    case 9:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2;
+      break;
+    case 10:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3;
+      break;
+    case 11:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4;
+      break;
+    case 12:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6;
+      break;
+    case 13:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2;
+      break;
+    case 14:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3;
+      break;
+    case 15:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4;
+      break;
+    case 16:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6;
+      break;
+    case 17:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8;
+      break;
+    default:
+      ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
+      break;
+  }
+  return ecs;
+} // getScheme
+
+uint8_t * makePacket(uint16_t length) {
+  uint8_t * packet = (uint8_t *) malloc(length);
+
+  for (unsigned long i = 0; i < length; i++) {
+    packet[i] = (i % 79) + 0x30; // ASCII numbers through to ~
+  }
+  return packet;
+}
 
 /*!
  * @brief Test constructor
@@ -121,8 +195,6 @@ TEST(mac, PacketLoopbackNoDroppedPackets) {
   // Specifically, let's try the NO_FEC, CCSDS Convolutional Coders, and IEEE
   // 802.11 QCLDPC since they are what we plan to use at a minimum.
 
-  // Note: The QCLDPC is not actually implemented as of 202205
-
   int const numSchemes = 18;
   uint16_t expectedMPDUs[numSchemes][numPackets] = {
     {1,1,1,4,35}, // NO_FEC, m = n = 119
@@ -147,101 +219,30 @@ TEST(mac, PacketLoopbackNoDroppedPackets) {
 
   // @note, not all schemes are currently supported; the QCLDPC are stubbed for
   // now, and all but the rate 1/2 convolutional coding schemes are skipped.
-  ErrorCorrection::ErrorCorrectionScheme ecs;
 
   for (int ecScheme = 0; ecScheme < NUM_ERROR_CORRECTION_SCHEMES_TO_TEST; ecScheme++) {
 
-    switch(ecScheme) {
-      case 0:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
-        break;
-      case 1:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2;
-        break;
-      case 2:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3;
-        break;
-      case 3:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4;
-        break;
-      case 4:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6;
-        break;
-      case 5:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2;
-        break;
-      case 6:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3;
-        break;
-      case 7:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4;
-        break;
-      case 8:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6;
-        break;
-      case 9:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2;
-        break;
-      case 10:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3;
-        break;
-      case 11:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4;
-        break;
-      case 12:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6;
-        break;
-      case 13:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2;
-        break;
-      case 14:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3;
-        break;
-      case 15:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4;
-        break;
-      case 16:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6;
-        break;
-      case 17:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8;
-        break;
-      default:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
-        break;
-    }
+    ErrorCorrection::ErrorCorrectionScheme ecs  = getScheme(ecScheme);
 
     // Set the current ECS in the MAC object
     myMac1->setErrorCorrectionScheme(ecs);
 
     for (uint16_t currentPacket = 0; currentPacket < numPackets; currentPacket++) {
 
-      // Make a packet for the current length
+      // Make a user packet for the current length
+      uint8_t * packet = makePacket(packetDataLengths[currentPacket]);
+      ASSERT_FALSE(packet == NULL) << "Failed to get packet buffer";
 
-      uint8_t * packet = (uint8_t *) malloc(packetDataLengths[currentPacket]);
-
-      if (packet == NULL) {
-        printf("Failed to get packet buffer\n");
-      }
-
-      // Set the payload to readable ASCII
-      for (unsigned long i = 0; i < packetDataLengths[currentPacket]; i++) {
-        packet[i] = (i % 79) + 0x30; // ASCII numbers through to ~
-      }
-
-      // Process a packet
+      // Process a user packet
       bool packetEncoded = myMac1->receivePacket(packet, packetDataLengths[currentPacket]);
-
       ASSERT_TRUE(packetEncoded) << "Failed to encode packet ";
 
       uint32_t totalPayloadsBytes = myMac1->mpduPayloadsBufferLength();
-      uint32_t rawMPDULength = MPDU::rawMPDULength();
+      ASSERT_TRUE((totalPayloadsBytes % MPDU::rawMPDULength()) == 0) << "The raw payloads buffer must be an integer multiple of the raw MPDU length.";
 
-      ASSERT_TRUE((totalPayloadsBytes % rawMPDULength) == 0) << "The raw payloads buffer must be an integer multiple of the raw MPDU length.";
-
-      const uint32_t numMPDUs = totalPayloadsBytes / rawMPDULength;
+      const uint32_t numMPDUs = totalPayloadsBytes / MPDU::rawMPDULength();
 #if QA_MAC_DEBUG
-      printf("Raw MPDU length = %d\n", rawMPDULength);
+      printf("Raw MPDU length = %d\n", MPDU::rawMPDULength());
       printf("totalPayloadsBytes %d\n",totalPayloadsBytes);
       printf("numMPDUS = %d\n", numMPDUs);
       printf("expectedMPDUs[%d][%d] = %d\n",ecScheme,currentPacket,expectedMPDUs[ecScheme][currentPacket]);
@@ -256,46 +257,44 @@ TEST(mac, PacketLoopbackNoDroppedPackets) {
 
       // At this point we get the mpdu buffer and feed it one raw MPDU at a time
       // into myMac1->processUHFPacket(...)
-      if (packetEncoded) {
-        const uint8_t *mpdusBuffer = myMac1->mpduPayloadsBuffer();
+      const uint8_t *mpdusBuffer = myMac1->mpduPayloadsBuffer();
+      ASSERT_FALSE(mpdusBuffer == NULL) << "Failed to get MPDUs buffer";
 
-        // @todo get rid of magic number
-        if (mpdusBuffer && (myMac1->mpduPayloadsBufferLength() % 128 == 0)) {
+      bool recvPacketGood = false;
+      for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
+        MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
 
-          for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
-            MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
-
-            switch (status) {
-              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
-              {
-                const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
+        switch (status) {
+          case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+          {
+            const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
 
 #if QA_MAC_DEBUG
-                printf("original packet length %ld raw packet length %d \n",
-                  packetDataLengths[currentPacket], myMac1->getRawPacketBufferLength());
-                for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
-                  printf("%04d %02x|%02x\n",i,rawPacket[i],packet[i]);
-                }
-                printf("------------\n");
+            printf("original packet length %ld raw packet length %d \n",
+              packetDataLengths[currentPacket], myMac1->getRawPacketBufferLength());
+            for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
+              printf("%04d %02x|%02x\n",i,rawPacket[i],packet[i]);
+            }
+            printf("------------\n");
 #endif
-                bool same = true;
-                for (uint16_t i = 0; same && (i < myMac1->getRawPacketLength()); i++) {
-                  same = same && (rawPacket[i] == packet[i]);
-                }
-                ASSERT_TRUE(same) << "decoded packet does not match original";
-              }
-              break;
-              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
-                break;
-              case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
-                break;
-              default:
-                break;
-            } // switch on returned UHF packet process status
+            bool same = true;
+            for (uint16_t i = 0; same && (i < myMac1->getRawPacketLength()); i++) {
+              same = same && (rawPacket[i] == packet[i]);
+            }
+            recvPacketGood = same;
+            ASSERT_TRUE(same) << "decoded packet does not match original";
+          }
+          break;
+          case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+            break;
+          default:
+            break;
+        } // switch on returned UHF packet process status
 
-          } // for all the raw MPDUs
-        } // check if have an integral number of raw MPDUs
-      } // was the packet successfully encoded
+      } // for all the raw MPDUs
+
+      ASSERT_TRUE(recvPacketGood) << "The expected packet was not received.";
+
 
       // Clean up!
       free(packet);
@@ -323,10 +322,6 @@ TEST(mac, PacketLoopbackDroppedPackets) {
    * A wrinkle is that if the first MPDU goes missing (is corrupted), then we
    * give up on the packet entirely.
    *
-   * @todo do we need to actually give up?
-   *
-   * We might think that it's not necessary to test all the error correction
-   * schemes, but why not?
    * ---------------------------------------------------------------------
    */
 
@@ -374,199 +369,440 @@ TEST(mac, PacketLoopbackDroppedPackets) {
 
   // @note, not all schemes are currently supported; the QCLDPC are stubbed for
   // now, and all but the rate 1/2 convolutional coding schemes are skipped.
-  ErrorCorrection::ErrorCorrectionScheme ecs;
   std::vector<int> schemes({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13});
 
   for (int ecScheme : schemes) {
 
-    switch(ecScheme) {
-      case 0:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
-        break;
-      case 1:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_1_2;
-        break;
-      case 2:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_2_3;
-        break;
-      case 3:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_3_4;
-        break;
-      case 4:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_648_R_5_6;
-        break;
-      case 5:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_1_2;
-        break;
-      case 6:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_2_3;
-        break;
-      case 7:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_3_4;
-        break;
-      case 8:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1296_R_5_6;
-        break;
-      case 9:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_1_2;
-        break;
-      case 10:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_2_3;
-        break;
-      case 11:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_3_4;
-        break;
-      case 12:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::IEEE_802_11N_QCLDPC_1944_R_5_6;
-        break;
-      case 13:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2;
-        break;
-      case 14:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_2_3;
-        break;
-      case 15:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_3_4;
-        break;
-      case 16:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_5_6;
-        break;
-      case 17:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_7_8;
-        break;
-      default:
-        ecs = ErrorCorrection::ErrorCorrectionScheme::NO_FEC;
-        break;
-    }
+    ErrorCorrection::ErrorCorrectionScheme ecs  = getScheme(ecScheme);
 
     // Set the current ECS in the MAC object
     myMac1->setErrorCorrectionScheme(ecs);
 
     for (uint16_t currentPacket = 0; currentPacket < numPackets; currentPacket++) {
 
-      // Make a packet for the current length
+      // Make a user packet for the current length
+      uint8_t * packet = makePacket(packetDataLengths[currentPacket]);
+      ASSERT_FALSE(packet == NULL) << "Failed to get packet buffer";
 
-      uint8_t * packet = (uint8_t *) malloc(packetDataLengths[currentPacket]);
-
-      if (packet == NULL) {
-        printf("Failed to get packet buffer\n");
-      }
-
-      for (unsigned long i = 0; i < packetDataLengths[currentPacket]; i++) {
-        packet[i] = (i % 79) + 0x30; // ASCII numbers through to ~
-      }
-
-      // Process a packet
+      // Process a user packet
       bool packetEncoded = myMac1->receivePacket(packet, packetDataLengths[currentPacket]);
-
       ASSERT_TRUE(packetEncoded) << "Failed to encode Packet ";
 
       uint32_t totalPayloadsBytes = myMac1->mpduPayloadsBufferLength();
-      uint32_t rawMPDULength = MPDU::rawMPDULength();
-
       // @note we could skip some ASSERTs here since they are done in the happy
       // path unit test above, but it does not hurt to check
-      ASSERT_TRUE((totalPayloadsBytes % rawMPDULength) == 0) << "The raw payloads buffer must be an integer multiple of the raw MPDU length.";
+      ASSERT_TRUE((totalPayloadsBytes % MPDU::rawMPDULength()) == 0) << "The raw payloads buffer must be an integer multiple of the raw MPDU length.";
 
-      const uint32_t numMPDUs = totalPayloadsBytes / rawMPDULength;
+      const uint32_t numMPDUs = totalPayloadsBytes / MPDU::rawMPDULength();
 
       // Check the number of MPDUs required matches expectations
       ASSERT_TRUE(numMPDUs == expectedMPDUs[ecScheme][currentPacket]) << "Incorrect number of MPDUs for Packet " << numMPDUs;
+      ASSERT_TRUE(numMPDUs >= 4) << "All tests need at least 4 MPDUs";
 
-      // At this point we get the mpdu buffer and feed it one raw MPDU at a time
+      // At this point we get the mpdu buffer.
+      // For the various missing packet scenarios, we feed one or more raw MPDUs
       // into myMac1->processUHFPacket(...)
-      if (packetEncoded) {
-        const uint8_t *mpdusBuffer = myMac1->mpduPayloadsBuffer();
+      const uint8_t *mpdusBuffer = myMac1->mpduPayloadsBuffer();
+      ASSERT_FALSE(mpdusBuffer == NULL) << "Failed to get MPDUs buffer";
 
-        // @todo get rid of magic number
-        if (mpdusBuffer && (myMac1->mpduPayloadsBufferLength() % 128 == 0)) {
+      //////////////////////////////////////////////////////////////////////////
+      // Scenario 1; First raw MPDU is missing, all others received.
+      // Expected result; No packet is produced.
+      //////////////////////////////////////////////////////////////////////////
+#if QA_MAC_VERBOSE_DEBUG
+      printf("Scenario 1; First raw MPDU is missing.\n");
+#endif
+      bool recvPacketGood = false;
+      for (uint16_t rawMPDUCount = 1; rawMPDUCount < numMPDUs; rawMPDUCount++) {
+        MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
 
-          // Test if missing the first MPDU results in a packet. It should not
-          for (uint16_t rawMPDUCount = 1; rawMPDUCount < numMPDUs; rawMPDUCount++) {
-            MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
+        switch (status) {
+          case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+          {
+            FAIL() << "a packet was made without the first MPDU; this cannot happen";
+          }
+          break;
+          case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+            break;
+          default:
+            break;
+        } // switch on returned UHF packet process status
 
-            switch (status) {
-              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
-              {
-                FAIL() << "a packet was made without the first MPDU; this cannot happen";
+      } // for all the raw MPDUs except the first
+
+      ASSERT_FALSE(recvPacketGood) << "Scenario 1; Even though no first raw MPDU, a packet was received.";
+
+      //////////////////////////////////////////////////////////////////////////
+      // Scenario 2; Second raw MPDU is missing, all others received.
+      // Expected result; A packet is produced; it will not be correct, but that
+      // is to be dealt with by an upper layer. Check the packet does not match
+      // the original.
+      //////////////////////////////////////////////////////////////////////////
+#if QA_MAC_VERBOSE_DEBUG
+      printf("Scenario 2; Second raw MPDU is missing.\n");
+#endif
+      recvPacketGood = false;
+      for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
+        // skip the second MPDU
+        if (rawMPDUCount != 1) {
+          MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
+          switch (status) {
+            case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+            {
+              const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
+
+              bool same = true;
+              for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
+                same = same && (rawPacket[i] == packet[i]);
               }
-              break;
-              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
-                break;
-              case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
-                break;
-              default:
-                break;
-            } // switch on returned UHF packet process status
-
-          } // for all the raw MPDUs except the first
-
-          // Test if missing the second MPDU results in a packet. It should,
-          // and the result should be the correct length, but not match the
-          // original
-//printf("test missing second MPDU\n");
-          for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
-            // skip the second MPDU
-            if (rawMPDUCount != 1) {
-              MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
-              switch (status) {
-                case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
-                {
-                  const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
-
-                  bool same = true;
-                  for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
-                    same = same && (rawPacket[i] == packet[i]);
-                  }
-                  ASSERT_FALSE(same) << "decoded packet matches original even though an MPDU was dropped";
-                }
-                break;
-                case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
-                  break;
-                case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
-                  break;
-                default:
-                  break;
-              } // switch on returned UHF packet process status
-            } // skip the second MPDU
-          } // for all the raw MPDUs except the second
-
-          // Test if corrupting the second MPDU results in a packet. It should not
-          for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
-
-            MAC::MAC_UHFPacketProcessingStatus status;
-
-            if (rawMPDUCount == 1) {
-              // offset the raw packet start by 1
-              status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength() + 1, MPDU::rawMPDULength());
-            } else {
-              status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
+              recvPacketGood = !same;
+              ASSERT_FALSE(same) << "Scenario 2; decoded packet matches original even though an MPDU was dropped";
             }
-
-            switch (status) {
-              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
-              {
-                const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
-
-                bool same = true;
-                for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
-                  same = same && (rawPacket[i] == packet[i]);
-                }
-                ASSERT_FALSE(same) << "decoded packet matches original even though an MPDU was mangled";
-              }
+            break;
+            case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
               break;
-              case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
-                break;
-              case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
-                break;
-              default:
-                break;
-            } // switch on returned UHF packet process status
+            default:
+              break;
+          } // switch on returned UHF packet process status
+        } // skip the second MPDU
+      } // for all the raw MPDUs except the second
+      ASSERT_TRUE(recvPacketGood) << "Scenario 2; A packet should have been received even though second raw MPDU was missing.";
 
-          } // for all the raw MPDUs except the first
+      //////////////////////////////////////////////////////////////////////////
+      // Scenario 3; Receive the first two raw MPDUs, fragment indices 0 and 1,
+      // then receive "new" packet (an MPDU with fragment index 0).
+      // Expected result; Only one packet is produced; it will not be correct, but that
+      // is to be dealt with by an upper layer. Check the packet does not match
+      // the original.
+      //////////////////////////////////////////////////////////////////////////
+#if QA_MAC_VERBOSE_DEBUG
+      printf("Scenario 3; incomplete packet when new packet arrives.\n");
+#endif
+      recvPacketGood = false;
+      for (uint16_t rawMPDUCount = 0; rawMPDUCount < 2; rawMPDUCount++) {
+        MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
 
-        } // check if have an integral number of raw MPDUs
-      } // was the packet successfully encoded
+        switch (status) {
+          case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+          {
+            // It's bad mojo to end up here since we did not provide all the MPDUs.
+            recvPacketGood = true;
+          }
+          break;
+          case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+            break;
+          default:
+            break;
+        } // switch on returned UHF packet process status
+
+      } // for only the first two raw MPDUs
+      ASSERT_FALSE(recvPacketGood) << "Scenario 3; A packet should not been received at this point as only two raw MPDUs have been processed.";
+#if QA_MAC_VERBOSE_DEBUG
+      printf("first two PMDUs received... now send a new MPDU 0\n");
+#endif
+      // Now receive another packet.
+      recvPacketGood = false;
+      for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
+        MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
+        switch (status) {
+          case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+          {
+            const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
+
+#if QA_MAC_DEBUG
+            printf("original packet length %ld raw packet length %d \n",
+              packetDataLengths[currentPacket], myMac1->getRawPacketBufferLength());
+            for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
+              printf("%04d %02x|%02x\n",i,rawPacket[i],packet[i]);
+            }
+            printf("------------\n");
+#endif
+            bool same = true;
+            for (uint16_t i = 0; same && (i < myMac1->getRawPacketLength()); i++) {
+              same = same && (rawPacket[i] == packet[i]);
+            }
+            recvPacketGood = same;
+#if QA_MAC_VERBOSE_DEBUG
+            printf("Scenario 3 packet rec'd\n");
+#endif
+            ASSERT_TRUE(same) << "Scenario 3; the decoded packet does not match original even though all raw MPDUs received";
+          }
+          break;
+          case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+            break;
+          default:
+            break;
+        } // switch on returned UHF packet process status
+
+      } // for all raw MPDUs
+      ASSERT_TRUE(recvPacketGood) << "Scenario 3; A packet should have been received.";
+
+      //////////////////////////////////////////////////////////////////////////
+      // Scenario 4; Receive raw MPDUs out of order after the first.
+      // Expected result; Only one packet is produced; it will not be correct, but that
+      // is to be dealt with by an upper layer. Check the packet does not match
+      // the original.
+      //////////////////////////////////////////////////////////////////////////
+#if QA_MAC_VERBOSE_DEBUG
+      printf("Scenario 4; Raw MPDUs arrive out of order.\n");
+#endif
+      // Get the first raw MPDU and process.
+      uint16_t rawMPDUCount = 0;
+      MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
+      switch (status) {
+        case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+        {
+          FAIL() << "Scenario 4; first MPDU should not result in packet";
+        }
+        break;
+        case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+          break;
+        default:
+          break;
+      } // switch on returned UHF packet process status
+
+      // Get the third raw MPDU and process
+      rawMPDUCount = 2;
+      status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
+      switch (status) {
+        case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+        {
+          FAIL() << "Scenario 4; third MPDU should not result in packet";
+        }
+        break;
+        case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+          break;
+        default:
+          break;
+      } // switch on returned UHF packet process status
+
+      // Get the second raw MPDU and process. Should put the state machine back
+      // looking for the first MPDU, but we can't tell that at this level.
+      rawMPDUCount = 1;
+      status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
+      switch (status) {
+        case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+        {
+          const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
+
+          bool same = true;
+          for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
+            same = same && (rawPacket[i] == packet[i]);
+          }
+          recvPacketGood = same;
+          ASSERT_FALSE(same) << "Scenario 4; decoded packet matches original even though MPDUs were out of order";
+        }
+        break;
+        case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+        {
+          FAIL() << "Scenario 4; second (out of order) MPDU should result in packet";
+        }
+          break;
+        default:
+          break;
+      } // switch on returned UHF packet process status
+
+      // Finally, get the last raw MPDU and process. Since we expect the state
+      // machine to have been put back to looking for the first MPDU, providing
+      // the final MPDU should not result in a packet.
+      rawMPDUCount = numMPDUs - 1;
+      status = myMac1->processUHFPacket(mpdusBuffer+rawMPDUCount*MPDU::rawMPDULength(), MPDU::rawMPDULength());
+      switch (status) {
+        case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+        {
+          FAIL() << "Scenario 4; final MPDU should not result in packet";
+        }
+        break;
+        case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+          break;
+        default:
+          break;
+      } // switch on returned UHF packet process status
+      ASSERT_FALSE(recvPacketGood) << "Scenario 4; A corrupted packet should have been received.";
+
+      //////////////////////////////////////////////////////////////////////////
+      // Scenario 5a); Receive raw MPDUs in order, but corrupt the MPDU header
+      // first Golay-encoded message (12 bits).
+      // Expected result; No packet is produced because the first MPDU is
+      // corrupted and the rest of the MPDUs are dropped.
+      //////////////////////////////////////////////////////////////////////////
+//#if QA_MAC_VERBOSE_DEBUG
+//      printf("Scenario 5a; Error correction scheme in MPDU header bits is corrupted.\n");
+//#endif
+//      recvPacketGood = false;
+//      for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
+//
+//        // Make a copy fo the current MPDU because we might use the original in a later test
+//        std::vector<uint8_t> rawMPDU;
+//        for (uint16_t i = 0; i < MPDU::rawMPDULength(); i++) {
+//          rawMPDU.push_back(mpdusBuffer[rawMPDUCount*MPDU::rawMPDULength()+i]);
+//        }
+//
+//        // Now, let's mangle the 5 MSBs of the 6-bit MPDUHeader error correction
+//        // enum, but only for the first MPDU
+//        if (rawMPDUCount == 0) {
+//#if QA_MAC_VERBOSE_DEBUG
+//          printf("Scenario 5a) rawMPDU[0] = 0x%02x ",rawMPDU[0]);
+//#endif
+//          uint8_t temp = ~rawMPDU[0];
+//          temp = (temp & 0x1F) | (rawMPDU[0] & 0xE0);
+//          rawMPDU[0] = temp;
+//#if QA_MAC_VERBOSE_DEBUG
+//          printf("temp = 0x%02x\n",temp);
+//#endif
+//        }
+//        try {
+//        // process the copy
+//        MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(&rawMPDU[0], MPDU::rawMPDULength());
+//
+//        switch (status) {
+//          case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+//          {
+//            recvPacketGood = true;
+//            ASSERT_FALSE(recvPacketGood) << "Scenario 5a; A packet was decoded, which should not happen";
+//          }
+//          break;
+//          case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+//            break;
+//          default:
+//            break;
+//        } // switch on returned UHF packet process status
+//        }
+//        catch (const MPDUException& e) {
+//
+//        }
+//
+//      } // for all raw MPDUs
+//      ASSERT_FALSE(recvPacketGood) << "Scenario 5a; A packet should not been received at this point";
+//
+//      //////////////////////////////////////////////////////////////////////////
+//      // Scenario 5b); Receive raw MPDUs in order, but corrupt the MPDU header
+//      // second Golay-encoded message (12 bits).
+//      // Expected result; One packet is produced; the user packet length field
+//      // is corrupted in the third MPDU, so the rest of the packet is padded
+//      // and then decoded.
+//      //////////////////////////////////////////////////////////////////////////
+//#if QA_MAC_VERBOSE_DEBUG
+//      printf("Scenario 5b; Uaser packet length in MPDU header bits is corrupted.\n");
+//#endif
+//      recvPacketGood = false;
+//      for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
+//
+//        // Make a copy fo the current MPDU because we might use the original in a later test
+//        std::vector<uint8_t> rawMPDU;
+//        for (uint16_t i = 0; i < MPDU::rawMPDULength(); i++) {
+//          rawMPDU.push_back(mpdusBuffer[rawMPDUCount*MPDU::rawMPDULength()+i]);
+//        }
+//
+//        // Now, let's mangle the 7 LSBs of the user packet length field in the
+//        // 3rd MPDU. Since the Golay-encoded codeword is 24 bits == 3 bytes, we
+//        // need to mangle the 7 LSBs of the 5th byte in the MPDU
+//        if (rawMPDUCount == 2) {
+//#if QA_MAC_VERBOSE_DEBUG
+//          printf("Scenario 5b) rawMPDU[4] = 0x%02x ",rawMPDU[4]);
+//#endif
+//          uint8_t temp = ~rawMPDU[4];
+//          temp = (temp & 0x7F) | (rawMPDU[4] & 0x80);
+//          rawMPDU[4] = temp;
+//#if QA_MAC_VERBOSE_DEBUG
+//          printf("temp = 0x%02x\n",rawMPDU[4]);
+//#endif
+//        }
+//        try {
+//        // process the copy
+//        MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(&rawMPDU[0], MPDU::rawMPDULength());
+//
+//        switch (status) {
+//          case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+//          {
+//            const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
+//
+//            bool same = true;
+//            for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
+//              same = same && (rawPacket[i] == packet[i]);
+//            }
+//            recvPacketGood = same;
+//            ASSERT_FALSE(recvPacketGood) << "Scenario 5b; A packet was decoded with no errors, which should not happen";
+//          }
+//          break;
+//          case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+//            break;
+//          default:
+//            break;
+//        } // switch on returned UHF packet process status
+//        }
+//        catch (const MPDUException& e) {
+//
+//        }
+//
+//      } // for all raw MPDUs
+//      ASSERT_FALSE(recvPacketGood) << "Scenario 5b; A good packet should not been received at this point";
+
+      //////////////////////////////////////////////////////////////////////////
+      // Scenario 5c); Receive raw MPDUs in order, but corrupt the MPDU header
+      // third Golay-encoded message (12 bits).
+      // Expected result; One packet is produced; the user packet fragment index
+      // is corrupted in the third MPDU, so the rest of the packet is padded
+      // and then decoded.
+      //////////////////////////////////////////////////////////////////////////
+#if QA_MAC_VERBOSE_DEBUG
+      printf("Scenario 5c; User packet fragment index in MPDU header bits is corrupted.\n");
+#endif
+      recvPacketGood = false;
+      for (uint16_t rawMPDUCount = 0; rawMPDUCount < numMPDUs; rawMPDUCount++) {
+
+        // Make a copy fo the current MPDU because we might use the original in a later test
+        std::vector<uint8_t> rawMPDU;
+        for (uint16_t i = 0; i < MPDU::rawMPDULength(); i++) {
+          rawMPDU.push_back(mpdusBuffer[rawMPDUCount*MPDU::rawMPDULength()+i]);
+        }
+
+        // Now, let's corrupt 7 bits of the user packet fragment index in the
+        // 3rd MPDU. Since the Golay-encoded codeword is 24 bits == 3 bytes, we
+        // need to mangle the LSB of the 9th byte in the MPDU
+        if (rawMPDUCount == 2) {
+#if QA_MAC_VERBOSE_DEBUG
+          for (uint16_t j=0; j < 9; j++) {
+            printf("0x%02X ",rawMPDU[j]);
+          }
+          printf("\n");
+          printf("Scenario 5c) rawMPDU[8] = 0x%02x ",rawMPDU[8]);
+#endif
+          uint8_t temp = (~rawMPDU[8]) & 0xFE;
+          rawMPDU[8] = rawMPDU[8] | temp;
+#if QA_MAC_VERBOSE_DEBUG
+          printf("temp = 0x%02x\n",rawMPDU[8]);
+#endif
+        }
+        try {
+          // process the copy
+          MAC::MAC_UHFPacketProcessingStatus status = myMac1->processUHFPacket(&rawMPDU[0], MPDU::rawMPDULength());
+
+          switch (status) {
+            case MAC::MAC_UHFPacketProcessingStatus::PACKET_READY:
+            {
+              const uint8_t *rawPacket = myMac1->getRawPacketBuffer();
+
+              bool same = true;
+              for (uint16_t i = 0; i < myMac1->getRawPacketLength(); i++) {
+                same = same && (rawPacket[i] == packet[i]);
+              }
+              recvPacketGood = same;
+              ASSERT_FALSE(recvPacketGood) << "Scenario 5c; A packet was decoded with no errors, which should not happen";
+            }
+            break;
+            case MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET:
+              break;
+            default:
+              break;
+          } // switch on returned UHF packet process status
+        }
+        catch (const MPDUException& e) {
+
+        }
+
+      } // for all raw MPDUs
+      ASSERT_FALSE(recvPacketGood) << "Scenario 5c; A good packet should not been received at this point";
 
       // Clean up!
       free(packet);
@@ -575,7 +811,7 @@ TEST(mac, PacketLoopbackDroppedPackets) {
 
   } // for a number of Error Correction schemes
 
-    delete myMac1;
+  delete myMac1;
 
 } // PacketLoopbackDroppedPackets
 

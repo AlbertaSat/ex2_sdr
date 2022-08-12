@@ -13,6 +13,7 @@
 
 #include "mpdu.hpp"
 
+#define MPDU_DEBUG 0 // set to 1 for debug output
 namespace ex2
 {
   namespace sdr
@@ -47,6 +48,7 @@ namespace ex2
     }
 
     MPDU::MPDU (
+      const ErrorCorrection &currentErrorCorrection,
       std::vector<uint8_t>& rawMPDU) {
 
       // There are several possibilities for received @p rawMPDU:
@@ -76,7 +78,7 @@ namespace ex2
       // >
 
       try {
-        m_mpduHeader = new MPDUHeader(rawMPDU);
+        m_mpduHeader = new MPDUHeader(currentErrorCorrection, rawMPDU);
 
         // Header seems okay, so make codeword based on how many remaining bytes
         // in rawMPDU
@@ -92,7 +94,9 @@ namespace ex2
       }
       catch (MPDUHeaderException& e) {
         // @todo should log this
+//#if MPDU_DEBUG
         printf("MPDUHeader exception : %s\n", e.what());
+//#endif
         throw MPDUException("MPDU: Bad raw MPDUHeader.");
       }
 

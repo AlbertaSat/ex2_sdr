@@ -117,7 +117,7 @@ TEST(mpdu, ConstructorsAndAccessors)
 #endif
 
   // Instantiate a second object using the raw data constructor
-  MPDU *mpdu2 = new MPDU(rawMPDU);
+  MPDU *mpdu2 = new MPDU(errorCorrection, rawMPDU);
 
   ASSERT_TRUE(mpdu2 != NULL) << "MPDU 2 failed to instantiate";
 

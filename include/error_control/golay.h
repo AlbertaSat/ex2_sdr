@@ -28,24 +28,49 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+/*!
+ * @file golay.h
+ * @author StevenKnudsen
+ * @date Aug 7, 2022
+ *
+ * @details Changes to original code and documentation.
+ *
+ * @copyright See original file information above.
+ *
+ * @license GPL, see above
+ */
+
 #ifndef EX2_SDR__GOLAY_H__
 #define EX2_SDR__GOLAY_H__
 
 #include <stdint.h>
 
-/* encodes a 12-bit word to a 24-bit codeword
+/*!
+ * @brief Encodes a 12-bit word to a 24-bit codeword
+ * @param[in] message The 12-bit message word
+ * @return The 24-bit encoded message word aka codeword
  */
-uint32_t golay_encode(uint16_t w);
+uint32_t golay_encode(uint16_t message);
 
-/* return a mask showing the bits which are in error in a received
- * 24-bit codeword, or -1 if 4 errors were detected.
+/*!
+ * @brief Return a mask showing the bits which are in error in a received 24-bit
+ * codeword, or -1 if 4, 6, 8, 10, or 12 errors were detected. If the number of
+ * errors is odd, a mask is returned, but it likely not valid so don't rely on it.
+ * @param[in] codeword The Golay-encoded 12 message bits
+ * @return A mask showing the bits that are in error in the received 24-bit
+ * codeword
  */
 int32_t golay_errors(uint32_t codeword);
 
-/* decode a received codeword. Up to 3 errors are corrected for; 4
+/*!
+ * @brief Decode the input codeword. Up to 3 errors are corrected for; 4
    errors are detected as uncorrectable (return -1); 5 or more errors
-   cause an incorrect correction.
-*/
-int16_t golay_decode(uint32_t w);
+   cause an incorrect correction, that is, the result cannot be relied on and
+   some other check should be done.
+ * @param[in] codeword The Golay-encoded message
+ * @return
+ */
+int16_t golay_decode(uint32_t codeword);
 
 #endif // EX2_SDR__GOLAY_H__

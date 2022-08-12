@@ -1,11 +1,11 @@
 /*!
- * @file frameheader.h
+ * @file MPDUHeader.h
  * @author Steven Knudsen
  * @date April 30, 2021
  *
- * @details
- *
- * @todo change the user packet fragment index to be a CRC8 field
+ * @details Represents the MPDU header, which contains information about the
+ * radio RF Mode, Error Correction scheme, which codeword fragment and packet
+ * fragment this is, and the original payload length.
  *
  * @copyright AlbertaSat 2021
  *
@@ -24,8 +24,6 @@
 #include "pdu.hpp"
 #include "rfMode.hpp"
 
-#define TRANSPARENT_MODE_DATA_FIELD_2_MAX_LEN 128 // bytes
-
 namespace ex2 {
   namespace sdr {
 
@@ -37,7 +35,6 @@ namespace ex2 {
 
     class MPDUHeader {
     public:
-
 
       /*!
        * @brief Constructor
@@ -62,11 +59,14 @@ namespace ex2 {
        * @details Reconstitute a header object from raw (received, we assume)
        * bytes. Check the data for correctness and throw an exepction if bad.
        *
+       * @param[in] currentErrorCorrection The current ErrorCorrection scheme in
+       * use by the MAC.
        * @param[in] rawHeader The first @p k_MACHeaderLength / 8 bytes of this
        * vector are assumed to contain the MACHeader information.
        * @throws MPDUHeaderException
        */
-      MPDUHeader (std::vector<uint8_t> &rawHeader);
+      MPDUHeader (const ErrorCorrection &currentErrorCorrection,
+        std::vector<uint8_t> &rawHeader);
 
       /*!
        * @brief Copy Constructor
