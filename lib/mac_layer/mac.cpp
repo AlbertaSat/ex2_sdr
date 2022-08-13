@@ -504,6 +504,7 @@ namespace ex2 {
         }
         catch (FECException& e) { // @todo need an FEC exception that all subclasses inherit
           // @note No FEC method will throw an exception for encoding at this time.
+          // @note MPDU and MPDUHeader constructors will not throw exception.
         }
 
       } while (bytesRemaining > 0);
@@ -518,18 +519,24 @@ namespace ex2 {
         // payload. Note, the MPDUHeader constructor cannot fail since the
         // only possible error would be from a bad ErrorCorrection, but that
         // would have been caught when m_errorCorrection was made.
-        MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
-          mpduCodewordFragmentCount++, packetLength, MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT);
-        // Make an MPDU.
-        // Just the same as for the MPDUHeader, there is no way for this
-        // constructor to generate an exception because the only check that
-        // could be made is for the MPDUHeader, which as noted above can't
-        // fail.
-        MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
-        std::vector<uint8_t> rawMPDU = mpdu->getRawMPDU();
-        m_transparentModePayloads.insert(m_transparentModePayloads.end(), rawMPDU.begin(), rawMPDU.end());
-        delete mpdu;
-        delete mpduHeader;
+        try {
+          MPDUHeader *mpduHeader = new MPDUHeader(m_rfModeNumber, *m_errorCorrection,
+            mpduCodewordFragmentCount++, packetLength, MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT);
+          // Make an MPDU.
+          // Just the same as for the MPDUHeader, there is no way for this
+          // constructor to generate an exception because the only check that
+          // could be made is for the MPDUHeader, which as noted above can't
+          // fail.
+          MPDU *mpdu = new MPDU(*mpduHeader, mpduPayload);
+          std::vector<uint8_t> rawMPDU = mpdu->getRawMPDU();
+          m_transparentModePayloads.insert(m_transparentModePayloads.end(), rawMPDU.begin(), rawMPDU.end());
+          delete mpdu;
+          delete mpduHeader;
+        }
+        catch (FECException& e) { // @todo need an FEC exception that all subclasses inherit
+          // @note No FEC method will throw an exception for encoding at this time.
+          // @note MPDU and MPDUHeader constructors will not throw exception.
+        }
       }
 
 #if MAC_DEBUG
