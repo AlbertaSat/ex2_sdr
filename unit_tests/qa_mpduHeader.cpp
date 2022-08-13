@@ -152,7 +152,6 @@ TEST(mpduHeader, Accessors )
 
   MPDUHeader *header1, *header2;
 
-
   header1 = new MPDUHeader(
     modulation,
     ec,
@@ -205,12 +204,12 @@ TEST(mpduHeader, Accessors )
     headerLength = header2->MACHeaderLength();
     ASSERT_TRUE(headerLength == MPDUHeader::MACHeaderLength()) << "Header length is wrong!";
 
+    delete(header2);
   }
   catch(MPDUHeaderException &e) {
 
   };
-  if (!header2)
-    delete(header2);
+
   delete(header1);
 }
 
@@ -288,6 +287,7 @@ TEST(mpduHeader, RawReconstruction )
   // to embedded blocks properly, so we do it the old way.
 
   // We expect problems...
+  header2 = NULL;
   try {
     header2 = new MPDUHeader(ec, payload1);
     EXPECT_TRUE(false) << "The corrupted raw header should have caused an exception";
@@ -323,6 +323,7 @@ TEST(mpduHeader, RawReconstruction )
   // We expect no problems...
   try {
     header2 = new MPDUHeader(ec, payload1);
+    delete(header2);
   }
   catch(MPDUHeaderException &e) {
     EXPECT_TRUE(false) << "The corrupted raw header should not have caused an exception";
