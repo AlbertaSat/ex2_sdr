@@ -78,6 +78,7 @@ namespace ex2
        * @brief Accessor
        *
        * @param ecScheme The ErrorCorrectionScheme to use
+       * @throw If bad @p ErrorCorrectionScheme, throws @p ECException
        */
       void setErrorCorrectionScheme (
         ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
