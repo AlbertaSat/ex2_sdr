@@ -222,6 +222,8 @@ check_decoder_ber (
     }
   }
 
+  delete(ccHDCodec);
+  delete(ec);
   delete(rng);
 } // check decoder
 
@@ -399,11 +401,11 @@ TEST(convolutional_codec_hd, r_1_2_ber_match )
    */
 
   //  // Check some SNRs that should easily do better than 1e-4 BER
-  //  check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
-  //    60 /* dB */,
-  //    0.0001,
-  //    false,
-  //    10.0);
+    check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
+      60 /* dB */,
+      0.0001,
+      false,
+      10.0);
   check_decoder_ber (ErrorCorrection::ErrorCorrectionScheme::CCSDS_CONVOLUTIONAL_CODING_R_1_2,
     8 /* dB */,
     0.0001,
@@ -439,6 +441,5 @@ TEST(convolutional_codec_hd, r_1_2_ber_match )
     0.0001,
     true,
     10.0);
-
 }
 
