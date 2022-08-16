@@ -38,7 +38,14 @@ static int sdr_driver_init(sdr_interface_data_t *ifdata, const char *ifname) {
     }
 
     ifdata->rx_queue = os_queue_create(2, ifdata->mtu);
-    ifdata->mac_data = fec_create(RF_MODE_3, NO_FEC);
+    error_correction_scheme_t correction_scheme;
+    if (ifdata->sdr_conf->use_fec) {
+        correction_scheme = CCSDS_CONVOLUTIONAL_CODING_R_1_2;
+    } else {
+        correction_scheme = NO_FEC;
+    }
+    ifdata->mac_data = fec_create(RF_MODE_3, correction_scheme);
+
     ifdata->rx_mpdu_index = 0;
     ifdata->rx_mpdu = os_malloc(ifdata->mtu);
 
