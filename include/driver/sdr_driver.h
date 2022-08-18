@@ -58,6 +58,7 @@ typedef struct sdr_uhf_conf {
 } sdr_uhf_conf_t;
 
 typedef struct sdr_conf {
+    bool use_fec;
     sdr_rx_callback_t rx_callback;
     void *rx_callback_data;
     struct sdr_uhf_conf uhf_conf;
