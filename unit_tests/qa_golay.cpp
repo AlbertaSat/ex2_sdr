@@ -26,7 +26,7 @@ using namespace std;
 
 #include "gtest/gtest.h"
 
-#define QA_GLOAY_DEBUG 0 // Set to 1 to turn on logging
+#define QA_GOLAY_DEBUG 0 // Set to 1 to turn on logging
 
 /*!
  * @brief Factorial n!
@@ -95,7 +95,7 @@ TEST(golay, CheckManyCorrectableErrors )
       uint32_t recd = codeword ^ pattern;
       // Decode
       int16_t decoded = golay_decode(recd);
-#if QA_GLOAY_DEBUG
+#if QA_GOLAY_DEBUG
       printf("data     0x%08x\n", data);
       printf("codeword 0x%08x\n", codeword);
       printf("pattern  0x%08x\n", pattern);
@@ -132,12 +132,12 @@ TEST(golay, CheckManyUncorrectableErrors )
       uint32_t pattern = nBitErrorPattern(numBitErrors);
       // Apply the bit error tothe codeword to get received codeword
       uint32_t recd = codeword ^ pattern;
-#if QA_GLOAY_DEBUG
+#if QA_GOLAY_DEBUG
       printf("numBitErrors %d pattern 0x%08x codeword 0x%08x recd 0x%08x\n", numBitErrors, pattern, codeword, recd);
 #endif
       // Decode
       int16_t decoded = golay_decode(recd);
-#if QA_GLOAY_DEBUG
+#if QA_GOLAY_DEBUG
       if (decoded < 0) {
         printf("detected 4 errors for numBitErrors = %d\n",numBitErrors);
       }

@@ -2,9 +2,6 @@ project('ex2_obc_sdr', 'c', 'cpp',
     license: 'proprietary',
     version: '0.5.0',
     default_options : [
-#        'c_args=pr', 'cpp_args=pr',
-#        'c_std=c89', 'cpp_std=c++14',
-#        'cpp_std=c++14',
 #        'buildtype=release',
         'warning_level=3',
         'buildtype=debug',
@@ -12,16 +9,13 @@ project('ex2_obc_sdr', 'c', 'cpp',
         ],
     )
 
-#add_project_arguments(
-#    language: 'c,cpp')
-
 cpp = meson.get_compiler('cpp')
 
-home = run_command('sh', '-c', 'echo $HOME')
+home = run_command('sh', '-c', 'echo $HOME', check: true)
 HOME_DIR = home.stdout().strip()
 message('home = ' + HOME_DIR)
 
-prj_dir = run_command('sh', '-c', 'echo $PWD')
+prj_dir = run_command('sh', '-c', 'echo $PWD', check: true)
 PRJ_DIR = prj_dir.stdout().strip()
 message('prj_dir = ' + PRJ_DIR)
 
@@ -33,8 +27,6 @@ boost_dep = dependency('boost', modules: [
         'thread'
         ],
     )
-
-eigen_dep = dependency('eigen3')
 
 core_source_files = [
     PRJ_DIR / 'lib/error_control/ConvolutionalCodecHD.cpp',
@@ -67,13 +59,6 @@ incdir = include_directories(
 third_party_source_files = [
     PRJ_DIR / 'third_party/viterbi/viterbi.cpp'
 ]
-
-#executable('ex2_uhf_trx', 'src/ex2_uhf_trx.cpp', core_source_files,
-#    include_directories: incdir,
-#    dependencies: [boost_dep],
-##    link_with: ExSDRTxRxlib,
-#    install: true,
-#    )
 
 gtest_dep = dependency('gtest_main', required: false)
 

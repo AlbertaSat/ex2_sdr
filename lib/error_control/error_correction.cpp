@@ -32,10 +32,9 @@ namespace ex2 {
       // TODO this is hard coded. Find a more elegant way to update the code for
       // new implemented FEC schemes
       if (!isValid(ecScheme)) {
-#if ERROR_CORRECTION_DEBUG
-        printf("\nscheme %d\n", (uint16_t) ecScheme);
-#endif
-        throw ECException("Invalid FEC Scheme");
+        // Don't catch an exception thrown by ErrorCorrectionName, just let it propagate
+        std::string name = ErrorCorrectionName(ecScheme);
+        throw ECException("Invalid FEC Scheme "+name);
       }
       m_codingRate = m_getCodingRate(ecScheme);
       if (m_codingRate == ErrorCorrection::CodingRate::RATE_BAD) {
