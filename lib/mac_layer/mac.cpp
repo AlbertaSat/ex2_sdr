@@ -12,6 +12,9 @@
  */
 
 #include "mac.hpp"
+
+#include <boost/function.hpp>
+#include <boost/system/error_code.hpp>
 #include <cmath>
 
 #include "golay.h"
@@ -22,6 +25,10 @@
 // The user packet fragmentation index is not used currently. We can use it
 // to detect false positive Golay decoding since it should always be set to zero.
 #define MPDU_HEADER_USER_PACKET_FRAGMENT_INDEX_DEFAULT 0
+
+// We will give MPDU packets three times the amount of time needed to receive
+// one packet before deciding it's not coming
+#define MAC_MPDU_TIMEOUT_MS (UHF_TRANSPARENT_MODE_PACKET_TX_TIME_MS * 3)
 
 #define MAC_DEBUG 0 // Set to one to turn on debugging messages
 
@@ -37,6 +44,18 @@ namespace ex2 {
 
       // @TODO This should be estimated by the system somehow and updated regularly
       m_SNREstimate = 50.0; // dB
+
+      // Create a deadline timer and set the callback function
+      m_deadline_timer = new DeadlineTimer();
+//      std::bind(&MAC::m_mpdu_timeout_handler, this );
+
+//      boost::bind (&MAC::m_mpdu_timeout_handler, this, 1)(boost::system::error_code&);
+//boost::system::error_code ec;
+//std::bind(&MAC::m_mpdu_timeout_handler, this, &ec );
+      m_deadline_timer->setCallback(std::bind(&MAC::m_mpdu_timeout_handler, this, m_boost_error_code ));
+
+      // testing temp
+      m_deadline_timer->start(123);
     }
 
     MAC::~MAC () {
@@ -45,6 +64,9 @@ namespace ex2 {
       }
       if (m_FEC != NULL) {
         delete m_FEC;
+      }
+      if (m_deadline_timer != NULL) {
+        delete m_deadline_timer;
       }
     }
 
@@ -159,6 +181,8 @@ namespace ex2 {
               }
               // Otherwise there must be more MPDUs to come...
               m_firstFragmentReceived = true;
+              // Start a timer for the next expected MPDU packet
+//              m_deadline_timer->start(MAC_MPDU_TIMEOUT_MS, timer_callback_f)
             }
             return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
           } // MPDU user packet lengths don't match
@@ -206,6 +230,8 @@ namespace ex2 {
               }
               // Otherwise there must be more MPDUs to come...
               m_firstFragmentReceived = true;
+              // Start a timer for the next expected MPDU packet
+//              m_deadline_timer->start(MAC_MPDU_TIMEOUT_MS, timer_callback_f)
               return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
             }
 
@@ -272,6 +298,8 @@ namespace ex2 {
             }
             // Otherwise there must be more MPDUs to come...
             m_firstFragmentReceived = true;
+            // Start a timer for the next expected MPDU packet
+//            m_deadline_timer->start(MAC_MPDU_TIMEOUT_MS, timer_callback_f)
             return MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET;
           } // if first MPDU codeword fragment
           else { // @note empty else is so we can show the MPDU reconstruction logic
@@ -354,6 +382,25 @@ namespace ex2 {
       m_codewordBuffer.reserve(m_numExpectedMpduCodewordFragments*MPDU::maxMTU());
       m_codewordBuffer.assign(firstMPDU.getPayload().begin(),firstMPDU.getPayload().end());
     }
+
+    void
+    MAC::m_mpdu_timeout_handler(const boost::system::error_code&) {
+      printf("----------> MPDU timeout handler invoked\n");
+      if (m_firstFragmentReceived) {
+//        // Calculate the numMissingMPDUs
+//        uint32_t numMissingMPDUs = m_numExpectedMpduCodewordFragments - m_mpduCodewordFragmentCount;
+//        m_codewordBuffer.insert(m_codewordBuffer.end(), numMissingMPDUs * MPDU::maxMTU(), 0);
+//
+//        m_decodePacket();
+        // @todo set a status, do what? How to tell the owner of the MAC that there has been a packet timeout?
+//        return MAC_UHFPacketProcessingStatus::PACKET_READY;
+      }
+      else {
+        // do nothing
+      }
+      m_firstFragmentReceived = false;
+    }
+
 
     void
     MAC::m_decodePacket() {

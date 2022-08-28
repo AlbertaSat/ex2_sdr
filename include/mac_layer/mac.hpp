@@ -22,9 +22,14 @@
 #include <vector>
 #include <time.h>
 
+#include "DeadlineTimer.hpp"
 #include "FEC.hpp"
 #include "mpdu.hpp"
 #include "rfMode.hpp"
+
+#define MAC_MAX_RX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
+#define MAC_MAX_TX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
+
 
 namespace ex2
 {
@@ -239,12 +244,16 @@ namespace ex2
       uint16_t m_numExpectedMpduCodewordFragments;
       uint16_t m_mpduCodewordFragmentCount;
 
-      // Needed by some FEC codecs
       float m_SNREstimate;
 
-      // temp storage for the received user packet comprising 1+ MPDUs
       std::vector<uint8_t> m_rawPacket;
 
+      DeadlineTimer *m_deadline_timer;
+
+      void m_mpdu_timeout_handler(const boost::system::error_code&);
+
+      boost::system::error_code m_boost_error_code;
+//      void m_mpdu_timeout_handler(void);
     };
 
   } // namespace sdr

@@ -40,6 +40,7 @@ core_source_files = [
     PRJ_DIR / 'lib/mac_layer/pdu/mpduHeader.cpp',
     PRJ_DIR / 'lib/mac_layer/pdu/mpduUtility.cpp',
     PRJ_DIR / 'lib/utilities/vectorTools.cpp',
+    PRJ_DIR / 'lib/utilities/DeadlineTimer.cpp',
     PRJ_DIR / 'lib/wrapper/MACWrapper.cpp',
 ]
 
