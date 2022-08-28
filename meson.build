@@ -2,6 +2,9 @@ project('ex2_obc_sdr', 'c', 'cpp',
     license: 'proprietary',
     version: '0.5.0',
     default_options : [
+#        'c_args=pr', 'cpp_args=pr',
+#        'c_std=c89', 'cpp_std=c++14',
+#        'cpp_std=c++14',
 #        'buildtype=release',
         'warning_level=3',
         'buildtype=debug',
@@ -14,11 +17,11 @@ project('ex2_obc_sdr', 'c', 'cpp',
 
 cpp = meson.get_compiler('cpp')
 
-home = run_command('sh', '-c', 'echo $HOME', check: true)
+home = run_command('sh', '-c', 'echo $HOME')
 HOME_DIR = home.stdout().strip()
 message('home = ' + HOME_DIR)
 
-prj_dir = run_command('sh', '-c', 'echo $PWD', check: true)
+prj_dir = run_command('sh', '-c', 'echo $PWD')
 PRJ_DIR = prj_dir.stdout().strip()
 message('prj_dir = ' + PRJ_DIR)
 
@@ -32,10 +35,15 @@ boost_dep = dependency('boost', modules: [
     )
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 eigen_dep = dependency('eigen3')
 
 =======
 >>>>>>> 038d83e (fix meson warning in run_command(), remove unnecessary checked and old commented-out things)
+=======
+eigen_dep = dependency('eigen3')
+
+>>>>>>> b2213ed (revert to master version for rebase)
 core_source_files = [
     PRJ_DIR / 'lib/error_control/ConvolutionalCodecHD.cpp',
     PRJ_DIR / 'lib/error_control/error_correction.cpp',
@@ -69,6 +77,9 @@ third_party_source_files = [
 ]
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> b2213ed (revert to master version for rebase)
 #executable('ex2_uhf_trx', 'src/ex2_uhf_trx.cpp', core_source_files,
 #    include_directories: incdir,
 #    dependencies: [boost_dep],
@@ -76,8 +87,11 @@ third_party_source_files = [
 #    install: true,
 #    )
 
+<<<<<<< HEAD
 =======
 >>>>>>> 038d83e (fix meson warning in run_command(), remove unnecessary checked and old commented-out things)
+=======
+>>>>>>> b2213ed (revert to master version for rebase)
 gtest_dep = dependency('gtest_main', required: false)
 
 if not gtest_dep.found()
@@ -98,6 +112,7 @@ if not gtest_dep.found()
     error('unable to find gtest dependency')
 endif
 
+#thread_dep = dependency('threads')
 if gtest_dep.found()
     subdir('unit_tests')
 endif
