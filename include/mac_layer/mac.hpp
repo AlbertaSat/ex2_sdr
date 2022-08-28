@@ -17,7 +17,6 @@
 #ifndef EX2_SDR_MAC_LAYER_MAC_H_
 #define EX2_SDR_MAC_LAYER_MAC_H_
 
-#include <mutex>
 #include <stdexcept>
 #include <queue>
 #include <vector>
@@ -26,10 +25,6 @@
 #include "FEC.hpp"
 #include "mpdu.hpp"
 #include "rfMode.hpp"
-
-#define MAC_MAX_RX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
-#define MAC_MAX_TX_BUFFERS MAC_SERVICE_QUEUE_LENGTH
-
 
 namespace ex2
 {
@@ -206,11 +201,25 @@ namespace ex2
 
     private:
 
+      /*!
+       * @brief Update the Error Correction according to new scheme
+       *
+       * @param[in] errorCorrectionScheme
+       */
       void m_updateErrorCorrection(
         ErrorCorrection::ErrorCorrectionScheme errorCorrectionScheme);
 
+      /*!
+       * @brief Process the first MPDU of a user packet. Set up various internal
+       * details.
+       *
+       * @param[in] firstMPDU
+       */
       void m_processFirstMPDU(MPDU &firstMPDU);
 
+      /*!
+       * @brief Finalize the received user packet comprising one or more received MPDUs.
+       */
       void m_decodePacket();
 
       // member vars that define the MAC operation
@@ -230,13 +239,15 @@ namespace ex2
       uint16_t m_numExpectedMpduCodewordFragments;
       uint16_t m_mpduCodewordFragmentCount;
 
+      // Needed by some FEC codecs
       float m_SNREstimate;
 
+      // temp storage for the received user packet comprising 1+ MPDUs
       std::vector<uint8_t> m_rawPacket;
+
     };
 
   } // namespace sdr
 } // namespace ex2
 
 #endif /* EX2_SDR_MAC_LAYER_MAC_H_ */
-
