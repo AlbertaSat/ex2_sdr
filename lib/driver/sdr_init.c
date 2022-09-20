@@ -8,7 +8,10 @@ void sdr_loopback_open(sdr_interface_data_t *ifdata);
 
 static int sdr_driver_init(sdr_interface_data_t *ifdata, const char *ifname) {
     int rc;
-
+    ifdata->mtx = os_mutex_create();
+    if (ifdata->mtx == NULL) {
+        return NULL;
+    }
     if (strcmp(ifname, SDR_IF_LOOPBACK_NAME) == 0) {
         sdr_loopback_open(ifdata);
     }

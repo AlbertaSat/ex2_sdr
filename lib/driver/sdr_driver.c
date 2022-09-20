@@ -18,6 +18,9 @@ static int sdr_uhf_baud_rate_delay[] = {
 };
 
 int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
+    if (!os_mutex_lock(ifdata->mtx, SDR_TX_MTX_TIMEOUT)) {
+        return 1;
+    }
     sdr_uhf_baud_rate_t uhf_baudrate = ifdata->sdr_conf->uhf_conf.uhf_baudrate;
 
     if (fec_data_to_mpdu(ifdata->mac_data, data, len)) {
@@ -30,6 +33,7 @@ int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
             os_sleep_ms(delay_time);
         }
     }
+    os_mutex_unlock(ifdata->mtx);
 
     return 0;
 }

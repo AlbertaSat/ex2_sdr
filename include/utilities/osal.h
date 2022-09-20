@@ -52,17 +52,24 @@ typedef os_task_return_t (*os_task_func_t)(void* parameter);
 #define OS_MAX_TIMEOUT (UINT32_MAX)
 #define OS_RX_TASK_STACK_SIZE 1024
 #define OS_TickType long
+#define OS_MutexType phread_mutex_t*
 #define ex2_log printf
 #elif defined(OS_FREERTOS)
 #include "FreeRTOS.h"
+#include "os_semphr.h"
 #define OS_MAX_TIMEOUT portMAX_DELAY
 #define OS_RX_TASK_STACK_SIZE 1024/sizeof(int) // FreeRTOS allocates stack sizes based of words, not bytes
 #define OS_TickType TickType_t
+#define OS_MutexType SemaphoreHandle_t
 #else
 #error "No OS specified"
 #endif /* OS_FREERTOS */
 
 int os_task_create(os_task_func_t func, const char *const name, unsigned int stack_size, void *parameter, unsigned int priority, os_task_handle_t *handle);
+
+int os_mutex_lock(OS_MutexType mtx, OS_TickType timeout);
+int os_mutex_unlock(OS_MutexType mtx);
+OS_MutexType os_mutex_create();
 
 OS_TickType os_get_ms(void);
 #ifdef __cplusplus

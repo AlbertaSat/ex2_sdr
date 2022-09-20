@@ -23,6 +23,8 @@ typedef enum {
 #define SDR_UHF_MAX_MTU 128
 #define SDR_SBAND_MAX_MTU 128
 
+#define SDR_TX_MTX_TIMEOUT 500
+
 typedef enum {
     SDR_ERR_NONE,
     SDR_ERR_NOMEM,
@@ -78,6 +80,7 @@ typedef struct sdr_interface_data {
     uint16_t rx_mpdu_index;
     uint8_t *rx_mpdu;
     OS_TickType last_rx;
+    OS_MutexType mtx;
 } sdr_interface_data_t;
 
 #define SDR_IF_UHF_NAME "UHF"
