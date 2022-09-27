@@ -332,6 +332,26 @@ blocks:
     coordinate: [1656, 480.0]
     rotation: 0
     state: enabled
+- name: blocks_socket_pdu_0_0
+  id: blocks_socket_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    host: 127.0.0.1
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mtu: '10000'
+    port: '4322'
+    tcp_no_delay: 'False'
+    type: TCP_SERVER
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1648, 660.0]
+    rotation: 0
+    state: enabled
 - name: blocks_socket_pdu_1
   id: blocks_socket_pdu
   parameters:
@@ -921,7 +941,7 @@ blocks:
     bus_structure: null
     coordinate: [1248, 616.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: satellites_fsk_demodulator_0
   id: satellites_fsk_demodulator
   parameters:
@@ -941,7 +961,7 @@ blocks:
     bus_structure: null
     coordinate: [512, 612.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: satellites_hexdump_sink_0
   id: satellites_hexdump_sink
   parameters:
@@ -1730,6 +1750,7 @@ connections:
 - [analog_pwr_squelch_xx_0, '0', analog_quadrature_demod_cf_0, '0']
 - [analog_quadrature_demod_cf_0, '0', digital_pfb_clock_sync_xxx_0, '0']
 - [analog_simple_squelch_cc_0, '0', analog_quadrature_demod_cf_0, '0']
+- [analog_simple_squelch_cc_0, '0', satellites_fsk_demodulator_0, '0']
 - [blocks_message_strobe_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0_0, strobe, uhd_usrp_sink_0, command]
@@ -1743,7 +1764,7 @@ connections:
 - [digital_gfsk_mod_0, '0', qtgui_time_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', uhd_usrp_sink_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
-- [satellites_ax25_deframer_0, out, blocks_socket_pdu_0, pdus]
+- [satellites_ax25_deframer_0, out, blocks_socket_pdu_0_0, pdus]
 - [satellites_ax25_deframer_0, out, satellites_hexdump_sink_0, in]
 - [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
 - [satellites_sync_to_pdu_packed_0_0, out, blocks_socket_pdu_0, pdus]
