@@ -36,7 +36,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: 10e6
+    value: 2.5e6
   states:
     bus_sink: false
     bus_source: false
@@ -48,7 +48,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: 2.428e9
+    value: (int)(2.428e9)
   states:
     bus_sink: false
     bus_source: false
@@ -240,6 +240,20 @@ blocks:
     coordinate: [984, 888.0]
     rotation: 0
     state: disabled
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [656, 1000.0]
+    rotation: 0
+    state: true
 - name: blocks_multiply_const_vxx_1
   id: blocks_multiply_const_vxx
   parameters:
@@ -311,6 +325,40 @@ blocks:
     coordinate: [880, 424.0]
     rotation: 0
     state: enabled
+- name: blocks_var_to_msg_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: baud_bit
+    target: baud_bit
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 1012.0]
+    rotation: 0
+    state: true
+- name: blocks_var_to_msg_0_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: center_freq
+    target: center_freq
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 1092.0]
+    rotation: 0
+    state: true
 - name: digital_constellation_decoder_cb_0
   id: digital_constellation_decoder_cb
   parameters:
@@ -437,6 +485,57 @@ blocks:
     coordinate: [504, 608.0]
     rotation: 0
     state: enabled
+- name: gpredict_doppler
+  id: epy_module
+  parameters:
+    alias: ''
+    comment: ''
+    source_code: "# this module will be imported in the into your flowgraph\nfrom\
+      \ gnuradio import gr\nimport threading\nimport time\nimport socket\n\nclass\
+      \ doppler_runner(threading.Thread):\n  def __init__(self, callback, freq, gpredict_host,\
+      \ gpredict_port):\n    threading.Thread.__init__(self)\n\n    self.callback\
+      \ = callback\n    self.gpredict_host = gpredict_host\n    self.gpredict_port\
+      \ = gpredict_port\n    self.freq = freq\n\n\n  def run(self):\n    #bind_to\
+      \ = (self.gpredict_host, self.gpredict_port)\n    bind_to = ('127.0.0.1', 4532)\n\
+      \    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    print(bind_to)\n\
+      \    server.bind(bind_to)\n    server.listen(0)\n\n    time.sleep(0.5) # TODO:\
+      \ Find better way to know if init is all done\n\n    while True:\n      print(\"\
+      Waiting for connection on: %s:%d\" % bind_to)\n      sock, addr = server.accept()\n\
+      \      print(\"Connected from: %s:%d\" % (addr[0], addr[1]))\n\n      cur_freq\
+      \ = 0\n      while True:\n        data = sock.recv(1024)\n        if not data:\n\
+      \          break\n\n        if data.startswith(b'F'):\n          self.freq =\
+      \ int(data[1:].strip())\n          if cur_freq != self.freq:\n            print(\"\
+      New frequency: %d\" % self.freq)\n            self.callback(self.freq)\n   \
+      \         cur_freq = self.freq\n          sock.sendall(b'RPRT 0\\n')\n     \
+      \   elif data.startswith(b'f'):\n          sock.sendall(b'f: %d\\n' % cur_freq)\n\
+      \n      sock.close()\n      print(\"Disconnected from: %s:%d\" % (addr[0], addr[1]))\n\
+      \n    #sys.exit()\n\nclass doppler(gr.sync_block):\n  def __init__(self, callback,\
+      \ freq, gpredict_host, gpredict_port):\n    gr.sync_block.__init__(self,\n \
+      \                          name = \"Gpredict Doppler\",\n                  \
+      \         in_sig = None,\n                           out_sig = None)\n    doppler_runner(callback,\
+      \ freq, gpredict_host, gpredict_port).start()\n\n"
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1312, 36.0]
+    rotation: 0
+    state: enabled
+- name: gpredict_doppler_0
+  id: gpredict_doppler
+  parameters:
+    alias: ''
+    comment: ''
+    gpredict_host: localhost
+    gpredict_port: '4532'
+    target: center_freq
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1488, 28.0]
+    rotation: 0
+    state: true
 - name: qtgui_const_sink_x_0_0
   id: qtgui_const_sink_x
   parameters:
@@ -1326,6 +1425,20 @@ blocks:
     coordinate: [64, 228.0]
     rotation: 0
     state: true
+- name: xmlrpc_server_0
+  id: xmlrpc_server
+  parameters:
+    addr: localhost
+    alias: ''
+    comment: ''
+    port: '8080'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [320, 932.0]
+    rotation: 0
+    state: true
 
 connections:
 - [analog_simple_squelch_cc_0, '0', satellites_rms_agc_0, '0']
@@ -1337,6 +1450,8 @@ connections:
 - [blocks_multiply_const_vxx_1, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_multiply_const_vxx_1, '0', qtgui_time_sink_x_0, '0']
 - [blocks_unpack_k_bits_bb_0, '0', digital_map_bb_1, '0']
+- [blocks_var_to_msg_0_0, msgout, blocks_message_debug_0, print]
+- [blocks_var_to_msg_0_0_0, msgout, blocks_message_debug_0, print]
 - [digital_constellation_decoder_cb_0, '0', digital_map_bb_0, '0']
 - [digital_costas_loop_cc_1, '0', blocks_null_sink_0, '0']
 - [digital_costas_loop_cc_1, '0', digital_pfb_clock_sync_xxx_0_0, '0']

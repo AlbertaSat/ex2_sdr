@@ -65,7 +65,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 84.0]
+    coordinate: [584, 12.0]
     rotation: 0
     state: enabled
 - name: fsk_dev
@@ -89,7 +89,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1016, 20.0]
+    coordinate: [192, 92.0]
     rotation: 0
     state: enabled
 - name: nfilts
@@ -101,7 +101,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [600, 84.0]
+    coordinate: [712, 76.0]
     rotation: 0
     state: enabled
 - name: out_len
@@ -113,7 +113,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [248, 292.0]
+    coordinate: [288, 92.0]
     rotation: 0
     state: enabled
 - name: rx_gain
@@ -125,7 +125,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [784, 12.0]
+    coordinate: [80, 612.0]
     rotation: 0
     state: enabled
 - name: samp_rate
@@ -137,7 +137,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [360, 300.0]
+    coordinate: [376, 84.0]
     rotation: 0
     state: true
 - name: sensitivity
@@ -149,7 +149,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 12.0]
+    coordinate: [464, 12.0]
     rotation: 0
     state: enabled
 - name: spsym
@@ -161,7 +161,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 12.0]
+    coordinate: [840, 12.0]
     rotation: 0
     state: enabled
 - name: taps
@@ -173,7 +173,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 76.0]
+    coordinate: [920, 12.0]
     rotation: 0
     state: true
 - name: tx_gain
@@ -185,7 +185,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [600, 12.0]
+    coordinate: [696, 12.0]
     rotation: 0
     state: enabled
 - name: analog_pwr_squelch_xx_0
@@ -205,7 +205,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [304, 740.0]
+    coordinate: [336, 640.0]
     rotation: 0
     state: disabled
 - name: analog_quadrature_demod_cf_0
@@ -221,7 +221,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 492.0]
+    coordinate: [480, 492.0]
     rotation: 0
     state: true
 - name: analog_simple_squelch_cc_0
@@ -238,9 +238,23 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [272, 484.0]
+    coordinate: [296, 484.0]
     rotation: 0
     state: enabled
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [416, 856.0]
+    rotation: 0
+    state: true
 - name: blocks_message_strobe_0
   id: blocks_message_strobe
   parameters:
@@ -256,7 +270,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 236.0]
+    coordinate: [832, 220.0]
     rotation: 0
     state: true
 - name: blocks_message_strobe_0_0
@@ -274,7 +288,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 300.0]
+    coordinate: [832, 284.0]
     rotation: 0
     state: true
 - name: blocks_message_strobe_0_0_0
@@ -330,6 +344,26 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1656, 480.0]
+    rotation: 0
+    state: enabled
+- name: blocks_socket_pdu_0_0
+  id: blocks_socket_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    host: 127.0.0.1
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mtu: '10000'
+    port: '4322'
+    tcp_no_delay: 'False'
+    type: TCP_SERVER
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1632, 684.0]
     rotation: 0
     state: enabled
 - name: blocks_socket_pdu_1
@@ -391,6 +425,75 @@ blocks:
     coordinate: [496, 156.0]
     rotation: 0
     state: enabled
+- name: blocks_var_to_msg_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: fsk_dev
+    target: fsk_dev
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 844.0]
+    rotation: 0
+    state: true
+- name: blocks_var_to_msg_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: baud_bit
+    target: baud_bit
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 924.0]
+    rotation: 0
+    state: true
+- name: blocks_var_to_msg_0_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: center_freq
+    target: center_freq
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [48, 1004.0]
+    rotation: 0
+    state: true
+- name: blocks_vector_to_stream_0
+  id: blocks_vector_to_stream
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_items: '1'
+    type: byte
+    vlen: in_len
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 364.0]
+    rotation: 0
+    state: disabled
 - name: digital_binary_slicer_fb_0
   id: digital_binary_slicer_fb
   parameters:
@@ -403,7 +506,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [928, 472.0]
+    coordinate: [968, 472.0]
     rotation: 0
     state: true
 - name: digital_gfsk_mod_0
@@ -447,58 +550,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [664, 468.0]
-    rotation: 0
-    state: true
-- name: gpredict_doppler
-  id: epy_module
-  parameters:
-    alias: ''
-    comment: ''
-    source_code: "# this module will be imported in the into your flowgraph\nfrom\
-      \ gnuradio import gr\nimport threading\nimport time\nimport socket\n\nclass\
-      \ doppler_runner(threading.Thread):\n  def __init__(self, callback, freq, gpredict_host,\
-      \ gpredict_port):\n    threading.Thread.__init__(self)\n\n    self.callback\
-      \ = callback\n    self.gpredict_host = gpredict_host\n    self.gpredict_port\
-      \ = gpredict_port\n    self.freq = freq\n\n\n  def run(self):\n    #bind_to\
-      \ = (self.gpredict_host, self.gpredict_port)\n    bind_to = ('127.0.0.1', 4532)\n\
-      \    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    print(bind_to)\n\
-      \    server.bind(bind_to)\n    server.listen(0)\n\n    time.sleep(0.5) # TODO:\
-      \ Find better way to know if init is all done\n\n    while True:\n      print(\"\
-      Waiting for connection on: %s:%d\" % bind_to)\n      sock, addr = server.accept()\n\
-      \      print(\"Connected from: %s:%d\" % (addr[0], addr[1]))\n\n      cur_freq\
-      \ = 0\n      while True:\n        data = sock.recv(1024)\n        if not data:\n\
-      \          break\n\n        if data.startswith(b'F'):\n          self.freq =\
-      \ int(data[1:].strip())\n          if cur_freq != self.freq:\n            print(\"\
-      New frequency: %d\" % self.freq)\n            self.callback(self.freq)\n   \
-      \         cur_freq = self.freq\n          sock.sendall(b'RPRT 0\\n')\n     \
-      \   elif data.startswith(b'f'):\n          sock.sendall(b'f: %d\\n' % cur_freq)\n\
-      \n      sock.close()\n      print(\"Disconnected from: %s:%d\" % (addr[0], addr[1]))\n\
-      \n    #sys.exit()\n\nclass doppler(gr.sync_block):\n  def __init__(self, callback,\
-      \ freq, gpredict_host, gpredict_port):\n    gr.sync_block.__init__(self,\n \
-      \                          name = \"Gpredict Doppler\",\n                  \
-      \         in_sig = None,\n                           out_sig = None)\n    doppler_runner(callback,\
-      \ freq, gpredict_host, gpredict_port).start()\n\n"
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1312, 44.0]
-    rotation: 0
-    state: enabled
-- name: gpredict_doppler_1
-  id: gpredict_doppler
-  parameters:
-    alias: ''
-    comment: ''
-    gpredict_host: localhost
-    gpredict_port: '4532'
-    target: center_freq
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1448, 28.0]
+    coordinate: [712, 468.0]
     rotation: 0
     state: true
 - name: note_0
@@ -563,7 +615,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 356.0]
+    coordinate: [208, 284.0]
     rotation: 0
     state: enabled
 - name: qtgui_freq_sink_x_0
@@ -644,7 +696,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [936, 68.0]
+    coordinate: [832, 88.0]
     rotation: 0
     state: disabled
 - name: qtgui_time_sink_x_0
@@ -838,7 +890,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 844.0]
+    coordinate: [256, 596.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1_0
@@ -935,7 +987,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 788.0]
+    coordinate: [720, 636.0]
     rotation: 0
     state: disabled
 - name: satellites_ax25_deframer_0
@@ -954,7 +1006,7 @@ blocks:
     bus_structure: null
     coordinate: [1248, 616.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: satellites_fsk_demodulator_0
   id: satellites_fsk_demodulator
   parameters:
@@ -972,9 +1024,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 660.0]
+    coordinate: [512, 612.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: satellites_hexdump_sink_0
   id: satellites_hexdump_sink
   parameters:
@@ -1004,7 +1056,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1088, 452.0]
+    coordinate: [1232, 472.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_sink_0
@@ -1281,7 +1333,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1200, 164.0]
+    coordinate: [1104, 124.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_source_0_0
@@ -1720,6 +1772,20 @@ blocks:
     coordinate: [32, 452.0]
     rotation: 0
     state: enabled
+- name: xmlrpc_server_0
+  id: xmlrpc_server
+  parameters:
+    addr: localhost
+    alias: ''
+    comment: ''
+    port: '8080'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [80, 780.0]
+    rotation: 0
+    state: true
 - name: zeromq_pub_msg_sink_0
   id: zeromq_pub_msg_sink
   parameters:
@@ -1736,11 +1802,34 @@ blocks:
     coordinate: [1160, 380.0]
     rotation: 0
     state: disabled
+- name: zeromq_sub_source_0
+  id: zeromq_sub_source
+  parameters:
+    address: tcp://127.0.0.1:1234
+    affinity: ''
+    alias: ''
+    comment: ''
+    hwm: '-1'
+    key: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    pass_tags: 'False'
+    timeout: '100'
+    type: byte
+    vlen: in_len
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 340.0]
+    rotation: 0
+    state: disabled
 
 connections:
 - [analog_pwr_squelch_xx_0, '0', analog_quadrature_demod_cf_0, '0']
 - [analog_quadrature_demod_cf_0, '0', digital_pfb_clock_sync_xxx_0, '0']
 - [analog_simple_squelch_cc_0, '0', analog_quadrature_demod_cf_0, '0']
+- [analog_simple_squelch_cc_0, '0', satellites_fsk_demodulator_0, '0']
 - [blocks_message_strobe_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0_0, strobe, uhd_usrp_sink_0, command]
@@ -1748,12 +1837,17 @@ connections:
 - [blocks_socket_pdu_1, pdus, blocks_pdu_to_tagged_stream_0, pdus]
 - [blocks_socket_pdu_1_0, pdus, blocks_pdu_to_tagged_stream_0, pdus]
 - [blocks_unpacked_to_packed_xx_0, '0', digital_gfsk_mod_0, '0']
+- [blocks_var_to_msg_0, msgout, blocks_message_debug_0, print]
+- [blocks_var_to_msg_0_0, msgout, blocks_message_debug_0, print]
+- [blocks_var_to_msg_0_0_0, msgout, blocks_message_debug_0, print]
+- [blocks_vector_to_stream_0, '0', blocks_unpacked_to_packed_xx_0, '0']
 - [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_freq_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_time_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', uhd_usrp_sink_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
 - [satellites_ax25_deframer_0, out, blocks_socket_pdu_0, pdus]
+- [satellites_ax25_deframer_0, out, blocks_socket_pdu_0_0, pdus]
 - [satellites_ax25_deframer_0, out, satellites_hexdump_sink_0, in]
 - [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
 - [satellites_sync_to_pdu_packed_0_0, out, blocks_socket_pdu_0, pdus]
@@ -1762,6 +1856,7 @@ connections:
 - [uhd_usrp_source_0_0, '0', analog_simple_squelch_cc_0, '0']
 - [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1, '0']
 - [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1_0, '0']
+- [zeromq_sub_source_0, '0', blocks_vector_to_stream_0, '0']
 
 metadata:
   file_format: 1

@@ -240,6 +240,20 @@ blocks:
     coordinate: [864, 924.0]
     rotation: 0
     state: enabled
+- name: blocks_message_debug_0
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [480, 1080.0]
+    rotation: 0
+    state: true
 - name: blocks_multiply_const_vxx_1
   id: blocks_multiply_const_vxx
   parameters:
@@ -292,6 +306,40 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [760, 460.0]
+    rotation: 0
+    state: true
+- name: blocks_var_to_msg_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: baud_bit
+    target: baud_bit
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [112, 1092.0]
+    rotation: 0
+    state: true
+- name: blocks_var_to_msg_0_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: center_freq
+    target: center_freq
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [112, 1172.0]
     rotation: 0
     state: true
 - name: digital_constellation_decoder_cb_0
@@ -1294,6 +1342,20 @@ blocks:
     coordinate: [64, 228.0]
     rotation: 0
     state: true
+- name: xmlrpc_server_0
+  id: xmlrpc_server
+  parameters:
+    addr: localhost
+    alias: ''
+    comment: ''
+    port: '8080'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [144, 1012.0]
+    rotation: 0
+    state: true
 
 connections:
 - [analog_simple_squelch_cc_0, '0', satellites_rms_agc_0, '0']
@@ -1303,6 +1365,8 @@ connections:
 - [blocks_multiply_const_vxx_1, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_multiply_const_vxx_1, '0', qtgui_time_sink_x_0, '0']
 - [blocks_unpack_k_bits_bb_0, '0', digital_map_bb_1, '0']
+- [blocks_var_to_msg_0_0, msgout, blocks_message_debug_0, print]
+- [blocks_var_to_msg_0_0_0, msgout, blocks_message_debug_0, print]
 - [digital_constellation_decoder_cb_0, '0', digital_map_bb_0, '0']
 - [digital_costas_loop_cc_1, '0', digital_pfb_clock_sync_xxx_0_0, '0']
 - [digital_diff_decoder_bb_0_1, '0', blocks_char_to_float_1, '0']
