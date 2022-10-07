@@ -14,7 +14,8 @@ static int sdr_uhf_baud_rate_delay[] = {
     [SDR_UHF_4800_BAUD] = 240,
     [SDR_UHF_9600_BAUD] = 120,
     [SDR_UHF_19200_BAUD] = 60,
-    [SDR_UHF_TEST_BAUD] = 20
+    [SDR_UHF_TEST_BAUD] = 20,
+    [SDR_UHF_GNURADIO_BAUD] = 0
 };
 
 int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
