@@ -39,6 +39,8 @@ from gnuradio import eng_notation
 from gnuradio import uhd
 import time
 import satellites.components.datasinks
+import satellites.components.deframers
+import satellites.components.demodulators
 import satellites.hier
 
 
@@ -134,6 +136,8 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
             threshold=0,
         )
         self.satellites_hexdump_sink_0 = satellites.components.datasinks.hexdump_sink(options="")
+        self.satellites_fsk_demodulator_0 = satellites.components.demodulators.fsk_demodulator(baudrate = baud_bit, samp_rate = spsym*baud_bit, iq = True, subaudio = False, options="")
+        self.satellites_ax25_deframer_0 = satellites.components.deframers.ax25_deframer(g3ruh_scrambler=True, options="")
         self.qtgui_time_sink_x_1 = qtgui.time_sink_c(
             baud_bit*spsym*5, #size
             baud_bit*spsym*5, #samp_rate
@@ -248,6 +252,7 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.blocks_unpacked_to_packed_xx_0 = blocks.unpacked_to_packed_bb(8, gr.GR_MSB_FIRST)
         self.blocks_socket_pdu_1_0 = blocks.socket_pdu('TCP_SERVER', '127.0.0.1', '1235', 10000, False)
         self.blocks_socket_pdu_1 = blocks.socket_pdu('TCP_SERVER', '127.0.0.1', '1234', 10000, False)
+        self.blocks_socket_pdu_0_0 = blocks.socket_pdu('TCP_SERVER', '127.0.0.1', '4322', 10000, False)
         self.blocks_socket_pdu_0 = blocks.socket_pdu('TCP_SERVER', '127.0.0.1', '4321', 10000, False)
         self.blocks_pdu_to_tagged_stream_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
         self.blocks_message_strobe_0_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'DDR', 'value': 1, 'mask': ((1 << 11) - 1)})), 8500)
@@ -266,16 +271,20 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.msg_connect((self.blocks_message_strobe_0_0_0, 'strobe'), (self.uhd_usrp_sink_0, 'command'))
         self.msg_connect((self.blocks_socket_pdu_1, 'pdus'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
         self.msg_connect((self.blocks_socket_pdu_1_0, 'pdus'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
+        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.blocks_socket_pdu_0_0, 'pdus'))
+        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.satellites_hexdump_sink_0, 'in'))
         self.msg_connect((self.satellites_sync_to_pdu_packed_0_0, 'out'), (self.blocks_socket_pdu_0, 'pdus'))
         self.msg_connect((self.satellites_sync_to_pdu_packed_0_0, 'out'), (self.satellites_hexdump_sink_0, 'in'))
         self.connect((self.analog_quadrature_demod_cf_0, 0), (self.digital_pfb_clock_sync_xxx_0, 0))
         self.connect((self.analog_simple_squelch_cc_0, 0), (self.analog_quadrature_demod_cf_0, 0))
+        self.connect((self.analog_simple_squelch_cc_0, 0), (self.satellites_fsk_demodulator_0, 0))
         self.connect((self.blocks_pdu_to_tagged_stream_0, 0), (self.blocks_unpacked_to_packed_xx_0, 0))
         self.connect((self.blocks_unpacked_to_packed_xx_0, 0), (self.digital_gfsk_mod_0, 0))
         self.connect((self.digital_binary_slicer_fb_0, 0), (self.satellites_sync_to_pdu_packed_0_0, 0))
         self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.digital_gfsk_mod_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.digital_pfb_clock_sync_xxx_0, 0), (self.digital_binary_slicer_fb_0, 0))
+        self.connect((self.satellites_fsk_demodulator_0, 0), (self.satellites_ax25_deframer_0, 0))
         self.connect((self.uhd_usrp_source_0_0, 0), (self.analog_simple_squelch_cc_0, 0))
         self.connect((self.uhd_usrp_source_0_0, 0), (self.qtgui_time_sink_x_1, 0))
 
