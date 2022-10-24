@@ -42,7 +42,9 @@ namespace ex2
       }
       catch (MPDUHeaderException& e) {
         // @todo should log this
+#if MPDU_DEBUG
         printf("MPDUHeader exception : %s\n", e.what());
+#endif
         throw MPDUException("MPDU: Bad MPDUHeader.");
       }
     }
@@ -94,9 +96,9 @@ namespace ex2
       }
       catch (MPDUHeaderException& e) {
         // @todo should log this
-//#if MPDU_DEBUG
+#if MPDU_DEBUG
         printf("MPDUHeader exception : %s\n", e.what());
-//#endif
+#endif
         throw MPDUException("MPDU: Bad raw MPDUHeader.");
       }
 
