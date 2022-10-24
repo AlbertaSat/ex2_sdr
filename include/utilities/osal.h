@@ -56,7 +56,7 @@ typedef os_task_return_t (*os_task_func_t)(void* parameter);
 #elif defined(OS_FREERTOS)
 #include "FreeRTOS.h"
 #define OS_MAX_TIMEOUT portMAX_DELAY
-#define OS_RX_TASK_STACK_SIZE 1024/sizeof(int) // FreeRTOS allocates stack sizes based of words, not bytes
+#define OS_RX_TASK_STACK_SIZE 1512/sizeof(int) // FreeRTOS allocates stack sizes based of words, not bytes
 #define OS_TickType TickType_t
 #else
 #error "No OS specified"
