@@ -14,8 +14,10 @@
 #ifndef EX2_SDR_PHY_LAYER_RF_MODE_H_
 #define EX2_SDR_PHY_LAYER_RF_MODE_H_
 
-#include <cstdint>
+#include "stdint.h"
 #include <string>
+#include "sdr_driver.h"
+
 
 namespace ex2 {
   namespace sdr {
@@ -63,14 +65,22 @@ namespace ex2 {
         return m_bitRate;
       }
 
+      /*!
+       * @brief Return the baud rate symbol used by uhf sdr driver
+       * @return The baud rate symbol
+       */
+      sdr_uhf_baud_rate_t getBaudRateEnum() const {
+        return m_baudrate_enum;
+      }
+
     private:
       RF_ModeNumber m_rfMode;
       uint16_t m_bitRate;
+      sdr_uhf_baud_rate_t m_baudrate_enum;
     };
 
 
   } /* namespace sdr */
 } /* namespace ex2 */
-
 
 #endif /* EX2_SDR_PHY_LAYER_RF_MODE_H_ */
