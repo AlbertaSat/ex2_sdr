@@ -12,6 +12,7 @@
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
  */
 #include "rfMode.hpp"
+#include "sdr_driver.h"
 
 namespace ex2 {
   namespace sdr {
@@ -21,24 +22,30 @@ namespace ex2 {
       switch(rfMode) {
         case RF_ModeNumber::RF_MODE_0:
           m_bitRate = 1200;
+          m_baudrate_enum = SDR_UHF_1200_BAUD;
           break;
         case RF_ModeNumber::RF_MODE_1:
           m_bitRate = 2400;
+          m_baudrate_enum = SDR_UHF_2400_BAUD;
           break;
         case RF_ModeNumber::RF_MODE_2:
           m_bitRate = 4800;
+          m_baudrate_enum = SDR_UHF_4800_BAUD;
           break;
         case RF_ModeNumber::RF_MODE_3:
         case RF_ModeNumber::RF_MODE_4:
           m_bitRate = 9600;
+          m_baudrate_enum = SDR_UHF_9600_BAUD;
           break;
         case RF_ModeNumber::RF_MODE_5:
         case RF_ModeNumber::RF_MODE_6:
         case RF_ModeNumber::RF_MODE_7:
           m_bitRate = 19200;
+          m_baudrate_enum = SDR_UHF_19200_BAUD;
           break;
         default:
           m_bitRate = 9600;
+          m_baudrate_enum = SDR_UHF_9600_BAUD;
           break;
       }
     }
@@ -48,3 +55,10 @@ namespace ex2 {
 
   } /* namespace sdr */
 } /* namespace ex2 */
+
+sdr_uhf_baud_rate_t get_uhf_baud_t_from_rf_mode_number(uint8_t rf_mode_number)
+{
+    ex2::sdr::RF_Mode obj((ex2::sdr::RF_Mode::RF_ModeNumber)rf_mode_number);
+
+    return obj.getBaudRateEnum();
+}

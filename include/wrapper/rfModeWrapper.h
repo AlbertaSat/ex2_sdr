@@ -17,6 +17,8 @@
 extern "C" {
 #endif
 
+#include "sdr_driver.h"
+
 typedef enum {
   RF_MODE_0 = 0, //RF_Mode::RF_ModeNumber::RF_MODE_0,    // 2GFSK, 1200 bps,  Fdev 600Hz,   ModInd 1
   RF_MODE_1 = 1, //RF_Mode::RF_ModeNumber::RF_MODE_1,    // 2GFSK, 2400 bps,  Fdev 600Hz,   ModInd 0.5
@@ -30,6 +32,19 @@ typedef enum {
   RF_MODE_BAD_WRAPPER_CONTEXT = 102 // needed for wrapper existance checking
 
 } rf_mode_number_t;
+
+
+//mac_t *rfMode_create(rf_mode_number_t rfMode, error_correction_scheme_t fecScheme);
+//
+///*!
+// * @brief C wrapper for MAC object destructor
+// *
+// * @param m A pointer to a @p mac_t that can be NULL
+// */
+//void rfMode_destroy(mac_t *m);
+
+sdr_uhf_baud_rate_t get_uhf_baud_t_from_rf_mode_number(uint8_t rf_mode_number);
+
 
 #ifdef __cplusplus
 }
