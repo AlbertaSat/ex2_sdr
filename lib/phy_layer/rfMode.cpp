@@ -12,6 +12,7 @@
  * This software may not be modified or distributed in any form, except as described in the LICENSE file.
  */
 #include "rfMode.hpp"
+#include "rfModeWrapper.h"
 #include "sdr_driver.h"
 
 namespace ex2 {
