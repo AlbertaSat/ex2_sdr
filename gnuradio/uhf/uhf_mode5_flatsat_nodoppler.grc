@@ -65,7 +65,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [584, 12.0]
+    coordinate: [640, 12.0]
     rotation: 0
     state: enabled
 - name: fsk_dev
@@ -101,7 +101,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [712, 76.0]
+    coordinate: [744, 68.0]
     rotation: 0
     state: enabled
 - name: out_len
@@ -114,6 +114,18 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [288, 92.0]
+    rotation: 0
+    state: enabled
+- name: oversample_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '8'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [624, 84.0]
     rotation: 0
     state: enabled
 - name: rx_gain
@@ -140,11 +152,11 @@ blocks:
     coordinate: [376, 84.0]
     rotation: 0
     state: true
-- name: sensitivity
+- name: sensitivity_tx
   id: variable
   parameters:
     comment: ''
-    value: 2*3.14159265358979323846*(fsk_dev/(baud_bit*spsym))
+    value: 2*3.14159265358979323846*(fsk_dev/(baud_bit*spsym_frontend))
   states:
     bus_sink: false
     bus_source: false
@@ -156,7 +168,19 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '32'
+    value: spsym_frontend/oversample_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [520, 84.0]
+    rotation: 0
+    state: enabled
+- name: spsym_frontend
+  id: variable
+  parameters:
+    comment: ''
+    value: '256'
   states:
     bus_sink: false
     bus_source: false
@@ -168,12 +192,12 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: firdes.root_raised_cosine(nfilts,nfilts,1/float(spsym),0.35,11*spsym*nfilts)
+    value: firdes.root_raised_cosine(nfilts,nfilts,1/float(spsym),0.35,int(11*spsym*nfilts))
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [920, 12.0]
+    coordinate: [976, 12.0]
     rotation: 0
     state: true
 - name: tx_gain
@@ -185,7 +209,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 12.0]
+    coordinate: [752, 12.0]
     rotation: 0
     state: enabled
 - name: analog_pwr_squelch_xx_0
@@ -205,7 +229,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 640.0]
+    coordinate: [432, 644.0]
     rotation: 0
     state: disabled
 - name: analog_quadrature_demod_cf_0
@@ -221,7 +245,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 492.0]
+    coordinate: [520, 460.0]
     rotation: 0
     state: true
 - name: analog_simple_squelch_cc_0
@@ -238,7 +262,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [296, 484.0]
+    coordinate: [336, 524.0]
     rotation: 0
     state: enabled
 - name: blocks_message_debug_0
@@ -476,24 +500,6 @@ blocks:
     coordinate: [48, 1004.0]
     rotation: 0
     state: true
-- name: blocks_vector_to_stream_0
-  id: blocks_vector_to_stream
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_items: '1'
-    type: byte
-    vlen: in_len
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [264, 364.0]
-    rotation: 0
-    state: disabled
 - name: digital_binary_slicer_fb_0
   id: digital_binary_slicer_fb
   parameters:
@@ -520,8 +526,8 @@ blocks:
     log: 'False'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_symbol: spsym
-    sensitivity: sensitivity
+    samples_per_symbol: spsym_frontend
+    sensitivity: sensitivity_tx
     verbose: 'False'
   states:
     bus_sink: false
@@ -754,8 +760,8 @@ blocks:
     marker9: '-1'
     name: '""'
     nconnections: '1'
-    size: spsym*50
-    srate: spsym*50
+    size: int(spsym_frontend*50)
+    srate: int(spsym_frontend*50)
     stemplot: 'False'
     style1: '1'
     style10: '1'
@@ -851,8 +857,8 @@ blocks:
     marker9: '-1'
     name: '""'
     nconnections: '1'
-    size: baud_bit*spsym*5
-    srate: baud_bit*spsym*5
+    size: int(baud_bit*spsym_frontend*5)
+    srate: int(baud_bit*spsym_frontend*5)
     stemplot: 'False'
     style1: '1'
     style10: '1'
@@ -890,7 +896,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [256, 596.0]
+    coordinate: [240, 644.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_1_0
@@ -948,8 +954,8 @@ blocks:
     marker9: '-1'
     name: '""'
     nconnections: '1'
-    size: baud_bit*spsym*5
-    srate: baud_bit*spsym*5
+    size: int(baud_bit*spsym*5)
+    srate: int(baud_bit*spsym*5)
     stemplot: 'False'
     style1: '1'
     style10: '1'
@@ -987,9 +993,126 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [720, 636.0]
+    coordinate: [704, 756.0]
     rotation: 0
     state: disabled
+- name: qtgui_time_sink_x_1_1
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '1'
+    size: int(baud_bit*spsym*5)
+    srate: int(baud_bit*spsym*5)
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: complex
+    update_time: '5'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Post-squelch
+    ymax: '1'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [392, 300.0]
+    rotation: 0
+    state: enabled
+- name: rational_resampler_xxx_0
+  id: rational_resampler_xxx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    decim: spsym_frontend*baud_bit
+    fbw: '0.4'
+    interp: int(spsym*baud_bit)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    taps: '[]'
+    type: ccc
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [296, 396.0]
+    rotation: 0
+    state: true
 - name: satellites_ax25_deframer_0
   id: satellites_ax25_deframer
   parameters:
@@ -1024,7 +1147,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [512, 612.0]
+    coordinate: [760, 644.0]
     rotation: 0
     state: enabled
 - name: satellites_hexdump_sink_0
@@ -1306,7 +1429,7 @@ blocks:
     nchan: '1'
     num_mboards: '1'
     otw: ''
-    samp_rate: baud_bit*spsym
+    samp_rate: baud_bit*spsym_frontend
     sd_spec0: ''
     sd_spec1: ''
     sd_spec2: ''
@@ -1742,7 +1865,7 @@ blocks:
     rx_agc7: Default
     rx_agc8: Default
     rx_agc9: Default
-    samp_rate: samp_rate
+    samp_rate: baud_bit*spsym_frontend
     sd_spec0: ''
     sd_spec1: ''
     sd_spec2: ''
@@ -1786,44 +1909,6 @@ blocks:
     coordinate: [80, 780.0]
     rotation: 0
     state: true
-- name: zeromq_pub_msg_sink_0
-  id: zeromq_pub_msg_sink
-  parameters:
-    address: tcp://127.0.0.1:4321
-    affinity: ''
-    alias: ''
-    bind: 'True'
-    comment: ''
-    timeout: '100'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1160, 380.0]
-    rotation: 0
-    state: disabled
-- name: zeromq_sub_source_0
-  id: zeromq_sub_source
-  parameters:
-    address: tcp://127.0.0.1:1234
-    affinity: ''
-    alias: ''
-    comment: ''
-    hwm: '-1'
-    key: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    pass_tags: 'False'
-    timeout: '100'
-    type: byte
-    vlen: in_len
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [8, 340.0]
-    rotation: 0
-    state: disabled
 
 connections:
 - [analog_pwr_squelch_xx_0, '0', analog_quadrature_demod_cf_0, '0']
@@ -1840,12 +1925,13 @@ connections:
 - [blocks_var_to_msg_0, msgout, blocks_message_debug_0, print]
 - [blocks_var_to_msg_0_0, msgout, blocks_message_debug_0, print]
 - [blocks_var_to_msg_0_0_0, msgout, blocks_message_debug_0, print]
-- [blocks_vector_to_stream_0, '0', blocks_unpacked_to_packed_xx_0, '0']
 - [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_freq_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_time_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', uhd_usrp_sink_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
+- [rational_resampler_xxx_0, '0', analog_simple_squelch_cc_0, '0']
+- [rational_resampler_xxx_0, '0', qtgui_time_sink_x_1_1, '0']
 - [satellites_ax25_deframer_0, out, blocks_socket_pdu_0, pdus]
 - [satellites_ax25_deframer_0, out, blocks_socket_pdu_0_0, pdus]
 - [satellites_ax25_deframer_0, out, satellites_hexdump_sink_0, in]
@@ -1853,10 +1939,9 @@ connections:
 - [satellites_sync_to_pdu_packed_0_0, out, blocks_socket_pdu_0, pdus]
 - [satellites_sync_to_pdu_packed_0_0, out, satellites_hexdump_sink_0, in]
 - [uhd_usrp_source_0_0, '0', analog_pwr_squelch_xx_0, '0']
-- [uhd_usrp_source_0_0, '0', analog_simple_squelch_cc_0, '0']
 - [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1, '0']
 - [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1_0, '0']
-- [zeromq_sub_source_0, '0', blocks_vector_to_stream_0, '0']
+- [uhd_usrp_source_0_0, '0', rational_resampler_xxx_0, '0']
 
 metadata:
   file_format: 1
