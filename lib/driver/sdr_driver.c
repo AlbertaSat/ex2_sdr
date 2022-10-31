@@ -4,8 +4,6 @@
 #include "osal.h"
 #include <stdio.h>
 #include "rfModeWrapper.h"
-#include "csp_types.h"
-#include "csp_iflist.h"
 
 #define PIPE_ENTER_MSG_LEN 15
 #define PIPE_EXIT_MSG_LEN 16
@@ -92,12 +90,7 @@ os_task_return_t sdr_rx_task(void *param) {
     }
 }
 
-int sdr_uhf_set_rf_mode(uint8_t rf_mode){
-    csp_iface_t * iface = csp_iflist_get_by_name(SDR_IF_UHF_NAME);
-    if(iface == NULL){
-        return -1;
-    }
-    sdr_interface_data_t * sdr_ifdata = iface->interface_data;
+int sdr_uhf_set_rf_mode(sdr_interface_data_t *sdr_ifdata, uint8_t rf_mode){
     sdr_ifdata->sdr_conf->uhf_conf.uhf_baudrate = get_uhf_baud_t_from_rf_mode_number(rf_mode);
     return 0;
 }
