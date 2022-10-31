@@ -96,7 +96,7 @@ void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken);
 
 os_task_return_t sdr_rx_task(void *param);
 
-int sdr_uhf_set_rf_mode(uint8_t rf_mode);
+int sdr_uhf_set_rf_mode(sdr_interface_data_t *sdr_ifdata, uint8_t rf_mode);
 
 #ifdef __cplusplus
 }
