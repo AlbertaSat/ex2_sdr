@@ -97,14 +97,13 @@ test('cc_hd_FEC', unit_test_cc_hd_FEC,
     timeout: 100
     )
 
-#unit_test_matrix2d = executable('unit_test-matrix2d', 'qa_matrix2d.cpp',
-#    include_directories : incdirUT,
-#    dependencies: [boost_dep, gtest_dep],
-#    link_with: DarkstarTxRxlib
-#    )
-#    
-#test('matrix2d', unit_test_matrix2d,
-#    timeout: 30
-#    )
- 
+unit_test_sdr_init = executable('unit_test-sdr_init', 'qa_sdr_init.cpp', core_source_files, third_party_source_files, sdr_driver_source_files,
+    include_directories : [incdirUT, sdr_driver_incdir],
+    dependencies: [gtest_dep]
+    )
+    
+test('cc_hd_FEC', unit_test_cc_hd_FEC,
+    timeout: 100
+    )
+
  

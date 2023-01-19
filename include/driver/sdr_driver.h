@@ -10,6 +10,7 @@
 extern "C" {
 #endif
 
+// baud rate is same as bit rate for EnduroSat radio
 typedef enum {
     SDR_UHF_1200_BAUD = 0,
     SDR_UHF_2400_BAUD,

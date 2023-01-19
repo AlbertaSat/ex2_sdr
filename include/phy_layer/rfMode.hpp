@@ -16,7 +16,7 @@
 
 #include "stdint.h"
 #include <string>
-#include "sdr_driver.h"
+//#include "sdr_driver.h"
 
 
 namespace ex2 {
@@ -69,14 +69,14 @@ namespace ex2 {
        * @brief Return the baud rate symbol used by uhf sdr driver
        * @return The baud rate symbol
        */
-      sdr_uhf_baud_rate_t getBaudRateEnum() const {
-        return m_baudrate_enum;
-      }
+      // sdr_uhf_baud_rate_t getBaudRateEnum() const {
+      //   return m_baudrate_enum;
+      // }
 
     private:
       RF_ModeNumber m_rfMode;
       uint16_t m_bitRate;
-      sdr_uhf_baud_rate_t m_baudrate_enum;
+//      sdr_uhf_baud_rate_t m_baudrate_enum;
     };
 
 

@@ -1,9 +1,9 @@
 /*!
- * @file qa_mpdu.cpp
+ * @file qa_macWrapper.cpp
  * @author Steven Knudsen
  * @date June 6, 2021
  *
- * @details Unit test for the MPDU class.
+ * @details Unit test for the MAC wrapper class.
  *
  * @copyright AlbertaSat 2021
  *

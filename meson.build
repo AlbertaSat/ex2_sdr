@@ -51,9 +51,18 @@ core_source_files = [
     PRJ_DIR / 'lib/wrapper/MACWrapper.cpp',
 ]
 
+sdr_driver_source_files = [
+    PRJ_DIR / 'lib/driver/fec.c',
+    PRJ_DIR / 'lib/driver/gnuradio.c',
+    PRJ_DIR / 'lib/driver/sband_driver.c',
+    PRJ_DIR / 'lib/driver/sdr_init.c',
+    PRJ_DIR / 'lib/driver/sdr_loopback.c',
+]
+
 incdir = include_directories(
     'include',
     'include/configuration',
+    'include/driver',
     'include/error_control',
     'include/mac_layer',
     'include/mac_layer/pdu',
@@ -62,6 +71,11 @@ incdir = include_directories(
     'include/utilities',
     'include/wrapper',
     'third_party/viterbi'
+)
+
+sdr_driver_incdir = include_directories(
+    'include/driver',
+    '../../ex2_sband_software/equipment_handler/include'
 )
 
 third_party_source_files = [

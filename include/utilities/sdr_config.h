@@ -7,6 +7,6 @@
  * puts all the config options in the include below. When we release SDR as a
  * stand-alone entity we can put the config options here directly.
  */
-#include <csp/csp_autoconfig.h>
+//#include <csp/csp_autoconfig.h>
 
 #endif // SDR_CONFIG_H_
