@@ -3,7 +3,7 @@ project('ex2_obc_sdr', 'c', 'cpp',
     version: '0.5.0',
     default_options : [
 #        'c_args=pr', 'cpp_args=pr',
-#        'c_std=c89', 'cpp_std=c++14',
+#        'c_std=c89', 'cpp_std=c++14', foo
 #        'cpp_std=c++14',
 #        'buildtype=release',
         'warning_level=3',
