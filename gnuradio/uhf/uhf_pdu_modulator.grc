@@ -1,8 +1,8 @@
 options:
   parameters:
-    author: Josh Lazaruk
+    author: Josh Lazaruk, Steven Knudsen
     catch_exceptions: 'True'
-    category: '[GRC Hier Blocks]'
+    category: '[AlbertaSat]'
     cmake_opt: ''
     comment: ''
     copyright: AlbertaSat 2022-202x
@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: hb
     hier_block_src_path: '.:'
-    id: uhf_mode5_pdu_modulate
+    id: uhf_pdu_modulate
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: UHF Mode 5 PDU Moduliate
+    title: UHF PDU Modulate
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -33,6 +33,30 @@ options:
     state: enabled
 
 blocks:
+- name: fm_samples_per_symbol
+  id: variable
+  parameters:
+    comment: ''
+    value: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 284.0]
+    rotation: 0
+    state: true
+- name: fm_sensitivity
+  id: variable
+  parameters:
+    comment: ''
+    value: math.pi*fm_modulation_index/fm_samples_per_symbol
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [176, 284.0]
+    rotation: 0
+    state: true
 - name: blocks_pdu_to_tagged_stream_0
   id: blocks_pdu_to_tagged_stream
   parameters:
@@ -80,16 +104,72 @@ blocks:
     log: 'False'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_symbol: spsym_frontend
-    sensitivity: sensitivity_tx
+    samples_per_symbol: fm_samples_per_symbol
+    sensitivity: fm_sensitivity
     verbose: 'False'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 148.0]
+    coordinate: [712, 148.0]
     rotation: 0
     state: enabled
+- name: fm_modulation_index
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: FM Modulation Index
+    short_id: ''
+    type: eng_float
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [288, 12.0]
+    rotation: 0
+    state: true
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import math
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [192, 12.0]
+    rotation: 0
+    state: true
+- name: note_0_0
+  id: note
+  parameters:
+    alias: ''
+    comment: ''
+    note: GFSK Mod input is packed bytes (eg. 0b01110000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [712, 100.0]
+    rotation: 0
+    state: true
+- name: note_0_0_1
+  id: note
+  parameters:
+    alias: ''
+    comment: ''
+    note: Must have high sample rate for smooth sinusoid
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 236.0]
+    rotation: 0
+    state: true
 - name: pad_sink_0
   id: pad_sink
   parameters:
@@ -114,7 +194,7 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    label: in
+    label: pdus
     maxoutbuf: '0'
     minoutbuf: '0'
     num_streams: '1'
@@ -125,41 +205,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [48, 164.0]
-    rotation: 0
-    state: true
-- name: sensitivity_tx
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: ''
-    value: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [200, 12.0]
-    rotation: 0
-    state: true
-- name: spsym_frontend
-  id: parameter
-  parameters:
-    alias: ''
-    comment: ''
-    hide: none
-    label: ''
-    short_id: ''
-    type: ''
-    value: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [352, 12.0]
+    coordinate: [56, 164.0]
     rotation: 0
     state: true
 
