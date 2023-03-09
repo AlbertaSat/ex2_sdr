@@ -350,7 +350,7 @@ blocks:
     bus_structure: null
     coordinate: [256, 164.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_socket_pdu_0
   id: blocks_socket_pdu
   parameters:
@@ -408,7 +408,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [32, 156.0]
+    coordinate: [40, 172.0]
     rotation: 0
     state: enabled
 - name: blocks_socket_pdu_1_0
@@ -428,7 +428,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [32, 260.0]
+    coordinate: [40, 316.0]
     rotation: 0
     state: enabled
 - name: blocks_unpacked_to_packed_xx_0
@@ -449,7 +449,7 @@ blocks:
     bus_structure: null
     coordinate: [496, 156.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_var_to_msg_0
   id: blocks_var_to_msg
   parameters:
@@ -536,7 +536,7 @@ blocks:
     bus_structure: null
     coordinate: [696, 148.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: digital_pfb_clock_sync_xxx_0
   id: digital_pfb_clock_sync_xxx
   parameters:
@@ -573,32 +573,6 @@ blocks:
     coordinate: [1120, 548.0]
     rotation: 0
     state: enabled
-- name: note_0_0
-  id: note
-  parameters:
-    alias: ''
-    comment: ''
-    note: GFSK Mod input is packed bytes (eg. 0b01110000)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [592, 276.0]
-    rotation: 0
-    state: true
-- name: note_0_0_1
-  id: note
-  parameters:
-    alias: ''
-    comment: ''
-    note: Must have high sample rate for smooth sinusoid
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [592, 340.0]
-    rotation: 0
-    state: true
 - name: note_0_1
   id: note
   parameters:
@@ -609,7 +583,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [24, 108.0]
+    coordinate: [40, 124.0]
     rotation: 0
     state: enabled
 - name: note_0_1_0
@@ -622,7 +596,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [208, 284.0]
+    coordinate: [40, 268.0]
     rotation: 0
     state: enabled
 - name: qtgui_freq_sink_x_0
@@ -1893,9 +1867,25 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [32, 452.0]
+    coordinate: [32, 468.0]
     rotation: 0
     state: disabled
+- name: uhf_pdu_modulate_0
+  id: uhf_pdu_modulate
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    fm_modulation_index: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [432, 220.0]
+    rotation: 0
+    state: true
 - name: virtual_sink_0
   id: virtual_sink
   parameters:
@@ -1919,7 +1909,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [96, 388.0]
+    coordinate: [32, 420.0]
     rotation: 0
     state: true
 - name: xmlrpc_server_0
@@ -1946,8 +1936,9 @@ connections:
 - [blocks_message_strobe_0_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_pdu_to_tagged_stream_0, '0', blocks_unpacked_to_packed_xx_0, '0']
-- [blocks_socket_pdu_1, pdus, blocks_pdu_to_tagged_stream_0, pdus]
+- [blocks_socket_pdu_1, pdus, uhf_pdu_modulate_0, pdus]
 - [blocks_socket_pdu_1_0, pdus, blocks_pdu_to_tagged_stream_0, pdus]
+- [blocks_socket_pdu_1_0, pdus, uhf_pdu_modulate_0, pdus]
 - [blocks_unpacked_to_packed_xx_0, '0', digital_gfsk_mod_0, '0']
 - [blocks_var_to_msg_0, msgout, blocks_message_debug_0, print]
 - [blocks_var_to_msg_0_0, msgout, blocks_message_debug_0, print]
@@ -1970,6 +1961,8 @@ connections:
 - [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1, '0']
 - [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1_0, '0']
 - [uhd_usrp_source_0_0, '0', rational_resampler_xxx_0, '0']
+- [uhf_pdu_modulate_0, '0', qtgui_time_sink_x_0, '0']
+- [uhf_pdu_modulate_0, '0', virtual_sink_0, '0']
 - [virtual_source_0, '0', qtgui_time_sink_x_1, '0']
 - [virtual_source_0, '0', rational_resampler_xxx_0, '0']
 
