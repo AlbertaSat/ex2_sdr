@@ -5,8 +5,8 @@ options:
     category: '[AlbertaSat]'
     cmake_opt: ''
     comment: ''
-    copyright: AlbertaSat 2022-202x
-    description: The basic UHF modulation block
+    copyright: AlbertaSat 2022-20xx
+    description: The basic UHF modulation block to match the EnduroSat II radio
     gen_cmake: 'On'
     gen_linking: dynamic
     generate_options: hb
