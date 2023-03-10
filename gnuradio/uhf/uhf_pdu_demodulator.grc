@@ -57,6 +57,18 @@ blocks:
     coordinate: [8, 396.0]
     rotation: 0
     state: true
+- name: nfilts
+  id: variable
+  parameters:
+    comment: ''
+    value: '16'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [280, 396.0]
+    rotation: 0
+    state: enabled
 - name: oversample_rate
   id: variable
   parameters:
@@ -69,13 +81,25 @@ blocks:
     coordinate: [8, 460.0]
     rotation: 0
     state: enabled
+- name: taps
+  id: variable
+  parameters:
+    comment: ''
+    value: firdes.root_raised_cosine(nfilts,nfilts,1/float(fm_samples_per_symbol/oversample_rate),0.35,int(11*fm_samples_per_symbol/oversample_rate*nfilts))
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [280, 460.0]
+    rotation: 0
+    state: true
 - name: analog_quadrature_demod_cf_0
   id: analog_quadrature_demod_cf
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    gain: samp_rate/(2*math.pi*fm_freq_dev)
+    gain: samp_rate/(2*math.pi*fm_freq_dev) if fm_freq_dev > 0 else samp_rate/(2*math.pi)
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
@@ -147,7 +171,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     osps: '1'
-    sps: spsym
+    sps: fm_samples_per_symbol/oversample_rate
     taps: taps
     type: fff
   states:
@@ -200,6 +224,19 @@ blocks:
     coordinate: [1328, 116.0]
     rotation: 0
     state: enabled
+- name: note_0_0
+  id: note
+  parameters:
+    alias: ''
+    comment: ''
+    note: Made QDemod Gain an if-then-else stmt to avoid div by zero
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [744, 204.0]
+    rotation: 0
+    state: enabled
 - name: pad_sink_0
   id: pad_sink
   parameters:
@@ -246,7 +283,7 @@ blocks:
     comment: ''
     decim: fm_samples_per_symbol*baud_rate
     fbw: '0.4'
-    interp: int(spsym_frontend/oversample_rate*baud_rate)
+    interp: int(fm_samples_per_symbol/oversample_rate*baud_rate)
     maxoutbuf: '0'
     minoutbuf: '0'
     taps: '[]'
