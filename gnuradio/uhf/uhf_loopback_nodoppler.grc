@@ -255,6 +255,29 @@ blocks:
     coordinate: [1384, 456.0]
     rotation: 0
     state: true
+- name: blocks_selector_0
+  id: blocks_selector
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    enabled: 'True'
+    input_index: '0'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_inputs: '2'
+    num_outputs: '2'
+    output_index: '0'
+    showports: 'True'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1072, 416.0]
+    rotation: 0
+    state: true
 - name: blocks_socket_pdu_0
   id: blocks_socket_pdu
   parameters:
