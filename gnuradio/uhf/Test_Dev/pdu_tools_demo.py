@@ -23,14 +23,16 @@ if __name__ == '__main__':
         except:
             print("Warning: failed to XInitThreads()")
 
+from PyQt5 import Qt
+from gnuradio import qtgui
+from gnuradio.filter import firdes
+import sip
 from gnuradio import blocks
 import pmt
 from gnuradio import gr
-from gnuradio.filter import firdes
 from gnuradio.fft import window
 import sys
 import signal
-from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
@@ -78,6 +80,7 @@ class pdu_tools_demo(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.val = val = 123.4
+        self.samp_rate = samp_rate = 32000
         self.interval = interval = 0.400
 
         ##################################################
@@ -86,18 +89,72 @@ class pdu_tools_demo(gr.top_block, Qt.QWidget):
         self._val_range = Range(0, 500.0, 0.1, 123.4, 200)
         self._val_win = RangeWidget(self._val_range, self.set_val, "KEY1 Metadata Value", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._val_win)
+        self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
+            210, #size
+            samp_rate, #samp_rate
+            "", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_time_sink_x_0.set_update_time(0.10)
+        self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
+
+        self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
+
+        self.qtgui_time_sink_x_0.enable_tags(True)
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "packet_len")
+        self.qtgui_time_sink_x_0.enable_autoscale(False)
+        self.qtgui_time_sink_x_0.enable_grid(False)
+        self.qtgui_time_sink_x_0.enable_axis_labels(True)
+        self.qtgui_time_sink_x_0.enable_control_panel(False)
+        self.qtgui_time_sink_x_0.enable_stem_plot(True)
+
+
+        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [0, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_time_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_0.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
         self.msg_strobe = blocks.message_strobe(pmt.PMT_T, int(interval*1000))
         self.msg_dbg_0 = blocks.message_debug(True)
         self.blocks_random_pdu_0 = blocks.random_pdu(10, 10, 0xFF, 2)
-        self.blocks_pdu_set_0 = blocks.pdu_set(pmt.intern("KEY1"), pmt.from_double(val))
+        self.blocks_pdu_to_tagged_stream_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
+        self.blocks_pdu_filter_0 = blocks.pdu_filter(pmt.intern("key"), pmt.intern("value"), False)
+        self.blocks_packed_to_unpacked_xx_0 = blocks.packed_to_unpacked_bb(1, gr.GR_MSB_FIRST)
+        self.blocks_char_to_float_0 = blocks.char_to_float(1, 1)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.blocks_pdu_set_0, 'pdus'), (self.msg_dbg_0, 'print_pdu'))
-        self.msg_connect((self.blocks_random_pdu_0, 'pdus'), (self.blocks_pdu_set_0, 'pdus'))
+        self.msg_connect((self.blocks_random_pdu_0, 'pdus'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
+        self.msg_connect((self.blocks_random_pdu_0, 'pdus'), (self.msg_dbg_0, 'print_pdu'))
         self.msg_connect((self.msg_strobe, 'strobe'), (self.blocks_random_pdu_0, 'generate'))
+        self.connect((self.blocks_char_to_float_0, 0), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.blocks_packed_to_unpacked_xx_0, 0), (self.blocks_char_to_float_0, 0))
+        self.connect((self.blocks_pdu_to_tagged_stream_0, 0), (self.blocks_packed_to_unpacked_xx_0, 0))
 
 
     def closeEvent(self, event):
@@ -113,7 +170,13 @@ class pdu_tools_demo(gr.top_block, Qt.QWidget):
 
     def set_val(self, val):
         self.val = val
-        self.blocks_pdu_set_0.set_val(pmt.from_double(self.val))
+
+    def get_samp_rate(self):
+        return self.samp_rate
+
+    def set_samp_rate(self, samp_rate):
+        self.samp_rate = samp_rate
+        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
 
     def get_interval(self):
         return self.interval
