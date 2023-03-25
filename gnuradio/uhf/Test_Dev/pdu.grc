@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: pdu
+    id: pduexample
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -43,6 +43,27 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [456, 20.0]
+    rotation: 0
+    state: true
+- name: pdu_length_bytes
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: PDU Length (bytes)
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '1'
+    stop: '128'
+    value: '15'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1000, 68.0]
     rotation: 0
     state: true
 - name: samp_rate
@@ -114,77 +135,6 @@ blocks:
     coordinate: [968, 364.0]
     rotation: 0
     state: true
-- name: blocks_pdu_filter_0
-  id: blocks_pdu_filter
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    invert: 'False'
-    k: pmt.intern("key")
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    v: pmt.intern("value")
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [728, 156.0]
-    rotation: 0
-    state: true
-- name: blocks_pdu_set_0
-  id: blocks_pdu_set
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    k: pmt.intern("KEY1")
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    v: pmt.from_double(val)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [592, 252.0]
-    rotation: 0
-    state: disabled
-- name: blocks_pdu_to_tagged_stream_0
-  id: blocks_pdu_to_tagged_stream
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    tag: packet_len
-    type: byte
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [712, 372.0]
-    rotation: 0
-    state: enabled
-- name: blocks_random_pdu_0
-  id: blocks_random_pdu
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    length_modulo: '2'
-    mask: '0xFF'
-    maxoutbuf: '0'
-    maxsize: '10'
-    minoutbuf: '0'
-    minsize: '10'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [320, 236.0]
-    rotation: 0
-    state: true
 - name: msg_dbg_0
   id: blocks_message_debug
   parameters:
@@ -196,7 +146,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [472, 352.0]
+    coordinate: [472, 424.0]
     rotation: 0
     state: true
 - name: msg_strobe
@@ -231,6 +181,60 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [616, 20.0]
+    rotation: 0
+    state: true
+- name: pdu_pdu_to_stream_x_0
+  id: pdu_pdu_to_stream_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    depth: '64'
+    early_behavior: pdu.EARLY_BURST_APPEND
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 528.0]
+    rotation: 0
+    state: true
+- name: pdu_pdu_to_tagged_stream_0
+  id: pdu_pdu_to_tagged_stream
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    tag: packet_len
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [712, 372.0]
+    rotation: 0
+    state: true
+- name: pdu_random_pdu_0
+  id: pdu_random_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    length_modulo: '1'
+    mask: '0xFF'
+    maxoutbuf: '0'
+    maxsize: pdu_length_bytes
+    minoutbuf: '0'
+    minsize: pdu_length_bytes
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 228.0]
     rotation: 0
     state: true
 - name: qtgui_time_sink_x_0
@@ -360,14 +364,12 @@ blocks:
 connections:
 - [blocks_char_to_float_0, '0', qtgui_time_sink_x_0, '0']
 - [blocks_packed_to_unpacked_xx_0, '0', blocks_char_to_float_0, '0']
-- [blocks_pdu_set_0, pdus, virtual_sink_0, '0']
-- [blocks_pdu_to_tagged_stream_0, '0', blocks_packed_to_unpacked_xx_0, '0']
-- [blocks_random_pdu_0, pdus, blocks_pdu_set_0, pdus]
-- [blocks_random_pdu_0, pdus, virtual_sink_0, '0']
-- [msg_strobe, strobe, blocks_random_pdu_0, generate]
-- [virtual_source_0, '0', blocks_pdu_to_tagged_stream_0, pdus]
+- [msg_strobe, strobe, pdu_random_pdu_0, generate]
+- [pdu_pdu_to_tagged_stream_0, '0', blocks_packed_to_unpacked_xx_0, '0']
+- [pdu_random_pdu_0, pdus, virtual_sink_0, '0']
 - [virtual_source_0, '0', msg_dbg_0, print_pdu]
+- [virtual_source_0, '0', pdu_pdu_to_tagged_stream_0, pdus]
 
 metadata:
   file_format: 1
-  grc_version: 3.9.7.0
+  grc_version: 3.10.2.0

@@ -57,6 +57,23 @@ blocks:
     coordinate: [176, 284.0]
     rotation: 0
     state: true
+- name: analog_const_source_x_0
+  id: analog_const_source_x
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    const: fm_sensitivity
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    type: float
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [360, 324.0]
+    rotation: 0
+    state: true
 - name: blocks_pdu_to_tagged_stream_0
   id: blocks_pdu_to_tagged_stream
   parameters:
@@ -188,6 +205,24 @@ blocks:
     coordinate: [920, 164.0]
     rotation: 0
     state: true
+- name: pad_sink_0_0
+  id: pad_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    label: sensitivity
+    num_streams: '1'
+    optional: 'False'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 324.0]
+    rotation: 0
+    state: true
 - name: pad_source_0
   id: pad_source
   parameters:
@@ -210,6 +245,7 @@ blocks:
     state: true
 
 connections:
+- [analog_const_source_x_0, '0', pad_sink_0_0, '0']
 - [blocks_pdu_to_tagged_stream_0, '0', blocks_unpacked_to_packed_xx_0, '0']
 - [blocks_unpacked_to_packed_xx_0, '0', digital_gfsk_mod_0, '0']
 - [digital_gfsk_mod_0, '0', pad_sink_0, '0']

@@ -166,7 +166,7 @@ blocks:
     bus_structure: null
     coordinate: [416, 856.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_message_strobe_0
   id: blocks_message_strobe
   parameters:
@@ -237,7 +237,7 @@ blocks:
     bus_structure: null
     coordinate: [1632, 400.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_pdu_set_0
   id: blocks_pdu_set
   parameters:
@@ -254,7 +254,7 @@ blocks:
     bus_structure: null
     coordinate: [1384, 456.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_selector_0
   id: blocks_selector
   parameters:
@@ -277,7 +277,7 @@ blocks:
     bus_structure: null
     coordinate: [1072, 416.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_socket_pdu_0
   id: blocks_socket_pdu
   parameters:
@@ -391,7 +391,7 @@ blocks:
     bus_structure: null
     coordinate: [48, 924.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_var_to_msg_0_0_0
   id: blocks_var_to_msg
   parameters:
@@ -408,6 +408,69 @@ blocks:
     bus_structure: null
     coordinate: [48, 1004.0]
     rotation: 0
+    state: disabled
+- name: fm_sensitivity
+  id: qtgui_number_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    autoscale: 'False'
+    avg: '0'
+    color1: ("black", "black")
+    color10: ("black", "black")
+    color2: ("black", "black")
+    color3: ("black", "black")
+    color4: ("black", "black")
+    color5: ("black", "black")
+    color6: ("black", "black")
+    color7: ("black", "black")
+    color8: ("black", "black")
+    color9: ("black", "black")
+    comment: ''
+    factor1: '1'
+    factor10: '1'
+    factor2: '1'
+    factor3: '1'
+    factor4: '1'
+    factor5: '1'
+    factor6: '1'
+    factor7: '1'
+    factor8: '1'
+    factor9: '1'
+    graph_type: qtgui.NUM_GRAPH_NONE
+    gui_hint: ''
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    max: '1'
+    min: '0'
+    name: '"FM Sensitivity"'
+    nconnections: '1'
+    type: float
+    unit1: ''
+    unit10: ''
+    unit2: ''
+    unit3: ''
+    unit4: ''
+    unit5: ''
+    unit6: ''
+    unit7: ''
+    unit8: ''
+    unit9: ''
+    update_time: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [344, 348.0]
+    rotation: 180
     state: true
 - name: note_0_1
   id: note
@@ -490,7 +553,7 @@ blocks:
     marker9: '-1'
     name: '""'
     nconnections: '1'
-    size: int(spsym_frontend*50)
+    size: int(spsym_frontend*50)*10
     srate: int(spsym_frontend*50)
     stemplot: 'False'
     style1: '1'
@@ -660,7 +723,7 @@ blocks:
     bus_structure: null
     coordinate: [1328, 664.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: satellites_sync_to_pdu_soft_0
   id: satellites_sync_to_pdu_soft
   parameters:
@@ -678,7 +741,7 @@ blocks:
     bus_structure: null
     coordinate: [1328, 572.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: uhd_usrp_sink_0
   id: uhd_usrp_sink
   parameters:
@@ -1465,7 +1528,7 @@ blocks:
     bus_structure: null
     coordinate: [80, 780.0]
     rotation: 0
-    state: true
+    state: disabled
 
 connections:
 - [blocks_message_strobe_0, strobe, uhd_usrp_sink_0, command]
@@ -1483,6 +1546,7 @@ connections:
 - [uhf_pdu_modulate_0, '0', qtgui_time_sink_x_0, '0']
 - [uhf_pdu_modulate_0, '0', uhd_usrp_sink_0, '0']
 - [uhf_pdu_modulate_0, '0', virtual_sink_0, '0']
+- [uhf_pdu_modulate_0, '1', fm_sensitivity, '0']
 - [virtual_source_0, '0', qtgui_time_sink_x_1, '0']
 - [virtual_source_0, '0', uhf_pdu_demodulate_0, '0']
 
