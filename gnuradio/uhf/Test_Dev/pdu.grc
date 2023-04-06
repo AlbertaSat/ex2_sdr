@@ -200,7 +200,7 @@ blocks:
     bus_structure: null
     coordinate: [952, 528.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: pdu_pdu_to_tagged_stream_0
   id: pdu_pdu_to_tagged_stream
   parameters:
@@ -292,7 +292,7 @@ blocks:
     marker9: '-1'
     name: '""'
     nconnections: '1'
-    size: '210'
+    size: 15*8*2
     srate: samp_rate
     stemplot: 'True'
     style1: '1'
@@ -334,6 +334,24 @@ blocks:
     coordinate: [1360, 356.0]
     rotation: 0
     state: true
+- name: satellites_sync_to_pdu_packed_0
+  id: satellites_sync_to_pdu_packed
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    packlen: '0'
+    sync: '"00011010110011111111110000011101"'
+    threshold: '4'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [864, 644.0]
+    rotation: 0
+    state: disabled
 - name: virtual_sink_0
   id: virtual_sink
   parameters:
