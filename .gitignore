@@ -4,4 +4,4 @@ Debug**
 .project
 .settings
 .obsidian
-
+*pycache*
