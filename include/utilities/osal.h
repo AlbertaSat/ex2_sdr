@@ -44,7 +44,7 @@ int os_queue_enqueue(os_queue_handle_t handle, const void * value);
 int os_queue_dequeue(os_queue_handle_t handle, void* buf, uint32_t timeout);
 
 typedef void* os_task_handle_t;
-typedef void *os_task_return_t;
+typedef void os_task_return_t;
 
 typedef os_task_return_t (*os_task_func_t)(void* parameter);
 
