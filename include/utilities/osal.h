@@ -44,23 +44,28 @@ int os_queue_enqueue(os_queue_handle_t handle, const void * value);
 int os_queue_dequeue(os_queue_handle_t handle, void* buf, uint32_t timeout);
 
 typedef void* os_task_handle_t;
-typedef void os_task_return_t;
-
-typedef os_task_return_t (*os_task_func_t)(void* parameter);
 
 #if defined(OS_POSIX)
-#define OS_MAX_TIMEOUT (UINT32_MAX)
-#define OS_RX_TASK_STACK_SIZE 1024
-#define OS_TickType long
-#define ex2_log printf
+#  define OS_MAX_TIMEOUT (UINT32_MAX)
+#  define OS_RX_TASK_STACK_SIZE 1024
+#  define OS_TickType long
+#  define ex2_log printf
+
+typedef void* os_task_return_t;
+
 #elif defined(OS_FREERTOS)
 #include "FreeRTOS.h"
-#define OS_MAX_TIMEOUT portMAX_DELAY
-#define OS_RX_TASK_STACK_SIZE 1512/sizeof(int) // FreeRTOS allocates stack sizes based of words, not bytes
-#define OS_TickType TickType_t
+#  define OS_MAX_TIMEOUT portMAX_DELAY
+#  define OS_RX_TASK_STACK_SIZE 1512/sizeof(int) // FreeRTOS allocates stack sizes based of words, not bytes
+#  define OS_TickType TickType_t
+
+typedef void os_task_return_t;
+
 #else
 #error "No OS specified"
 #endif /* OS_FREERTOS */
+
+typedef os_task_return_t (*os_task_func_t)(void* parameter);
 
 int os_task_create(os_task_func_t func, const char *const name, unsigned int stack_size, void *parameter, unsigned int priority, os_task_handle_t *handle);
 
