@@ -49,9 +49,7 @@ namespace ex2
       }
     }
 
-    MPDU::MPDU (
-      const ErrorCorrection &currentErrorCorrection,
-      std::vector<uint8_t>& rawMPDU) {
+    MPDU::MPDU (std::vector<uint8_t>& rawMPDU) {
 
       // There are several possibilities for received @p rawMPDU:
       //     1. Shorter than expected
