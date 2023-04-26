@@ -47,8 +47,7 @@ namespace ex2 {
       m_headerValid = true;
     }
 
-    MPDUHeader::MPDUHeader (const ErrorCorrection &currentErrorCorrection,
-      std::vector<uint8_t> &rawHeader){
+    MPDUHeader::MPDUHeader(std::vector<uint8_t> &rawHeader) {
 
       if (rawHeader.size() < (k_MACHeaderLength / 8)) {
         throw MPDUHeaderException("MPDUHeader: Raw header too short");
@@ -61,14 +60,6 @@ namespace ex2 {
 
           // @TODO Any rfMode value is valid, and we really don't do anything with
           // rfMode yet, so not worth checking.
-
-          // It's possible that the check for a valid error correction scheme in
-          // decodeMACHeader passes, but it's still the wrong scheme, not the
-          // one in actual use.
-          if (m_errorCorrection->getErrorCorrectionScheme() != currentErrorCorrection.getErrorCorrectionScheme()){
-            // The header is bad
-            throw MPDUHeaderException("MPDUHeader: Bad transparent mode packet data; ErrorCorrectionScheme not allowed.");
-          }
         }
         else {
           throw MPDUHeaderException("MPDUHeader: Too many bit errors.");
