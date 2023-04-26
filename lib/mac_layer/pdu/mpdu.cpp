@@ -80,7 +80,7 @@ namespace ex2
       // >
 
       try {
-        m_mpduHeader = new MPDUHeader(currentErrorCorrection, rawMPDU);
+        m_mpduHeader = new MPDUHeader(rawMPDU);
 
         // Header seems okay, so make codeword based on how many remaining bytes
         // in rawMPDU

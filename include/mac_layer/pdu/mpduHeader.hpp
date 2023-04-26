@@ -59,14 +59,11 @@ namespace ex2 {
        * @details Reconstitute a header object from raw (received, we assume)
        * bytes. Check the data for correctness and throw an exepction if bad.
        *
-       * @param[in] currentErrorCorrection The current ErrorCorrection scheme in
-       * use by the MAC.
        * @param[in] rawHeader The first @p k_MACHeaderLength / 8 bytes of this
        * vector are assumed to contain the MACHeader information.
        * @throws MPDUHeaderException
        */
-      MPDUHeader (const ErrorCorrection &currentErrorCorrection,
-        std::vector<uint8_t> &rawHeader);
+      MPDUHeader (std::vector<uint8_t> &rawHeader);
 
       /*!
        * @brief Copy Constructor
