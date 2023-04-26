@@ -101,7 +101,7 @@ namespace ex2 {
       std::vector<uint8_t> p;
       p.assign(uhfPayload, uhfPayload+payloadLength);
       try {
-        MPDU mpdu(*m_errorCorrection, p);
+        MPDU mpdu(p);
 
         // Since we do not use the userPacketFragmentIndex field of the MPDU
         // header (we set to 0 always), we can check it and catch cases where
@@ -344,6 +344,10 @@ namespace ex2 {
       // of the error handling mechanisms to terminate the current packet
       // reconstruction.
 
+      if (firstMPDU.getMpduHeader()->getErrorCorrectionScheme() != getErrorCorrectionScheme()) {
+	// Use the error correction scheme specified in the header
+	m_updateErrorCorrection(firstMPDU.getMpduHeader()->getErrorCorrectionScheme());
+      }
       m_currentPacketLength = firstMPDU.getMpduHeader()->getUserPacketPayloadLength();
       m_numExpectedMpduCodewordFragments = MPDU::mpdusInNBytes(m_currentPacketLength, *m_errorCorrection);
       m_mpduCodewordFragmentCount = 1;
