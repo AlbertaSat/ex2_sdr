@@ -400,8 +400,7 @@ namespace ex2 {
 #if MAC_DEBUG
       uint32_t const cwLen = m_errorCorrection->getCodewordLen() / 8;
       printf("current ECS = %d\n", (uint16_t) getErrorCorrectionScheme());
-      uint32_t numMPDUsPerPacket = mpdusPerPacket(packet, *m_errorCorrection);
-      printf("numMPDUsPerPacket %d packetLength %d messageLength %d cwLen %d\n",numMPDUsPerPacket,packetLength,messageLength,cwLen);
+      printf("packetLength %d messageLength %d cwLen %d\n",packetLength,messageLength,cwLen);
 #endif
 
       // A packet is broken into codewords for transmission. Each codeword
@@ -535,7 +534,7 @@ namespace ex2 {
 #if MAC_DEBUG
       printf("Total MPDU bytes = %ld\n", m_transparentModePayloads.size());
       for (unsigned int i = 0; i < m_transparentModePayloads.size(); i++) {
-        printf("tpmodePayaloads[%04d] 0x%02x\n",i,m_transparentModePayloads[i]);
+        printf("tpmodePayloads[%04d] 0x%02x\n",i,m_transparentModePayloads[i]);
       }
 #endif
       return true; // @todo not yet sure when we'd return false. Only if FEC encoding fails, so check that possibility
