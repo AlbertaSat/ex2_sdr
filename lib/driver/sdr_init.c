@@ -79,3 +79,14 @@ sdr_interface_data_t *sdr_interface_init(const sdr_conf_t *conf, const char *ifn
     return ifdata;
 }
 
+bool sdr_fec_ctl(sdr_interface_data_t *ifdata, bool use_fec) {
+    error_correction_scheme_t correction_scheme;
+
+    if (use_fec) {
+        correction_scheme = CCSDS_CONVOLUTIONAL_CODING_R_1_2;
+    } else {
+        correction_scheme = NO_FEC;
+    }
+
+    return set_error_correction_scheme(ifdata->mac_data, correction_scheme);
+}

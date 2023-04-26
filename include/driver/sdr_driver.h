@@ -98,6 +98,8 @@ os_task_return_t sdr_rx_task(void *param);
 
 int sdr_uhf_set_rf_mode(sdr_interface_data_t *sdr_ifdata, uint8_t rf_mode);
 
+bool sdr_fec_ctl(sdr_interface_data_t *sdr_ifdata, bool use_fec);
+
 #ifdef __cplusplus
 }
 #endif
