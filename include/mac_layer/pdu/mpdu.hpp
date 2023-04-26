@@ -140,9 +140,7 @@ namespace ex2
        * use by the MAC.
        * @param[in] rawMPDU The received transparent mode Data Field 2 as a byte vector
        */
-      MPDU (
-        const ErrorCorrection &currentErrorCorrection,
-        std::vector<uint8_t> &rawMPDU);
+      MPDU (std::vector<uint8_t> &rawMPDU);
 
       ~MPDU ();
 
