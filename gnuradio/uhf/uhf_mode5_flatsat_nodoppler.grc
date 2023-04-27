@@ -56,6 +56,18 @@ blocks:
     coordinate: [280, 12.0]
     rotation: 0
     state: enabled
+- name: bits_to_capture
+  id: variable
+  parameters:
+    comment: ''
+    value: int(100*8)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [608, 840.0]
+    rotation: 0
+    state: enabled
 - name: center_freq
   id: variable
   parameters:
@@ -125,21 +137,30 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [624, 84.0]
+    coordinate: [168, 360.0]
     rotation: 0
     state: enabled
 - name: rx_gain
-  id: variable
+  id: variable_qtgui_range
   parameters:
     comment: ''
+    gui_hint: ''
+    label: rx_gain
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: int
+    start: '10'
+    step: '1'
+    stop: '90'
     value: '30'
+    widget: counter_slider
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [80, 612.0]
+    coordinate: [592, 664.0]
     rotation: 0
-    state: enabled
+    state: true
 - name: samp_rate
   id: variable
   parameters:
@@ -173,7 +194,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [520, 84.0]
+    coordinate: [464, 392.0]
     rotation: 0
     state: enabled
 - name: spsym_frontend
@@ -185,9 +206,30 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [840, 12.0]
+    coordinate: [0, 600.0]
     rotation: 0
     state: enabled
+- name: squelch_db
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: squelch_db
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: int
+    start: '-100'
+    step: '1'
+    stop: '0'
+    value: '-30'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 744.0]
+    rotation: 0
+    state: true
 - name: taps
   id: variable
   parameters:
@@ -229,7 +271,27 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [432, 644.0]
+    coordinate: [560, 552.0]
+    rotation: 0
+    state: disabled
+- name: analog_pwr_squelch_xx_1
+  id: analog_pwr_squelch_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: 1e-4
+    comment: ''
+    gate: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ramp: '0'
+    threshold: '-120'
+    type: complex
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 920.0]
     rotation: 0
     state: disabled
 - name: analog_quadrature_demod_cf_0
@@ -257,7 +319,7 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    threshold: '-30'
+    threshold: squelch_db
   states:
     bus_sink: false
     bus_source: false
@@ -265,6 +327,42 @@ blocks:
     coordinate: [336, 524.0]
     rotation: 0
     state: enabled
+- name: blocks_file_sink_0
+  id: blocks_file_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    append: 'False'
+    comment: ''
+    file: /home/albertasat/josh_dev/19200_baud_samples
+    type: complex
+    unbuffered: 'False'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1008, 928.0]
+    rotation: 0
+    state: disabled
+- name: blocks_head_0
+  id: blocks_head
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_items: int(bits_to_capture*spsym)
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [800, 944.0]
+    rotation: 0
+    state: disabled
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:
@@ -1093,15 +1191,76 @@ blocks:
     coordinate: [392, 300.0]
     rotation: 0
     state: enabled
+- name: qtgui_waterfall_sink_x_0
+  id: qtgui_waterfall_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    axislabels: 'True'
+    bw: 2*baud_bit*spsym
+    color1: '0'
+    color10: '0'
+    color2: '0'
+    color3: '0'
+    color4: '0'
+    color5: '0'
+    color6: '0'
+    color7: '0'
+    color8: '0'
+    color9: '0'
+    comment: ''
+    fc: '437875000'
+    fftsize: 1024*10
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    int_max: '10'
+    int_min: '-140'
+    label1: ''
+    label10: ''
+    label2: ''
+    label3: ''
+    label4: ''
+    label5: ''
+    label6: ''
+    label7: ''
+    label8: ''
+    label9: ''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    showports: 'False'
+    type: complex
+    update_time: '0.10'
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [264, 728.0]
+    rotation: 0
+    state: true
 - name: rational_resampler_xxx_0
   id: rational_resampler_xxx
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    decim: spsym_frontend*baud_bit
+    decim: spsym_frontend
     fbw: '0.4'
-    interp: int(spsym*baud_bit)
+    interp: int(spsym)
     maxoutbuf: '0'
     minoutbuf: '0'
     taps: '[]'
@@ -1912,9 +2071,13 @@ blocks:
 
 connections:
 - [analog_pwr_squelch_xx_0, '0', analog_quadrature_demod_cf_0, '0']
+- [analog_pwr_squelch_xx_1, '0', blocks_head_0, '0']
 - [analog_quadrature_demod_cf_0, '0', digital_pfb_clock_sync_xxx_0, '0']
+- [analog_simple_squelch_cc_0, '0', analog_pwr_squelch_xx_1, '0']
 - [analog_simple_squelch_cc_0, '0', analog_quadrature_demod_cf_0, '0']
+- [analog_simple_squelch_cc_0, '0', qtgui_time_sink_x_1_1, '0']
 - [analog_simple_squelch_cc_0, '0', satellites_fsk_demodulator_0, '0']
+- [blocks_head_0, '0', blocks_file_sink_0, '0']
 - [blocks_message_strobe_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_0_0, strobe, uhd_usrp_sink_0, command]
@@ -1931,7 +2094,6 @@ connections:
 - [digital_gfsk_mod_0, '0', uhd_usrp_sink_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
 - [rational_resampler_xxx_0, '0', analog_simple_squelch_cc_0, '0']
-- [rational_resampler_xxx_0, '0', qtgui_time_sink_x_1_1, '0']
 - [satellites_ax25_deframer_0, out, blocks_socket_pdu_0, pdus]
 - [satellites_ax25_deframer_0, out, blocks_socket_pdu_0_0, pdus]
 - [satellites_ax25_deframer_0, out, satellites_hexdump_sink_0, in]
@@ -1941,6 +2103,7 @@ connections:
 - [uhd_usrp_source_0_0, '0', analog_pwr_squelch_xx_0, '0']
 - [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1, '0']
 - [uhd_usrp_source_0_0, '0', qtgui_time_sink_x_1_0, '0']
+- [uhd_usrp_source_0_0, '0', qtgui_waterfall_sink_x_0, '0']
 - [uhd_usrp_source_0_0, '0', rational_resampler_xxx_0, '0']
 
 metadata:
