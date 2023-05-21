@@ -65,7 +65,31 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 84.0]
+    coordinate: [216, 84.0]
+    rotation: 0
+    state: enabled
+- name: center_freq_rx
+  id: variable
+  parameters:
+    comment: ''
+    value: '437875000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [336, 84.0]
+    rotation: 0
+    state: enabled
+- name: center_freq_tx
+  id: variable
+  parameters:
+    comment: ''
+    value: int(center_freq + abs(center_freq - center_freq_rx))
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [464, 84.0]
     rotation: 0
     state: enabled
 - name: fsk_dev
@@ -467,13 +491,30 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    msgname: center_freq
-    target: center_freq
+    msgname: center_freq_rx
+    target: center_freq_rx
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
     coordinate: [208, 1124.0]
+    rotation: 0
+    state: true
+- name: blocks_var_to_msg_0_0_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: center_freq_tx
+    target: center_freq_tx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [208, 1196.0]
     rotation: 0
     state: true
 - name: digital_binary_slicer_fb_0
@@ -578,7 +619,7 @@ blocks:
     comment: ''
     gpredict_host: localhost
     gpredict_port: '4532'
-    target: center_freq
+    target: center_freq_rx
   states:
     bus_sink: false
     bus_source: false
@@ -1161,7 +1202,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: center_freq
+    center_freq0: center_freq_tx
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1438,7 +1479,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: center_freq
+    center_freq0: center_freq_rx
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1851,6 +1892,7 @@ connections:
 - [blocks_var_to_msg_0, msgout, blocks_message_debug_0, print]
 - [blocks_var_to_msg_0_0, msgout, blocks_message_debug_0, print]
 - [blocks_var_to_msg_0_0_0, msgout, blocks_message_debug_0, print]
+- [blocks_var_to_msg_0_0_0_0, msgout, blocks_message_debug_0, print]
 - [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_freq_sink_x_0, '0']
 - [digital_gfsk_mod_0, '0', qtgui_time_sink_x_0, '0']
