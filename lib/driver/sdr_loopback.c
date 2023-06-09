@@ -5,6 +5,10 @@
 static sdr_interface_data_t *loop_ifdata;
 
 static int sdr_loopback_tx(int fd, const void *buf, size_t len) {
+    // Suppress unused var warning
+    (void) fd;
+    (void) len;
+    
     if (os_queue_enqueue(loop_ifdata->rx_queue, (const uint8_t *)buf) != true) {
         return SDR_ERR_TIMEOUT;
     }

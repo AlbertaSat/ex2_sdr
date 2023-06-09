@@ -89,15 +89,15 @@ bool set_rf_mode_number (mac_t *m, rf_mode_number_t rf_mode_number)
   return true;
 }
 
-uhf_packet_processing_status_t process_uhf_packet(mac_t *m, const uint8_t *uhf_payload, const uint32_t payload_length)
+packet_processing_status_t process_packet(mac_t *m, const uint8_t *uhf_payload, const uint32_t payload_length)
 {
   ex2::sdr::MAC *obj;
 
   if (m == NULL)
-    return UHF_PACKET_PROCESSING_BAD_WRAPPER_CONTEXT;
+    return PACKET_PROCESSING_BAD_WRAPPER_CONTEXT;
 
   obj = static_cast<ex2::sdr::MAC *>(m->obj);
-  return (uhf_packet_processing_status_t) (obj->processUHFPacket(uhf_payload, payload_length));
+  return (packet_processing_status_t) (obj->processUHFPacket(uhf_payload, payload_length));
 }
 
 const uint8_t* get_raw_packet_buffer(mac_t *m)
@@ -122,7 +122,7 @@ int32_t get_raw_packet_length(mac_t *m)
   return obj->getRawPacketLength();
 }
 
-bool receive_packet(mac_t *m, uint8_t *data, uint16_t len)
+bool prepare_packet_for_tx(mac_t *m, uint8_t *data, uint16_t len)
 {
   ex2::sdr::MAC *obj;
 

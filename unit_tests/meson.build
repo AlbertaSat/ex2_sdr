@@ -102,7 +102,7 @@ unit_test_sdr_init = executable('unit_test-sdr_init', 'qa_sdr_init.cpp', core_so
     dependencies: [gtest_dep]
     )
     
-test('cc_hd_FEC', unit_test_cc_hd_FEC,
+test('cc_hd_FEC', unit_test_sdr_init,
     timeout: 100
     )
 

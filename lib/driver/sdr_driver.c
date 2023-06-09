@@ -1,9 +1,10 @@
 #include <string.h>
 #include "sdr_driver.h"
-#include "fec.h"
+//#include "fec.h"
+#include "mac_handler.h"
 #include "osal.h"
 #include <stdio.h>
-#include "rfModeWrapper.h"
+//#include "rfModeWrapper.h"
 
 #define PIPE_ENTER_MSG_LEN 15
 #define PIPE_EXIT_MSG_LEN 16
@@ -22,13 +23,13 @@ static int sdr_uhf_baud_rate_delay[] = {
 int sdr_uhf_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
     sdr_uhf_baud_rate_t uhf_baudrate = ifdata->sdr_conf->uhf_conf.uhf_baudrate;
 
-    if (fec_data_to_mpdu(ifdata->mac_data, data, len)) {
+    if (prepare_packet_for_tx(ifdata->mac, data, len)) {
         uint8_t *buf;
         int delay_time = sdr_uhf_baud_rate_delay[uhf_baudrate];
-        size_t mtu = (size_t)fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
+        size_t mtu = (size_t)get_next_mpdu(ifdata->mac, (void **)&buf);
         while (mtu != 0) {
             (ifdata->tx_func)(ifdata->fd, buf, mtu);
-            mtu = fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
+            mtu = get_next_mpdu(ifdata->mac, (void **)&buf);
             os_sleep_ms(delay_time);
         }
     }
@@ -83,7 +84,7 @@ os_task_return_t sdr_rx_task(void *param) {
             continue;
         }
 
-        int plen = fec_mpdu_to_data(ifdata->mac_data, mpdu, &data, ifdata->mtu);
+        int plen = mpdu_to_buffer(ifdata->mac, mpdu, &data, ifdata->mtu);
         if (plen) {
             sdr_conf->rx_callback(sdr_conf->rx_callback_data, data, plen, 0);
             os_free(data);
@@ -91,7 +92,7 @@ os_task_return_t sdr_rx_task(void *param) {
     }
 }
 
-int sdr_uhf_set_rf_mode(sdr_interface_data_t *sdr_ifdata, uint8_t rf_mode){
-    sdr_ifdata->sdr_conf->uhf_conf.uhf_baudrate = get_uhf_baud_t_from_rf_mode_number(rf_mode);
-    return 0;
-}
+// int sdr_uhf_set_rf_mode(sdr_interface_data_t *sdr_ifdata, uint8_t rf_mode){
+//     sdr_ifdata->sdr_conf->uhf_conf.uhf_baudrate = get_uhf_baud_t_from_rf_mode_number(rf_mode);
+//     return 0;
+// }

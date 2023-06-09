@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sdr_driver.h"
-#include "fec.h"
+//#include "fec.h"
+#include "mac_handler.h"
 #include "osal.h"
 
 void sdr_loopback_open(sdr_interface_data_t *ifdata);
@@ -44,7 +45,7 @@ static int sdr_driver_init(sdr_interface_data_t *ifdata, const char *ifname) {
     } else {
         correction_scheme = NO_FEC;
     }
-    ifdata->mac_data = fec_create(RF_MODE_3, correction_scheme);
+    ifdata->mac = mac_create(RF_MODE_3, correction_scheme);
 
     ifdata->rx_mpdu_index = 0;
     ifdata->rx_mpdu = os_malloc(ifdata->mtu);

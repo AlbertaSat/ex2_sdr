@@ -1,10 +1,26 @@
 #ifndef SDR_SBAND_H_
 #define SDR_SBAND_H_
 
+#include <stdbool.h>
 #include <osal.h>
 
 #ifdef OS_POSIX
-#include <stdbool.h>
+
+// @TODO: include some constants that are already defined in sTransmitter.h under ex2_hal
+#define S_RATE_FULL 0
+#define S_RATE_HALF 1
+#define S_RATE_QUARTER 2
+
+// @TODO: include some constants that are already defined in sband.h under ex2_hal
+
+/* Send an S-Band Sync word every sync interval bytes */
+#define SBAND_SYNC_INTERVAL 8 * 1024
+
+/* The depth of our TX FIFO */
+#define SBAND_FIFO_DEPTH 20 * 1024
+#define SBAND_FIFO_READY_COUNT 2561
+
+//#include <stdbool.h>
 
 // These don't exist (and aren't needed) on Linux
 int sband_get_rate(void);

@@ -1,4 +1,4 @@
-project('ex2_obc_sdr', 'c', 'cpp',
+project('ex2_sdr', 'c', 'cpp',
     license: 'proprietary',
     version: '0.5.0',
     default_options : [
@@ -52,7 +52,8 @@ core_source_files = [
 ]
 
 sdr_driver_source_files = [
-    PRJ_DIR / 'lib/driver/fec.c',
+#    PRJ_DIR / 'lib/driver/fec.c',
+    PRJ_DIR / 'lib/driver/mac_handler.c',
     PRJ_DIR / 'lib/driver/gnuradio.c',
     PRJ_DIR / 'lib/driver/sband_driver.c',
     PRJ_DIR / 'lib/driver/sdr_init.c',
@@ -75,7 +76,7 @@ incdir = include_directories(
 
 sdr_driver_incdir = include_directories(
     'include/driver',
-    '../../ex2_sband_software/equipment_handler/include'
+    '../../ex2_sband_software/equipment_handler/include',
 )
 
 third_party_source_files = [

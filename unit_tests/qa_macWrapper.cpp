@@ -214,7 +214,7 @@ TEST(macWrapper, PacketLoopbackNoDroppedPackets) {
       }
 
       // Process a packet
-      bool packetEncoded = receive_packet(myMac1, packet, packetDataLengths[currentPacket]);
+      bool packetEncoded = prepare_packet_for_tx(myMac1, packet, packetDataLengths[currentPacket]);
 
       ASSERT_TRUE(packetEncoded) << "Failed to encode Packet ";
 
@@ -247,7 +247,7 @@ TEST(macWrapper, PacketLoopbackNoDroppedPackets) {
         if (mpdusBuffer && (mpdu_payloads_buffer_length(myMac1) % 128 == 0)) {
 
           for (uint16_t rawMPDUIndex = 0; rawMPDUIndex < mpdu_payloads_buffer_length(myMac1); rawMPDUIndex += 128) {
-            uhf_packet_processing_status_t status = process_uhf_packet(myMac1, mpdusBuffer+rawMPDUIndex, 128);
+            packet_processing_status_t status = process_packet(myMac1, mpdusBuffer+rawMPDUIndex, 128);
             switch (status) {
               case PACKET_READY:
               {
@@ -270,11 +270,11 @@ TEST(macWrapper, PacketLoopbackNoDroppedPackets) {
               break;
               case PACKET_READY_RESUBMIT_PREVIOUS_PACKET:
                 break;
-              case READY_FOR_NEXT_UHF_PACKET:
+              case READY_FOR_NEXT_PACKET:
                 break;
               default:
                 break;
-            } // switch on returned UHF packet process status
+            } // switch on returned packet process status
 
           } // for all the raw MPDUs
         } // check if have an integral number of raw MPDUs

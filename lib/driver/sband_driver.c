@@ -5,9 +5,9 @@
  *      Author: Robert Taylor
  */
 
-#include <sdr_sband.h>
+#include "sdr_sband.h"
 #include "sdr_driver.h"
-#include "fec.h"
+#include "mac_handler.h"
 
 #define SBAND_IDLE 0
 #define SBAND_FIRST_FILL 1
@@ -92,9 +92,9 @@ void sdr_sband_tx_stop(sdr_interface_data_t *ifdata) {
 int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
     sdr_sband_conf_t *sband_conf = &ifdata->sdr_conf->sband_conf;
 
-    if (fec_data_to_mpdu(ifdata->mac_data, data, len)) {
+    if (prepare_packet_for_tx(ifdata->mac, data, len)) {
         uint8_t *buf;
-        size_t mtu = (size_t)fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
+        size_t mtu = (size_t)get_next_mpdu(ifdata->mac, (void **)&buf);
         while (mtu != 0) {
             if (sband_conf->bytes_until_sync == 0) {
                 sband_sync();
@@ -115,7 +115,7 @@ int sdr_sband_tx(sdr_interface_data_t *ifdata, uint8_t *data, uint16_t len) {
 
                 sband_conf->state = SBAND_FILL;
             }
-            mtu = fec_get_next_mpdu(ifdata->mac_data, (void **)&buf);
+            mtu = get_next_mpdu(ifdata->mac, (void **)&buf);
         }
     }
 

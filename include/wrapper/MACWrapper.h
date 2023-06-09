@@ -3,7 +3,7 @@
  * @author Steven Knudsen
  * @date Nov. 17, 2021
  *
- * @details 
+ * @details Provide a C wrapper for the MAC and its methods
  *
  * @copyright University of Alberta 2021
  *
@@ -80,34 +80,39 @@ rf_mode_number_t get_rf_mode_number(mac_t *m);
 bool set_rf_mode_number (mac_t *m, rf_mode_number_t rf_mode_number);
 
 /************************************************************************/
-/* Receive from PHY (UHF Radio) methods                                 */
+/* Receive from PHY (radio) methods                                 */
 /************************************************************************/
 
 typedef enum {
-  PACKET_READY = 0, //(uint16_t) MAC::MAC_UHFPacketProcessingStatus::PACKET_READY,
-  PACKET_READY_RESUBMIT_PREVIOUS_PACKET = 1, //(uint16_t) MAC::MAC_UHFPacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET,
-  READY_FOR_NEXT_UHF_PACKET = 2, //(uint16_t) MAC::MAC_UHFPacketProcessingStatus::READY_FOR_NEXT_UHF_PACKET
-  UHF_PACKET_PROCESSING_BAD_WRAPPER_CONTEXT = 100 // needed for wrapper existance checking
-} uhf_packet_processing_status_t;
+  PACKET_READY = 0, //(uint16_t) MAC::MAC_PacketProcessingStatus::PACKET_READY,
+  PACKET_READY_RESUBMIT_PREVIOUS_PACKET = 1, //(uint16_t) MAC::MAC_PacketProcessingStatus::PACKET_READY_RESUBMIT_PREVIOUS_PACKET,
+  READY_FOR_NEXT_PACKET = 2, //(uint16_t) MAC::MAC_PacketProcessingStatus::READY_FOR_NEXT_PACKET
+  PACKET_PROCESSING_BAD_WRAPPER_CONTEXT = 100 // needed for wrapper existance checking
+} packet_processing_status_t;
 
 /*!
- * @brief Process the received UHF data as an MPDU.
+ * @brief Process the received PHY data until a packet is complete.
  *
- * @details Process each MPDU received (UHF received data in transparent
- * mode) until a full packet is received or there is an error.
+ * @details Process each PHY data buffer received as an MPDU until a full
+ * packet is received or there is an error. The packet length and other
+ * details are encapsulated in the MPDU and the MAC processing of each MPDU.
+ * 
+ * Usually this method is called inside a loop and the return status checked
+ * to see when a full packet is available. At that point, a pointer to the
+ * raw packet buffer is obtained from @p get_raw_packet_buffer .
  *
  * @param m Pointer to the MAC object wrapper
- * @param uhf_payload The transparent mode data received from the UHF radio
- * @param payload_length The number of transparent mode data bytes received
+ * @param payload Pointer to the buffer containing data received from the PHY (i.e., a raw MPDU)
+ * @param payload_length The number of payload bytes
  *
- * @return The status of the process operation. If @p PACKET_READY,
- * a raw packet is in the raw buffer. 
- * If there is a problem, @p UHF_PACKET_PROCESSING_BAD_WRAPPER_CONTEXT is returned.
+ * @return The status of the process operation.
+ * If @p PACKET_READY a raw packet is in the raw buffer. 
+ * If there is a problem, @p PACKET_PROCESSING_BAD_WRAPPER_CONTEXT is returned.
  */
-uhf_packet_processing_status_t process_uhf_packet(mac_t *m, const uint8_t *uhf_payload, const uint32_t payload_length);
+packet_processing_status_t process_packet(mac_t *m, const uint8_t *payload, const uint32_t payload_length);
 
 /*!
- * @brief When ready, the raw packet buffer can be retrieved.
+ * @brief When a packet is ready, the raw packet buffer can be retrieved.
  *
  * @param m Pointer to the MAC object wrapper
  *
@@ -117,7 +122,7 @@ uhf_packet_processing_status_t process_uhf_packet(mac_t *m, const uint8_t *uhf_p
 const uint8_t * get_raw_packet_buffer(mac_t *m);
 
 /*!
- * @brief When ready, the raw packet buffer length can be returned.
+ * @brief When a packet is ready, the raw packet buffer length can be returned.
  *
  * @param m Pointer to the MAC object wrapper
  *
@@ -128,23 +133,23 @@ int32_t get_raw_packet_length(mac_t *m);
 
 
 /************************************************************************/
-/* Send to PHY (UHF Radio) methods                                      */
+/* Send to PHY (Radio) methods                                      */
 /************************************************************************/
 
 /*!
- * @brief Receive and encode new packet.
+ * @brief Prepare packet for PHY transmission.
  *
  * @details Processed the received packet to create MPDUs ready for
- * transmission by the UHF radio in transparent mode. If the method returns
- * true, then there will be raw MPDUs in the mpdu payloads buffer
+ * transmission by the radio. If the method returns true, then there will
+ * be raw MPDUs in the mpdu buffer, which is accessed via @p mpdu_payloads_buffer
  *
  * @param m Pointer to the MAC object wrapper
  * @param packet
  * @param len
  *
- * @return True if the packet was encoded, false otherwise
+ * @return True if the packet was processed, false otherwise
  */
-    bool receive_packet(mac_t *m, uint8_t *packet, uint16_t len);
+    bool prepare_packet_for_tx(mac_t *m, uint8_t *packet, uint16_t len);
 
 /*!
  * @brief Pointer to MPDU payloads buffer.
@@ -158,7 +163,10 @@ int32_t get_raw_packet_length(mac_t *m);
 const uint8_t* mpdu_payloads_buffer(mac_t *m);
 
 /*!
- * @breif The number of bytes in the MPDU payloads buffer.
+ * @brief The number of bytes in the MPDU payloads buffer.
+ *
+ * @details The number of bytes will be an integer multiple of the MPDU length.
+ * There will be one (1) or more MPDUs in the buffer.
  *
  * @param m Pointer to the MAC object wrapper
  *

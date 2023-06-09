@@ -1,6 +1,7 @@
 #ifndef SDR_DRIVER_H_
 #define SDR_DRIVER_H_
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include "osal.h"
@@ -74,7 +75,8 @@ typedef struct sdr_interface_data {
     sdr_tx_t tx_func;
     /** Low level Receive function */
     os_queue_handle_t rx_queue;
-    void *mac_data;
+    /** pointer to MAC instance */
+    void *mac;
     sdr_conf_t *sdr_conf;
     /** Low level buffer state */
     uint16_t rx_mpdu_index;
@@ -97,7 +99,7 @@ void sdr_rx_isr(void *cb_data, uint8_t *buf, size_t len, void *pxTaskWoken);
 
 os_task_return_t sdr_rx_task(void *param);
 
-int sdr_uhf_set_rf_mode(sdr_interface_data_t *sdr_ifdata, uint8_t rf_mode);
+//int sdr_uhf_set_rf_mode(sdr_interface_data_t *sdr_ifdata, uint8_t rf_mode);
 
 #ifdef __cplusplus
 }
