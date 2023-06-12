@@ -7,30 +7,19 @@
 # GNU Radio Python Flow Graph
 # Title: Not titled yet
 # Author: knud
-# GNU Radio version: 3.10.2.0
+# GNU Radio version: 3.10.6.0
 
 from packaging.version import Version as StrictVersion
-
-if __name__ == '__main__':
-    import ctypes
-    import sys
-    if sys.platform.startswith('linux'):
-        try:
-            x11 = ctypes.cdll.LoadLibrary('libX11.so')
-            x11.XInitThreads()
-        except:
-            print("Warning: failed to XInitThreads()")
-
 from PyQt5 import Qt
 from gnuradio import qtgui
-from gnuradio.filter import firdes
-import sip
 from gnuradio import blocks
 import pmt
 from gnuradio import gr
+from gnuradio.filter import firdes
 from gnuradio.fft import window
 import sys
 import signal
+from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
@@ -38,10 +27,9 @@ from gnuradio import gr, pdu
 from gnuradio import pdu
 import numpy as np
 import pdu_gen_epy_block_0 as epy_block_0  # embedded python block
+import sip
 
 
-
-from gnuradio import qtgui
 
 class pdu_gen(gr.top_block, Qt.QWidget):
 
@@ -52,8 +40,8 @@ class pdu_gen(gr.top_block, Qt.QWidget):
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
-        except:
-            pass
+        except BaseException as exc:
+            print(f"Qt GUI: Could not set Icon: {str(exc)}", file=sys.stderr)
         self.top_scroll_layout = Qt.QVBoxLayout()
         self.setLayout(self.top_scroll_layout)
         self.top_scroll = Qt.QScrollArea()
@@ -73,8 +61,8 @@ class pdu_gen(gr.top_block, Qt.QWidget):
                 self.restoreGeometry(self.settings.value("geometry").toByteArray())
             else:
                 self.restoreGeometry(self.settings.value("geometry"))
-        except:
-            pass
+        except BaseException as exc:
+            print(f"Qt GUI: Could not restore geometry: {str(exc)}", file=sys.stderr)
 
         ##################################################
         # Variables
@@ -90,8 +78,9 @@ class pdu_gen(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
+
         self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
-            (max_pipe_payload_len+header_len)*8*2, #size
+            ((max_pipe_payload_len+header_len)*8*2), #size
             samp_rate, #samp_rate
             "", #name
             1, #number of inputs
@@ -139,11 +128,10 @@ class pdu_gen(gr.top_block, Qt.QWidget):
         self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
         self.pdu_tagged_stream_to_pdu_0 = pdu.tagged_stream_to_pdu(gr.types.byte_t, 'packet_len')
-        self.pdu_random_pdu_0 = pdu.random_pdu(int(np.floor(mpdu_payload_len*fec_rate)), int(np.floor(mpdu_payload_len*fec_rate)), 0xFF, 2)
+        self.pdu_random_pdu_0 = pdu.random_pdu((int(np.floor(mpdu_payload_len*fec_rate))), (int(np.floor(mpdu_payload_len*fec_rate))), 0xFF, 2)
         self.pdu_pdu_to_tagged_stream_0 = pdu.pdu_to_tagged_stream(gr.types.byte_t, 'packet_len')
         self.epy_block_0 = epy_block_0.blk()
         self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(8)
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_char*1, samp_rate,True)
         self.blocks_message_strobe_0 = blocks.message_strobe(pmt.cons(pmt.make_dict(), pmt.init_u8vector(10, (1,2,3,4,5,6,7,8,9,10))), 1000)
         self.blocks_message_debug_0 = blocks.message_debug(True)
         self.blocks_char_to_float_0 = blocks.char_to_float(1, 1)
@@ -157,10 +145,9 @@ class pdu_gen(gr.top_block, Qt.QWidget):
         self.msg_connect((self.pdu_random_pdu_0, 'pdus'), (self.epy_block_0, 'pdu_in'))
         self.msg_connect((self.pdu_tagged_stream_to_pdu_0, 'pdus'), (self.blocks_message_debug_0, 'print_pdu'))
         self.connect((self.blocks_char_to_float_0, 0), (self.qtgui_time_sink_x_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.pdu_tagged_stream_to_pdu_0, 0))
         self.connect((self.blocks_unpack_k_bits_bb_0, 0), (self.blocks_char_to_float_0, 0))
-        self.connect((self.pdu_pdu_to_tagged_stream_0, 0), (self.blocks_throttle_0, 0))
         self.connect((self.pdu_pdu_to_tagged_stream_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
+        self.connect((self.pdu_pdu_to_tagged_stream_0, 0), (self.pdu_tagged_stream_to_pdu_0, 0))
 
 
     def closeEvent(self, event):
@@ -190,7 +177,7 @@ class pdu_gen(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
+        self.blocks_throttle2_0.set_sample_rate(self.samp_rate)
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
 
     def get_mpdu_payload_len(self):
