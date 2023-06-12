@@ -82,7 +82,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '300'
+    value: '600'
   states:
     bus_sink: false
     bus_source: false
@@ -264,6 +264,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     num_ports: '1'
+    showports: 'False'
     type: float
     vlen: '1'
   states:
@@ -932,4 +933,4 @@ connections:
 
 metadata:
   file_format: 1
-  grc_version: 3.9.7.0
+  grc_version: 3.10.6.0
