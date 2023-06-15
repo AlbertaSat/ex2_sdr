@@ -8,31 +8,43 @@
 # Title: FSK_example
 # Author: Barry Duggan
 # Description: FSK_example
-# GNU Radio version: 3.10.6.0
+# GNU Radio version: 3.9.7.0
 
-from packaging.version import Version as StrictVersion
+from distutils.version import StrictVersion
+
+if __name__ == '__main__':
+    import ctypes
+    import sys
+    if sys.platform.startswith('linux'):
+        try:
+            x11 = ctypes.cdll.LoadLibrary('libX11.so')
+            x11.XInitThreads()
+        except:
+            print("Warning: failed to XInitThreads()")
+
 from PyQt5 import Qt
 from gnuradio import qtgui
+from gnuradio.filter import firdes
+import sip
 from gnuradio import analog
 import math
 from gnuradio import blocks
 import numpy
 from gnuradio import digital
 from gnuradio import filter
-from gnuradio.filter import firdes
 from gnuradio import gr
 from gnuradio.fft import window
 import sys
 import signal
-from PyQt5 import Qt
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
 from gnuradio.qtgui import Range, RangeWidget
 from PyQt5 import QtCore
-import sip
 
 
+
+from gnuradio import qtgui
 
 class FSK_example(gr.top_block, Qt.QWidget):
 
@@ -43,8 +55,8 @@ class FSK_example(gr.top_block, Qt.QWidget):
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
-        except BaseException as exc:
-            print(f"Qt GUI: Could not set Icon: {str(exc)}", file=sys.stderr)
+        except:
+            pass
         self.top_scroll_layout = Qt.QVBoxLayout()
         self.setLayout(self.top_scroll_layout)
         self.top_scroll = Qt.QScrollArea()
@@ -64,8 +76,8 @@ class FSK_example(gr.top_block, Qt.QWidget):
                 self.restoreGeometry(self.settings.value("geometry").toByteArray())
             else:
                 self.restoreGeometry(self.settings.value("geometry"))
-        except BaseException as exc:
-            print(f"Qt GUI: Could not restore geometry: {str(exc)}", file=sys.stderr)
+        except:
+            pass
 
         ##################################################
         # Variables
@@ -85,7 +97,6 @@ class FSK_example(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
-
         self._sq_lvl_range = Range(-100, 0, 5, -70, 200)
         self._sq_lvl_win = RangeWidget(self._sq_lvl_range, self.set_sq_lvl, "Squelch", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._sq_lvl_win)
@@ -98,7 +109,7 @@ class FSK_example(gr.top_block, Qt.QWidget):
                 taps=[],
                 fractional_bw=0)
         self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
-            (1024*5), #size
+            1024*5, #size
             samp_rate, #samp_rate
             "", #name
             1, #number of inputs
@@ -203,7 +214,7 @@ class FSK_example(gr.top_block, Qt.QWidget):
             None # parent
         )
         self.qtgui_freq_sink_x_0.set_update_time(0.10)
-        self.qtgui_freq_sink_x_0.set_y_axis((-140), 10)
+        self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
         self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
         self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
         self.qtgui_freq_sink_x_0.enable_autoscale(False)
@@ -296,7 +307,7 @@ class FSK_example(gr.top_block, Qt.QWidget):
         self.blocks_add_const_vxx_0 = blocks.add_const_ff(vco_offset)
         self.analog_simple_squelch_cc_0 = analog.simple_squelch_cc(sq_lvl, 1)
         self.analog_random_source_x_0 = blocks.vector_source_b(list(map(int, numpy.random.randint(0, 255, 1024))), True)
-        self.analog_quadrature_demod_cf_1 = analog.quadrature_demod_cf((samp_rate/(2*math.pi*fsk_deviation)))
+        self.analog_quadrature_demod_cf_1 = analog.quadrature_demod_cf(samp_rate/(2*math.pi*fsk_deviation))
 
 
         ##################################################
@@ -349,7 +360,7 @@ class FSK_example(gr.top_block, Qt.QWidget):
         self.fsk_deviation = fsk_deviation
         self.set_inp_amp(((self.center+(self.fsk_deviation/2))/self.vco_max)-self.vco_offset)
         self.set_vco_offset((self.center-(self.fsk_deviation/2))/self.vco_max)
-        self.analog_quadrature_demod_cf_1.set_gain((self.samp_rate/(2*math.pi*self.fsk_deviation)))
+        self.analog_quadrature_demod_cf_1.set_gain(self.samp_rate/(2*math.pi*self.fsk_deviation))
 
     def get_center(self):
         return self.center
@@ -374,7 +385,7 @@ class FSK_example(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.set_repeat((int)(self.samp_rate*0.022))
-        self.analog_quadrature_demod_cf_1.set_gain((self.samp_rate/(2*math.pi*self.fsk_deviation)))
+        self.analog_quadrature_demod_cf_1.set_gain(self.samp_rate/(2*math.pi*self.fsk_deviation))
         self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.freq_xlating_fir_filter_xxx_0.set_taps(firdes.low_pass(1.0,self.samp_rate,1000,400))
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
@@ -414,7 +425,7 @@ class FSK_example(gr.top_block, Qt.QWidget):
 
     def set_delay(self, delay):
         self.delay = delay
-        self.blocks_delay_0.set_dly(int(int(self.delay)))
+        self.blocks_delay_0.set_dly(int(self.delay))
 
     def get_baud(self):
         return self.baud
