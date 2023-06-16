@@ -56,7 +56,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1552, 280.0]
+    coordinate: [720, 344.0]
     rotation: 0
     state: true
 - name: blocks_socket_pdu_1
@@ -76,7 +76,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1232, 248.0]
+    coordinate: [400, 312.0]
     rotation: 0
     state: enabled
 
