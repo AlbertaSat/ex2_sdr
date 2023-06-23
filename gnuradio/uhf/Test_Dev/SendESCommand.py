@@ -1,11 +1,34 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#
+# File : SendESCommand.py
+#
+# Purpose : Generate complete EnduroSAT ESTTC commands as selected
+#  by the user, place them in a packet as defined in the EnduroSat
+#  manual including the CRC16 at the end, and send via UDP to a
+#  client application. For example, the client may be a GNU Radio
+#  flowgraph that modulates the received packet bits and sends the
+#  result to a UHD USRP Sink block.
+#
+# Author : Steven Knudsen
+# Date : June 2, 2023
+# Copyright : University of Alberta, AlbertaSat, 2023
+#
+# Requirements : 
+#
+# InquirerPy - pip3 install InquirerPy
+# pycrc      - pip3 install pycrc
+#
+
 from __future__ import print_function, unicode_literals
 from pprint import pprint
 from InquirerPy import prompt, inquirer
 from InquirerPy.validator import EmptyInputValidator
 from prompt_toolkit.validation import ValidationError, Validator
+
+import binascii
+import pycrc.algorithms
 
 from os import system
 
