@@ -33,45 +33,45 @@ options:
     state: enabled
 
 blocks:
-- name: fm_samples_per_symbol
-  id: variable
-  parameters:
-    comment: Must have high samples per symbol for smooth FM
-    value: '256'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [8, 284.0]
-    rotation: 0
-    state: true
-- name: fm_sensitivity
+- name: sensitivity_tx
   id: variable
   parameters:
     comment: ''
-    value: math.pi*fm_modulation_index/fm_samples_per_symbol
+    value: 2*3.14159265358979323846*(fsk_dev/(baud_bit*spsym_frontend))
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 364.0]
+    coordinate: [408, 260.0]
     rotation: 0
-    state: true
-- name: analog_const_source_x_0
-  id: analog_const_source_x
+    state: disabled
+- name: sensitivity_tx_0
+  id: variable
   parameters:
-    affinity: ''
+    comment: ''
+    value: 2*3.14159265358979323846*(fsk_dev/(baud_bit*spsym_frontend))
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [392, 300.0]
+    rotation: 0
+    state: disabled
+- name: FSK_level
+  id: parameter
+  parameters:
     alias: ''
     comment: ''
-    const: fm_sensitivity
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    type: float
+    hide: none
+    label: FSK Level (M)
+    short_id: ''
+    type: intx
+    value: '2'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [360, 324.0]
+    coordinate: [712, 12.0]
     rotation: 0
     state: true
 - name: blocks_pdu_to_tagged_stream_0
@@ -88,7 +88,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [328, 172.0]
+    coordinate: [176, 220.0]
     rotation: 0
     state: true
 - name: blocks_unpacked_to_packed_xx_0
@@ -107,7 +107,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [568, 164.0]
+    coordinate: [416, 212.0]
     rotation: 0
     state: enabled
 - name: digital_gfsk_mod_0
@@ -116,21 +116,38 @@ blocks:
     affinity: ''
     alias: ''
     bt: '0.5'
-    comment: ''
+    comment: GFSK Mod input is packed bytes (eg. 0b01110000)
     do_unpack: 'True'
-    log: 'False'
+    log: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
     samples_per_symbol: fm_samples_per_symbol
-    sensitivity: fm_sensitivity
+    sensitivity: math.pi*fm_modulation_index*(FSK_level - 1)/fm_samples_per_symbol
     verbose: 'False'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [776, 156.0]
+    coordinate: [656, 196.0]
     rotation: 0
     state: enabled
+- name: fm_baud
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Baud
+    short_id: ''
+    type: eng_float
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [624, 12.0]
+    rotation: 0
+    state: true
 - name: fm_modulation_index
   id: parameter
   parameters:
@@ -148,6 +165,23 @@ blocks:
     coordinate: [288, 12.0]
     rotation: 0
     state: true
+- name: fm_samples_per_symbol
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: FM Samples per Symbol
+    short_id: ''
+    type: eng_float
+    value: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [448, 12.0]
+    rotation: 0
+    state: true
 - name: import_0
   id: import
   parameters:
@@ -159,19 +193,6 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [192, 12.0]
-    rotation: 0
-    state: true
-- name: note_0_0
-  id: note
-  parameters:
-    alias: ''
-    comment: ''
-    note: GFSK Mod input is packed bytes (eg. 0b01110000)
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [776, 108.0]
     rotation: 0
     state: true
 - name: pad_sink_0
@@ -189,25 +210,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [984, 172.0]
-    rotation: 0
-    state: true
-- name: pad_sink_0_0
-  id: pad_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    label: sensitivity
-    num_streams: '1'
-    optional: 'False'
-    type: float
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [560, 324.0]
+    coordinate: [872, 220.0]
     rotation: 0
     state: true
 - name: pad_source_0
@@ -227,12 +230,11 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [168, 172.0]
+    coordinate: [16, 220.0]
     rotation: 0
     state: true
 
 connections:
-- [analog_const_source_x_0, '0', pad_sink_0_0, '0']
 - [blocks_pdu_to_tagged_stream_0, '0', blocks_unpacked_to_packed_xx_0, '0']
 - [blocks_unpacked_to_packed_xx_0, '0', digital_gfsk_mod_0, '0']
 - [digital_gfsk_mod_0, '0', pad_sink_0, '0']

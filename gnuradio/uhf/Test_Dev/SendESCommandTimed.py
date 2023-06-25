@@ -257,6 +257,7 @@ def main():
             txDuration = txDuration - txIntervalMillis;
             print("sending packet "+str(packetCount)+"...")
             client_socket.sendto(thePacket, addr)
+            packetCount = packetCount + 1
             time.sleep(txIntervalMillis/1000.0)
 
     else:
