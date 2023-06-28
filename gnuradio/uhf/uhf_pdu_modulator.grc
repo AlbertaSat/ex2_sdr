@@ -33,30 +33,6 @@ options:
     state: enabled
 
 blocks:
-- name: sensitivity_tx
-  id: variable
-  parameters:
-    comment: ''
-    value: 2*3.14159265358979323846*(fsk_dev/(baud_bit*spsym_frontend))
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [408, 260.0]
-    rotation: 0
-    state: disabled
-- name: sensitivity_tx_0
-  id: variable
-  parameters:
-    comment: ''
-    value: 2*3.14159265358979323846*(fsk_dev/(baud_bit*spsym_frontend))
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [392, 300.0]
-    rotation: 0
-    state: disabled
 - name: FSK_level
   id: parameter
   parameters:
@@ -71,7 +47,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [712, 12.0]
+    coordinate: [856, 16.0]
     rotation: 0
     state: true
 - name: blocks_pdu_to_tagged_stream_0
@@ -88,7 +64,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [176, 220.0]
+    coordinate: [304, 216.0]
     rotation: 0
     state: true
 - name: blocks_unpacked_to_packed_xx_0
@@ -107,7 +83,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [416, 212.0]
+    coordinate: [600, 208.0]
     rotation: 0
     state: enabled
 - name: digital_gfsk_mod_0
@@ -128,7 +104,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [656, 196.0]
+    coordinate: [840, 192.0]
     rotation: 0
     state: enabled
 - name: fm_baud
@@ -145,7 +121,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [624, 12.0]
+    coordinate: [760, 16.0]
     rotation: 0
     state: true
 - name: fm_modulation_index
@@ -162,7 +138,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 12.0]
+    coordinate: [376, 16.0]
     rotation: 0
     state: true
 - name: fm_samples_per_symbol
@@ -179,7 +155,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [448, 12.0]
+    coordinate: [560, 16.0]
     rotation: 0
     state: true
 - name: import_0
@@ -210,7 +186,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [872, 220.0]
+    coordinate: [1096, 216.0]
     rotation: 0
     state: true
 - name: pad_source_0
@@ -230,7 +206,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [16, 220.0]
+    coordinate: [88, 216.0]
     rotation: 0
     state: true
 

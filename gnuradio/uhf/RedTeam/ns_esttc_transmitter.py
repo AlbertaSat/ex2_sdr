@@ -38,6 +38,8 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
+from gnuradio import uhd
+import time
 from uhf_pdu_modulate import uhf_pdu_modulate  # grc-generated hier_block
 import math
 
@@ -82,8 +84,9 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         # Variables
         ##################################################
         self.freq_dev = freq_dev = 4800
-        self.fm_samples_per_symbol = fm_samples_per_symbol = 255
-        self.baud = baud = 4800
+        self.fm_samples_per_symbol = fm_samples_per_symbol = 32
+        self.baud = baud = 19200
+        self.tx_gain = tx_gain = 0.9
         self.sensitivity_tx = sensitivity_tx = 2*math.pi*freq_dev/baud/fm_samples_per_symbol
         self.samp_rate = samp_rate = baud*fm_samples_per_symbol
         self.center_freq = center_freq = 437875000
@@ -94,9 +97,24 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.uhf_pdu_modulate_0 = uhf_pdu_modulate(
             FSK_level=2,
             fm_baud=baud,
-            fm_modulation_index=1,
+            fm_modulation_index=.5,
             fm_samples_per_symbol=256,
         )
+        self.uhd_usrp_sink_0 = uhd.usrp_sink(
+            ",".join(("", "")),
+            uhd.stream_args(
+                cpu_format="fc32",
+                args='',
+                channels=list(range(0,1)),
+            ),
+            '',
+        )
+        self.uhd_usrp_sink_0.set_samp_rate(samp_rate)
+        self.uhd_usrp_sink_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
+
+        self.uhd_usrp_sink_0.set_center_freq(center_freq, 0)
+        self.uhd_usrp_sink_0.set_antenna('TX/RX', 0)
+        self.uhd_usrp_sink_0.set_normalized_gain(tx_gain, 0)
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
             32768, #size
             window.WIN_FLATTOP, #wintype
@@ -150,6 +168,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.msg_connect((self.blocks_socket_pdu_1, 'pdus'), (self.blocks_message_debug_0, 'print_pdu'))
         self.msg_connect((self.blocks_socket_pdu_1, 'pdus'), (self.uhf_pdu_modulate_0, 'pdus'))
         self.connect((self.blocks_throttle_0, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.uhf_pdu_modulate_0, 0), (self.blocks_throttle_0, 0))
 
 
@@ -185,6 +204,13 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.set_sensitivity_tx(2*math.pi*self.freq_dev/self.baud/self.fm_samples_per_symbol)
         self.uhf_pdu_modulate_0.set_fm_baud(self.baud)
 
+    def get_tx_gain(self):
+        return self.tx_gain
+
+    def set_tx_gain(self, tx_gain):
+        self.tx_gain = tx_gain
+        self.uhd_usrp_sink_0.set_normalized_gain(self.tx_gain, 0)
+
     def get_sensitivity_tx(self):
         return self.sensitivity_tx
 
@@ -198,12 +224,14 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
+        self.uhd_usrp_sink_0.set_samp_rate(self.samp_rate)
 
     def get_center_freq(self):
         return self.center_freq
 
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
+        self.uhd_usrp_sink_0.set_center_freq(self.center_freq, 0)
 
 
 
