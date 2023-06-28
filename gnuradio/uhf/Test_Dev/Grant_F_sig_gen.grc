@@ -33,6 +33,18 @@ options:
     state: enabled
 
 blocks:
+- name: center_freq
+  id: variable
+  parameters:
+    comment: ''
+    value: '437875000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [296, 8.0]
+    rotation: 0
+    state: enabled
 - name: samp_rate
   id: variable
   parameters:
@@ -42,7 +54,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [184, 12]
+    coordinate: [192, 8.0]
     rotation: 0
     state: enabled
 - name: source
@@ -72,7 +84,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 12.0]
+    coordinate: [648, 12.0]
     rotation: 0
     state: true
 - name: tx_gain
@@ -93,7 +105,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [352, 12.0]
+    coordinate: [504, 8.0]
     rotation: 0
     state: true
 - name: analog_const_source_x_0
@@ -110,7 +122,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [32, 212.0]
+    coordinate: [136, 224.0]
     rotation: 0
     state: true
 - name: analog_sig_source_x_0
@@ -132,7 +144,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [24, 284.0]
+    coordinate: [88, 288.0]
     rotation: 0
     state: true
 - name: blocks_selector_0
@@ -155,7 +167,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [280, 204.0]
+    coordinate: [400, 208.0]
     rotation: 0
     state: true
 - name: uhd_usrp_sink_0
@@ -227,7 +239,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: '437825000'
+    center_freq0: center_freq
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -432,7 +444,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 188.0]
+    coordinate: [712, 192.0]
     rotation: 0
     state: enabled
 
