@@ -64,7 +64,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [304, 216.0]
+    coordinate: [304, 220.0]
     rotation: 0
     state: true
 - name: blocks_unpacked_to_packed_xx_0
@@ -83,7 +83,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [600, 208.0]
+    coordinate: [600, 212.0]
     rotation: 0
     state: enabled
 - name: digital_gfsk_mod_0
@@ -94,7 +94,7 @@ blocks:
     bt: '0.5'
     comment: GFSK Mod input is packed bytes (eg. 0b01110000)
     do_unpack: 'True'
-    log: 'True'
+    log: 'False'
     maxoutbuf: '0'
     minoutbuf: '0'
     samples_per_symbol: fm_samples_per_symbol
@@ -104,7 +104,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [840, 192.0]
+    coordinate: [840, 204.0]
     rotation: 0
     state: enabled
 - name: fm_baud
@@ -186,7 +186,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1096, 216.0]
+    coordinate: [1096, 220.0]
     rotation: 0
     state: true
 - name: pad_source_0
@@ -206,7 +206,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [88, 216.0]
+    coordinate: [88, 220.0]
     rotation: 0
     state: true
 
