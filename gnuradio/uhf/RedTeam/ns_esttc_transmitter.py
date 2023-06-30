@@ -5,10 +5,8 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: Northern SPIRIT ESTTC command transmitter
-# Author: Steven Knudsen
-# Copyright: AlbertaSat, 2023
-# Description: A program that accepts UDP packets containing complete ESTTC commands, modulates them, and transmits.
+# Title: Not titled yet
+# Author: knud
 # GNU Radio version: 3.9.7.0
 
 from distutils.version import StrictVersion
@@ -52,9 +50,9 @@ from gnuradio import qtgui
 class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "Northern SPIRIT ESTTC command transmitter", catch_exceptions=True)
+        gr.top_block.__init__(self, "Not titled yet", catch_exceptions=True)
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("Northern SPIRIT ESTTC command transmitter")
+        self.setWindowTitle("Not titled yet")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
