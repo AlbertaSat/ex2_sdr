@@ -28,6 +28,7 @@ import sys
 sys.path.append(os.environ.get('GRC_HIER_PATH', os.path.expanduser('~/.grc_gnuradio')))
 
 from PyQt5 import Qt
+from gnuradio import eng_notation
 from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
@@ -38,11 +39,11 @@ from gnuradio.fft import window
 import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
-from gnuradio import eng_notation
 from gnuradio import uhd
 import time
 from uhf_pdu_modulate import uhf_pdu_modulate  # grc-generated hier_block
 import math
+import numpy as np
 
 
 
@@ -84,12 +85,19 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.freq_dev = freq_dev = 4800
-        self.fm_samples_per_symbol = fm_samples_per_symbol = 32
-        self.baud = baud = 19200
+        self.es_mode = es_mode = 0
+        self.samples_per_symbol = samples_per_symbol = 100
+        self.freq_dev = freq_dev = {es_mode == 0: 600, es_mode==1: 600, es_mode==2:1200,es_mode==3:2400,es_mode==4:4800,es_mode==5:4800,es_mode==6:9600}.get(True,19200)
+        self.data_rate = data_rate = {es_mode == 0: 1200, es_mode==1: 2400, es_mode==2:4800,es_mode==3:9600,es_mode==4:9600}.get(True,19200)
+        self.sensitivity_tx = sensitivity_tx = 2*np.math.pi*(freq_dev/(data_rate*samples_per_symbol))
+        self.mod_index = mod_index = {es_mode == 0: 1, es_mode==1: 0.5, es_mode==2:0.5,es_mode==3:0.5,es_mode==4:1,es_mode==5:0.5,es_mode==6:1}.get(True,2)
         self.tx_gain = tx_gain = 0.9
-        self.sensitivity_tx = sensitivity_tx = 2*math.pi*freq_dev/baud/fm_samples_per_symbol
-        self.samp_rate = samp_rate = baud*fm_samples_per_symbol
+        self.sensitivity_label = sensitivity_label = sensitivity_tx
+        self.samp_rate = samp_rate = data_rate*samples_per_symbol
+        self.mod_index_label = mod_index_label = mod_index
+        self.freq_dev_label = freq_dev_label = freq_dev
+        self.es_mode_label = es_mode_label = es_mode
+        self.data_rate_label = data_rate_label = data_rate
         self.center_freq = center_freq = 437875000
 
         ##################################################
@@ -97,24 +105,10 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         ##################################################
         self.uhf_pdu_modulate_0 = uhf_pdu_modulate(
             FSK_level=2,
-            fm_baud=baud,
-            fm_modulation_index=.5,
-            fm_samples_per_symbol=256,
+            fm_baud=data_rate,
+            fm_modulation_index=mod_index,
+            fm_samples_per_symbol=samples_per_symbol,
         )
-        self.uhd_usrp_source_0 = uhd.usrp_source(
-            ",".join(("", '')),
-            uhd.stream_args(
-                cpu_format="fc32",
-                args='',
-                channels=list(range(0,1)),
-            ),
-        )
-        self.uhd_usrp_source_0.set_samp_rate(samp_rate)
-        self.uhd_usrp_source_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
-
-        self.uhd_usrp_source_0.set_center_freq(center_freq, 0)
-        self.uhd_usrp_source_0.set_antenna("RX2", 0)
-        self.uhd_usrp_source_0.set_gain(30, 0)
         self.uhd_usrp_sink_0_0 = uhd.usrp_sink(
             ",".join(("", "")),
             uhd.stream_args(
@@ -130,13 +124,28 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.uhd_usrp_sink_0_0.set_center_freq(center_freq, 0)
         self.uhd_usrp_sink_0_0.set_antenna('TX/RX', 0)
         self.uhd_usrp_sink_0_0.set_normalized_gain(tx_gain, 0)
+        self._sensitivity_label_tool_bar = Qt.QToolBar(self)
+
+        if None:
+            self._sensitivity_label_formatter = None
+        else:
+            self._sensitivity_label_formatter = lambda x: eng_notation.num_to_str(x)
+
+        self._sensitivity_label_tool_bar.addWidget(Qt.QLabel("FM Sensitivity"))
+        self._sensitivity_label_label = Qt.QLabel(str(self._sensitivity_label_formatter(self.sensitivity_label)))
+        self._sensitivity_label_tool_bar.addWidget(self._sensitivity_label_label)
+        self.top_grid_layout.addWidget(self._sensitivity_label_tool_bar, 0, 4, 1, 1)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(4, 5):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
             32768, #size
             window.WIN_FLATTOP, #wintype
             0, #fc
             samp_rate, #bw
             "", #name
-            2,
+            1,
             None # parent
         )
         self.qtgui_freq_sink_x_0.set_update_time(0.10)
@@ -161,7 +170,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0, 1.0]
 
-        for i in range(2):
+        for i in range(1):
             if len(labels[i]) == 0:
                 self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
             else:
@@ -172,6 +181,66 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
+        self._mod_index_label_tool_bar = Qt.QToolBar(self)
+
+        if None:
+            self._mod_index_label_formatter = None
+        else:
+            self._mod_index_label_formatter = lambda x: eng_notation.num_to_str(x)
+
+        self._mod_index_label_tool_bar.addWidget(Qt.QLabel("Mod Index"))
+        self._mod_index_label_label = Qt.QLabel(str(self._mod_index_label_formatter(self.mod_index_label)))
+        self._mod_index_label_tool_bar.addWidget(self._mod_index_label_label)
+        self.top_grid_layout.addWidget(self._mod_index_label_tool_bar, 0, 3, 1, 1)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(3, 4):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._freq_dev_label_tool_bar = Qt.QToolBar(self)
+
+        if None:
+            self._freq_dev_label_formatter = None
+        else:
+            self._freq_dev_label_formatter = lambda x: str(x)
+
+        self._freq_dev_label_tool_bar.addWidget(Qt.QLabel("Freq Dev"))
+        self._freq_dev_label_label = Qt.QLabel(str(self._freq_dev_label_formatter(self.freq_dev_label)))
+        self._freq_dev_label_tool_bar.addWidget(self._freq_dev_label_label)
+        self.top_grid_layout.addWidget(self._freq_dev_label_tool_bar, 0, 2, 1, 1)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(2, 3):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._es_mode_label_tool_bar = Qt.QToolBar(self)
+
+        if None:
+            self._es_mode_label_formatter = None
+        else:
+            self._es_mode_label_formatter = lambda x: str(x)
+
+        self._es_mode_label_tool_bar.addWidget(Qt.QLabel("EnduroSat UHF II Mode : "))
+        self._es_mode_label_label = Qt.QLabel(str(self._es_mode_label_formatter(self.es_mode_label)))
+        self._es_mode_label_tool_bar.addWidget(self._es_mode_label_label)
+        self.top_grid_layout.addWidget(self._es_mode_label_tool_bar, 0, 0, 1, 1)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 1):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self._data_rate_label_tool_bar = Qt.QToolBar(self)
+
+        if None:
+            self._data_rate_label_formatter = None
+        else:
+            self._data_rate_label_formatter = lambda x: str(x)
+
+        self._data_rate_label_tool_bar.addWidget(Qt.QLabel("Data Rate"))
+        self._data_rate_label_label = Qt.QLabel(str(self._data_rate_label_formatter(self.data_rate_label)))
+        self._data_rate_label_tool_bar.addWidget(self._data_rate_label_label)
+        self.top_grid_layout.addWidget(self._data_rate_label_tool_bar, 0, 1, 1, 1)
+        for r in range(0, 1):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(1, 2):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_socket_pdu_1 = blocks.socket_pdu('UDP_SERVER', '127.0.0.1', '52001', 10000, False)
         self.blocks_message_strobe_0_1_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_RX', 'value': 0, 'mask': 1})), 9000)
@@ -194,7 +263,6 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.msg_connect((self.blocks_socket_pdu_1, 'pdus'), (self.uhf_pdu_modulate_0, 'pdus'))
         self.connect((self.blocks_throttle_0, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.blocks_throttle_0, 0), (self.uhd_usrp_sink_0_0, 0))
-        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_freq_sink_x_0, 1))
         self.connect((self.uhf_pdu_modulate_0, 0), (self.blocks_throttle_0, 0))
 
 
@@ -206,29 +274,57 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
 
         event.accept()
 
+    def get_es_mode(self):
+        return self.es_mode
+
+    def set_es_mode(self, es_mode):
+        self.es_mode = es_mode
+        self.set_data_rate({self.es_mode == 0: 1200, self.es_mode==1: 2400, self.es_mode==2:4800,self.es_mode==3:9600,self.es_mode==4:9600}.get(True,19200))
+        self.set_es_mode_label(self.es_mode)
+        self.set_freq_dev({self.es_mode == 0: 600, self.es_mode==1: 600, self.es_mode==2:1200,self.es_mode==3:2400,self.es_mode==4:4800,self.es_mode==5:4800,self.es_mode==6:9600}.get(True,19200))
+        self.set_mod_index({self.es_mode == 0: 1, self.es_mode==1: 0.5, self.es_mode==2:0.5,self.es_mode==3:0.5,self.es_mode==4:1,self.es_mode==5:0.5,self.es_mode==6:1}.get(True,2))
+
+    def get_samples_per_symbol(self):
+        return self.samples_per_symbol
+
+    def set_samples_per_symbol(self, samples_per_symbol):
+        self.samples_per_symbol = samples_per_symbol
+        self.set_samp_rate(self.data_rate*self.samples_per_symbol)
+        self.set_sensitivity_tx(2*np.math.pi*(self.freq_dev/(self.data_rate*self.samples_per_symbol)))
+        self.uhf_pdu_modulate_0.set_fm_samples_per_symbol(self.samples_per_symbol)
+
     def get_freq_dev(self):
         return self.freq_dev
 
     def set_freq_dev(self, freq_dev):
         self.freq_dev = freq_dev
-        self.set_sensitivity_tx(2*math.pi*self.freq_dev/self.baud/self.fm_samples_per_symbol)
+        self.set_freq_dev_label(self.freq_dev)
+        self.set_sensitivity_tx(2*np.math.pi*(self.freq_dev/(self.data_rate*self.samples_per_symbol)))
 
-    def get_fm_samples_per_symbol(self):
-        return self.fm_samples_per_symbol
+    def get_data_rate(self):
+        return self.data_rate
 
-    def set_fm_samples_per_symbol(self, fm_samples_per_symbol):
-        self.fm_samples_per_symbol = fm_samples_per_symbol
-        self.set_samp_rate(self.baud*self.fm_samples_per_symbol)
-        self.set_sensitivity_tx(2*math.pi*self.freq_dev/self.baud/self.fm_samples_per_symbol)
+    def set_data_rate(self, data_rate):
+        self.data_rate = data_rate
+        self.set_data_rate_label(self.data_rate)
+        self.set_samp_rate(self.data_rate*self.samples_per_symbol)
+        self.set_sensitivity_tx(2*np.math.pi*(self.freq_dev/(self.data_rate*self.samples_per_symbol)))
+        self.uhf_pdu_modulate_0.set_fm_baud(self.data_rate)
 
-    def get_baud(self):
-        return self.baud
+    def get_sensitivity_tx(self):
+        return self.sensitivity_tx
 
-    def set_baud(self, baud):
-        self.baud = baud
-        self.set_samp_rate(self.baud*self.fm_samples_per_symbol)
-        self.set_sensitivity_tx(2*math.pi*self.freq_dev/self.baud/self.fm_samples_per_symbol)
-        self.uhf_pdu_modulate_0.set_fm_baud(self.baud)
+    def set_sensitivity_tx(self, sensitivity_tx):
+        self.sensitivity_tx = sensitivity_tx
+        self.set_sensitivity_label(self.sensitivity_tx)
+
+    def get_mod_index(self):
+        return self.mod_index
+
+    def set_mod_index(self, mod_index):
+        self.mod_index = mod_index
+        self.set_mod_index_label(self.mod_index)
+        self.uhf_pdu_modulate_0.set_fm_modulation_index(self.mod_index)
 
     def get_tx_gain(self):
         return self.tx_gain
@@ -237,11 +333,12 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.tx_gain = tx_gain
         self.uhd_usrp_sink_0_0.set_normalized_gain(self.tx_gain, 0)
 
-    def get_sensitivity_tx(self):
-        return self.sensitivity_tx
+    def get_sensitivity_label(self):
+        return self.sensitivity_label
 
-    def set_sensitivity_tx(self, sensitivity_tx):
-        self.sensitivity_tx = sensitivity_tx
+    def set_sensitivity_label(self, sensitivity_label):
+        self.sensitivity_label = sensitivity_label
+        Qt.QMetaObject.invokeMethod(self._sensitivity_label_label, "setText", Qt.Q_ARG("QString", str(self._sensitivity_label_formatter(self.sensitivity_label))))
 
     def get_samp_rate(self):
         return self.samp_rate
@@ -251,7 +348,34 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.uhd_usrp_sink_0_0.set_samp_rate(self.samp_rate)
-        self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
+
+    def get_mod_index_label(self):
+        return self.mod_index_label
+
+    def set_mod_index_label(self, mod_index_label):
+        self.mod_index_label = mod_index_label
+        Qt.QMetaObject.invokeMethod(self._mod_index_label_label, "setText", Qt.Q_ARG("QString", str(self._mod_index_label_formatter(self.mod_index_label))))
+
+    def get_freq_dev_label(self):
+        return self.freq_dev_label
+
+    def set_freq_dev_label(self, freq_dev_label):
+        self.freq_dev_label = freq_dev_label
+        Qt.QMetaObject.invokeMethod(self._freq_dev_label_label, "setText", Qt.Q_ARG("QString", str(self._freq_dev_label_formatter(self.freq_dev_label))))
+
+    def get_es_mode_label(self):
+        return self.es_mode_label
+
+    def set_es_mode_label(self, es_mode_label):
+        self.es_mode_label = es_mode_label
+        Qt.QMetaObject.invokeMethod(self._es_mode_label_label, "setText", Qt.Q_ARG("QString", str(self._es_mode_label_formatter(self.es_mode_label))))
+
+    def get_data_rate_label(self):
+        return self.data_rate_label
+
+    def set_data_rate_label(self, data_rate_label):
+        self.data_rate_label = data_rate_label
+        Qt.QMetaObject.invokeMethod(self._data_rate_label_label, "setText", Qt.Q_ARG("QString", str(self._data_rate_label_formatter(self.data_rate_label))))
 
     def get_center_freq(self):
         return self.center_freq
@@ -259,7 +383,6 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
         self.uhd_usrp_sink_0_0.set_center_freq(self.center_freq, 0)
-        self.uhd_usrp_source_0.set_center_freq(self.center_freq, 0)
 
 
 

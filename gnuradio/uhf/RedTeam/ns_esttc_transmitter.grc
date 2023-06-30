@@ -29,23 +29,11 @@ options:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 8]
+    coordinate: [8, 4.0]
     rotation: 0
     state: enabled
 
 blocks:
-- name: baud
-  id: variable
-  parameters:
-    comment: ''
-    value: '19200'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [304, 84.0]
-    rotation: 0
-    state: enabled
 - name: center_freq
   id: variable
   parameters:
@@ -55,55 +43,172 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [312, 8.0]
+    coordinate: [296, 4.0]
     rotation: 0
     state: enabled
-- name: fm_samples_per_symbol
+- name: data_rate
   id: variable
   parameters:
     comment: ''
-    value: '32'
+    value: '{es_mode == 0: 1200, es_mode==1: 2400, es_mode==2:4800,es_mode==3:9600,es_mode==4:9600}.get(True,19200)'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 8.0]
+    coordinate: [488, 4.0]
     rotation: 0
     state: enabled
+- name: data_rate_label
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 0,1,1,1
+    label: Data Rate
+    type: int
+    value: data_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [968, 4.0]
+    rotation: 0
+    state: true
+- name: es_mode
+  id: variable
+  parameters:
+    comment: "EnduroSat Mode\n  = [0,1,2,3,4,5,6,7]\n\nChoose a value before\nrunning\
+      \ this flowgraph"
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [240, 180.0]
+    rotation: 0
+    state: enabled
+- name: es_mode_label
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 0,0,1,1
+    label: 'EnduroSat UHF II Mode : '
+    type: int
+    value: es_mode
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [808, 4.0]
+    rotation: 0
+    state: true
 - name: freq_dev
   id: variable
   parameters:
     comment: ''
-    value: '4800'
+    value: '{es_mode == 0: 600, es_mode==1: 600, es_mode==2:1200,es_mode==3:2400,es_mode==4:4800,es_mode==5:4800,es_mode==6:9600}.get(True,19200)'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [392, 84.0]
+    coordinate: [576, 4.0]
     rotation: 0
     state: enabled
+- name: freq_dev_label
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 0,2,1,1
+    label: Freq Dev
+    type: int
+    value: freq_dev
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1096, 4.0]
+    rotation: 0
+    state: true
+- name: mod_index
+  id: variable
+  parameters:
+    comment: ''
+    value: '{es_mode == 0: 1, es_mode==1: 0.5, es_mode==2:0.5,es_mode==3:0.5,es_mode==4:1,es_mode==5:0.5,es_mode==6:1}.get(True,2)'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [664, 4.0]
+    rotation: 0
+    state: enabled
+- name: mod_index_label
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 0,3,1,1
+    label: Mod Index
+    type: real
+    value: mod_index
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [960, 84.0]
+    rotation: 0
+    state: true
 - name: samp_rate
   id: variable
   parameters:
     comment: ''
-    value: baud*fm_samples_per_symbol
+    value: data_rate*samples_per_symbol
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 8.0]
+    coordinate: [600, 68.0]
     rotation: 0
     state: enabled
+- name: samples_per_symbol
+  id: variable
+  parameters:
+    comment: ''
+    value: '100'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [208, 68.0]
+    rotation: 0
+    state: enabled
+- name: sensitivity_label
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 0,4,1,1
+    label: FM Sensitivity
+    type: real
+    value: sensitivity_tx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [808, 84.0]
+    rotation: 0
+    state: true
 - name: sensitivity_tx
   id: variable
   parameters:
     comment: ''
-    value: 2*math.pi*freq_dev/baud/fm_samples_per_symbol
+    value: 2*np.math.pi*(freq_dev/(data_rate*samples_per_symbol))
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [464, 8.0]
+    coordinate: [488, 68.0]
     rotation: 0
     state: enabled
 - name: tx_gain
@@ -115,7 +220,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [752, 12.0]
+    coordinate: [208, 4.0]
     rotation: 0
     state: enabled
 - name: blocks_message_debug_0
@@ -129,7 +234,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [64, 224.0]
+    coordinate: [56, 336.0]
     rotation: 180
     state: true
 - name: blocks_message_strobe_0
@@ -147,7 +252,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 92.0]
+    coordinate: [824, 204.0]
     rotation: 180
     state: true
 - name: blocks_message_strobe_0_0
@@ -165,7 +270,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [536, 220.0]
+    coordinate: [528, 332.0]
     rotation: 0
     state: true
 - name: blocks_message_strobe_0_0_0
@@ -183,7 +288,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [536, 284.0]
+    coordinate: [528, 396.0]
     rotation: 0
     state: true
 - name: blocks_message_strobe_0_1
@@ -201,7 +306,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 220.0]
+    coordinate: [824, 332.0]
     rotation: 180
     state: true
 - name: blocks_message_strobe_0_1_0
@@ -219,7 +324,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 156.0]
+    coordinate: [824, 268.0]
     rotation: 180
     state: true
 - name: blocks_socket_pdu_1
@@ -239,7 +344,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [64, 332.0]
+    coordinate: [56, 444.0]
     rotation: 0
     state: enabled
 - name: blocks_throttle_0
@@ -258,7 +363,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 356.0]
+    coordinate: [568, 468.0]
     rotation: 0
     state: true
 - name: import_0
@@ -271,7 +376,46 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [208, 88.0]
+    coordinate: [8, 132.0]
+    rotation: 0
+    state: true
+- name: import_0_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import numpy as np
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [104, 132.0]
+    rotation: 0
+    state: true
+- name: note_0
+  id: note
+  parameters:
+    alias: ''
+    comment: ''
+    note: Variables to be set
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [208, 132.0]
+    rotation: 0
+    state: true
+- name: note_0_0
+  id: note
+  parameters:
+    alias: ''
+    comment: ''
+    note: Calculated variables
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [488, 132.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0
@@ -352,7 +496,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 436.0]
+    coordinate: [824, 548.0]
     rotation: 0
     state: true
 - name: uhd_usrp_sink_0
@@ -906,7 +1050,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 300.0]
+    coordinate: [824, 412.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_source_0
@@ -1352,16 +1496,16 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
-    fm_baud: baud
-    fm_modulation_index: '.5'
-    fm_samples_per_symbol: '256'
+    fm_baud: data_rate
+    fm_modulation_index: mod_index
+    fm_samples_per_symbol: samples_per_symbol
     maxoutbuf: '0'
     minoutbuf: '0'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 332.0]
+    coordinate: [280, 444.0]
     rotation: 0
     state: true
 
