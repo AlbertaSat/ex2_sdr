@@ -32,6 +32,7 @@ from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
 from gnuradio import blocks
+import pmt
 from gnuradio import gr
 from gnuradio.fft import window
 import signal
@@ -100,7 +101,21 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
             fm_modulation_index=.5,
             fm_samples_per_symbol=256,
         )
-        self.uhd_usrp_sink_0 = uhd.usrp_sink(
+        self.uhd_usrp_source_0 = uhd.usrp_source(
+            ",".join(("", '')),
+            uhd.stream_args(
+                cpu_format="fc32",
+                args='',
+                channels=list(range(0,1)),
+            ),
+        )
+        self.uhd_usrp_source_0.set_samp_rate(samp_rate)
+        self.uhd_usrp_source_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
+
+        self.uhd_usrp_source_0.set_center_freq(center_freq, 0)
+        self.uhd_usrp_source_0.set_antenna("RX2", 0)
+        self.uhd_usrp_source_0.set_gain(30, 0)
+        self.uhd_usrp_sink_0_0 = uhd.usrp_sink(
             ",".join(("", "")),
             uhd.stream_args(
                 cpu_format="fc32",
@@ -109,19 +124,19 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
             ),
             '',
         )
-        self.uhd_usrp_sink_0.set_samp_rate(samp_rate)
-        self.uhd_usrp_sink_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
+        self.uhd_usrp_sink_0_0.set_samp_rate(samp_rate)
+        self.uhd_usrp_sink_0_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
 
-        self.uhd_usrp_sink_0.set_center_freq(center_freq, 0)
-        self.uhd_usrp_sink_0.set_antenna('TX/RX', 0)
-        self.uhd_usrp_sink_0.set_normalized_gain(tx_gain, 0)
+        self.uhd_usrp_sink_0_0.set_center_freq(center_freq, 0)
+        self.uhd_usrp_sink_0_0.set_antenna('TX/RX', 0)
+        self.uhd_usrp_sink_0_0.set_normalized_gain(tx_gain, 0)
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
             32768, #size
             window.WIN_FLATTOP, #wintype
             0, #fc
             samp_rate, #bw
             "", #name
-            1,
+            2,
             None # parent
         )
         self.qtgui_freq_sink_x_0.set_update_time(0.10)
@@ -146,7 +161,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
             1.0, 1.0, 1.0, 1.0, 1.0]
 
-        for i in range(1):
+        for i in range(2):
             if len(labels[i]) == 0:
                 self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
             else:
@@ -159,16 +174,27 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
         self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
         self.blocks_socket_pdu_1 = blocks.socket_pdu('UDP_SERVER', '127.0.0.1', '52001', 10000, False)
+        self.blocks_message_strobe_0_1_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_RX', 'value': 0, 'mask': 1})), 9000)
+        self.blocks_message_strobe_0_1 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_0X', 'value': 0, 'mask': 1})), 8500)
+        self.blocks_message_strobe_0_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'DDR', 'value': 0x0FFF, 'mask': 0xFFFF})), 8000)
+        self.blocks_message_strobe_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'CTRL', 'value': 1, 'mask': 0xFFFF})), 7000)
+        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_TX', 'value': 1, 'mask': 1})), 10000)
         self.blocks_message_debug_0 = blocks.message_debug(True)
 
 
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_0_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_1, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_1_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
         self.msg_connect((self.blocks_socket_pdu_1, 'pdus'), (self.blocks_message_debug_0, 'print_pdu'))
         self.msg_connect((self.blocks_socket_pdu_1, 'pdus'), (self.uhf_pdu_modulate_0, 'pdus'))
         self.connect((self.blocks_throttle_0, 0), (self.qtgui_freq_sink_x_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.uhd_usrp_sink_0, 0))
+        self.connect((self.blocks_throttle_0, 0), (self.uhd_usrp_sink_0_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.qtgui_freq_sink_x_0, 1))
         self.connect((self.uhf_pdu_modulate_0, 0), (self.blocks_throttle_0, 0))
 
 
@@ -209,7 +235,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
 
     def set_tx_gain(self, tx_gain):
         self.tx_gain = tx_gain
-        self.uhd_usrp_sink_0.set_normalized_gain(self.tx_gain, 0)
+        self.uhd_usrp_sink_0_0.set_normalized_gain(self.tx_gain, 0)
 
     def get_sensitivity_tx(self):
         return self.sensitivity_tx
@@ -224,14 +250,16 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.samp_rate = samp_rate
         self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
-        self.uhd_usrp_sink_0.set_samp_rate(self.samp_rate)
+        self.uhd_usrp_sink_0_0.set_samp_rate(self.samp_rate)
+        self.uhd_usrp_source_0.set_samp_rate(self.samp_rate)
 
     def get_center_freq(self):
         return self.center_freq
 
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
-        self.uhd_usrp_sink_0.set_center_freq(self.center_freq, 0)
+        self.uhd_usrp_sink_0_0.set_center_freq(self.center_freq, 0)
+        self.uhd_usrp_source_0.set_center_freq(self.center_freq, 0)
 
 
 
