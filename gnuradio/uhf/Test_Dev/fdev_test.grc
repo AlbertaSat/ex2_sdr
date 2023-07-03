@@ -66,14 +66,14 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [808, 20.0]
+    coordinate: [680, 20.0]
     rotation: 0
     state: enabled
 - name: fsk_dev
   id: variable
   parameters:
     comment: ''
-    value: '4800'
+    value: '2400'
   states:
     bus_sink: false
     bus_source: false
@@ -90,9 +90,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [976, 20.0]
+    coordinate: [936, 20.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: samp_rate
   id: variable
   parameters:
@@ -138,9 +138,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [904, 20.0]
+    coordinate: [848, 20.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: analog_sig_source_x_0
   id: analog_sig_source_x
   parameters:
@@ -304,7 +304,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [40, 180.0]
+    coordinate: [16, 260.0]
     rotation: 0
     state: true
 - name: digital_gfsk_demod_0
@@ -541,7 +541,7 @@ blocks:
     bus_structure: null
     coordinate: [656, 108.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: qtgui_time_sink_x_1
   id: qtgui_time_sink_x
   parameters:
