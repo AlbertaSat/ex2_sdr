@@ -39,7 +39,7 @@ from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import uhd
 import time
-from uhf_pdu_modulate import uhf_pdu_modulate  # grc-generated hier_block
+from uhf_byte_modulate import uhf_byte_modulate  # grc-generated hier_block
 import math
 import numpy as np
 
@@ -83,8 +83,8 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.es_mode = es_mode = 0
-        self.samples_per_symbol = samples_per_symbol = 100
+        self.es_mode = es_mode = 1
+        self.samples_per_symbol = samples_per_symbol = 256
         self.freq_dev = freq_dev = {es_mode == 0: 600, es_mode==1: 600, es_mode==2:1200,es_mode==3:2400,es_mode==4:4800,es_mode==5:4800,es_mode==6:9600}.get(True,19200)
         self.data_rate = data_rate = {es_mode == 0: 1200, es_mode==1: 2400, es_mode==2:4800,es_mode==3:9600,es_mode==4:9600}.get(True,19200)
         self.sensitivity_tx = sensitivity_tx = 2*np.math.pi*(freq_dev/(data_rate*samples_per_symbol))
@@ -101,7 +101,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
-        self.uhf_pdu_modulate_0 = uhf_pdu_modulate(
+        self.uhf_byte_modulate_0 = uhf_byte_modulate(
             FSK_level=2,
             fm_baud=data_rate,
             fm_modulation_index=mod_index,
@@ -239,14 +239,12 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
-        self.blocks_socket_pdu_1 = blocks.socket_pdu('UDP_SERVER', '127.0.0.1', '52001', 10000, False)
+        self.blocks_vector_source_x_0 = blocks.vector_source_b((0x55,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa,0xaa), True, 1, [])
         self.blocks_message_strobe_0_1_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_RX', 'value': 0, 'mask': 1})), 9000)
         self.blocks_message_strobe_0_1 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_0X', 'value': 0, 'mask': 1})), 8500)
         self.blocks_message_strobe_0_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'DDR', 'value': 0x0FFF, 'mask': 0xFFFF})), 8000)
         self.blocks_message_strobe_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'CTRL', 'value': 1, 'mask': 0xFFFF})), 7000)
         self.blocks_message_strobe_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_TX', 'value': 1, 'mask': 1})), 10000)
-        self.blocks_message_debug_0 = blocks.message_debug(True)
 
 
         ##################################################
@@ -257,11 +255,9 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.msg_connect((self.blocks_message_strobe_0_0_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
         self.msg_connect((self.blocks_message_strobe_0_1, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
         self.msg_connect((self.blocks_message_strobe_0_1_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
-        self.msg_connect((self.blocks_socket_pdu_1, 'pdus'), (self.blocks_message_debug_0, 'print_pdu'))
-        self.msg_connect((self.blocks_socket_pdu_1, 'pdus'), (self.uhf_pdu_modulate_0, 'pdus'))
-        self.connect((self.blocks_throttle_0, 0), (self.qtgui_freq_sink_x_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.uhd_usrp_sink_0_0, 0))
-        self.connect((self.uhf_pdu_modulate_0, 0), (self.blocks_throttle_0, 0))
+        self.connect((self.blocks_vector_source_x_0, 0), (self.uhf_byte_modulate_0, 0))
+        self.connect((self.uhf_byte_modulate_0, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.uhf_byte_modulate_0, 0), (self.uhd_usrp_sink_0_0, 0))
 
 
     def closeEvent(self, event):
@@ -289,7 +285,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.samples_per_symbol = samples_per_symbol
         self.set_samp_rate(self.data_rate*self.samples_per_symbol)
         self.set_sensitivity_tx(2*np.math.pi*(self.freq_dev/(self.data_rate*self.samples_per_symbol)))
-        self.uhf_pdu_modulate_0.set_fm_samples_per_symbol(self.samples_per_symbol)
+        self.uhf_byte_modulate_0.set_fm_samples_per_symbol(self.samples_per_symbol)
 
     def get_freq_dev(self):
         return self.freq_dev
@@ -307,7 +303,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.set_data_rate_label(self.data_rate)
         self.set_samp_rate(self.data_rate*self.samples_per_symbol)
         self.set_sensitivity_tx(2*np.math.pi*(self.freq_dev/(self.data_rate*self.samples_per_symbol)))
-        self.uhf_pdu_modulate_0.set_fm_baud(self.data_rate)
+        self.uhf_byte_modulate_0.set_fm_baud(self.data_rate)
 
     def get_sensitivity_tx(self):
         return self.sensitivity_tx
@@ -322,7 +318,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
     def set_mod_index(self, mod_index):
         self.mod_index = mod_index
         self.set_mod_index_label(self.mod_index)
-        self.uhf_pdu_modulate_0.set_fm_modulation_index(self.mod_index)
+        self.uhf_byte_modulate_0.set_fm_modulation_index(self.mod_index)
 
     def get_tx_gain(self):
         return self.tx_gain
@@ -343,7 +339,6 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.uhd_usrp_sink_0_0.set_samp_rate(self.samp_rate)
 

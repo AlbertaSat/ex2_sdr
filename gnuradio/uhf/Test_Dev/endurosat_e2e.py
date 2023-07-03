@@ -24,8 +24,8 @@ from PyQt5 import Qt
 from gnuradio import qtgui
 from gnuradio.filter import firdes
 import sip
-from gnuradio import analog
 from gnuradio import blocks
+import pmt
 from gnuradio import digital
 from gnuradio import gr
 from gnuradio.fft import window
@@ -34,7 +34,8 @@ import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
 from gnuradio import eng_notation
-import math
+from gnuradio import uhd
+import time
 
 
 
@@ -76,117 +77,36 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.spsym = spsym = 256
+        self.spsym = spsym = 100
         self.fsk_dev = fsk_dev = 4800
-        self.baud_bit = baud_bit = 9600
-        self.tx_gain = tx_gain = 1
-        self.sensitivity = sensitivity = 2*math.pi*(fsk_dev/(baud_bit*spsym))
-        self.samp_rate = samp_rate = baud_bit*spsym
+        self.baud_bit = baud_bit = 19200
+        self.tx_gain = tx_gain = 0.9
+        self.sensitivity = sensitivity = 2*3.14159*(fsk_dev/(baud_bit*spsym))
         self.rx_gain = rx_gain = 20
-        self.center_freq = center_freq = 100000
+        self.center_freq = center_freq = 437875000
+        self.baud_byte = baud_byte = baud_bit/8
 
         ##################################################
         # Blocks
         ##################################################
-        self.qtgui_time_sink_x_1_0 = qtgui.time_sink_f(
-            1024, #size
-            samp_rate, #samp_rate
-            "", #name
-            1, #number of inputs
-            None # parent
+        self.uhd_usrp_sink_0 = uhd.usrp_sink(
+            ",".join(("", "")),
+            uhd.stream_args(
+                cpu_format="fc32",
+                args='',
+                channels=list(range(0,1)),
+            ),
+            '',
         )
-        self.qtgui_time_sink_x_1_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_1_0.set_y_axis(-1, 1)
+        self.uhd_usrp_sink_0.set_samp_rate(baud_bit*spsym)
+        self.uhd_usrp_sink_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
 
-        self.qtgui_time_sink_x_1_0.set_y_label('Amplitude', "")
-
-        self.qtgui_time_sink_x_1_0.enable_tags(True)
-        self.qtgui_time_sink_x_1_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_1_0.enable_autoscale(False)
-        self.qtgui_time_sink_x_1_0.enable_grid(False)
-        self.qtgui_time_sink_x_1_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_1_0.enable_control_panel(True)
-        self.qtgui_time_sink_x_1_0.enable_stem_plot(True)
-
-
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
-            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'red', 'green', 'black', 'cyan',
-            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_time_sink_x_1_0.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_time_sink_x_1_0.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_1_0.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_1_0.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_1_0.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_1_0.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_1_0.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_1_0_win = sip.wrapinstance(self.qtgui_time_sink_x_1_0.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_1_0_win)
-        self.qtgui_time_sink_x_1 = qtgui.time_sink_f(
-            1024, #size
-            samp_rate, #samp_rate
-            "", #name
-            1, #number of inputs
-            None # parent
-        )
-        self.qtgui_time_sink_x_1.set_update_time(0.10)
-        self.qtgui_time_sink_x_1.set_y_axis(-1, 1)
-
-        self.qtgui_time_sink_x_1.set_y_label('Amplitude', "")
-
-        self.qtgui_time_sink_x_1.enable_tags(True)
-        self.qtgui_time_sink_x_1.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
-        self.qtgui_time_sink_x_1.enable_autoscale(False)
-        self.qtgui_time_sink_x_1.enable_grid(False)
-        self.qtgui_time_sink_x_1.enable_axis_labels(True)
-        self.qtgui_time_sink_x_1.enable_control_panel(True)
-        self.qtgui_time_sink_x_1.enable_stem_plot(True)
-
-
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
-            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'red', 'green', 'black', 'cyan',
-            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(1):
-            if len(labels[i]) == 0:
-                self.qtgui_time_sink_x_1.set_line_label(i, "Data {0}".format(i))
-            else:
-                self.qtgui_time_sink_x_1.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_1.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_1.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_1.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_1.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_1.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_1_win = sip.wrapinstance(self.qtgui_time_sink_x_1.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_1_win)
+        self.uhd_usrp_sink_0.set_center_freq(center_freq, 0)
+        self.uhd_usrp_sink_0.set_antenna('TX/RX', 0)
+        self.uhd_usrp_sink_0.set_gain(tx_gain, 0)
         self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
-            1024, #size
-            samp_rate, #samp_rate
+            spsym*50, #size
+            spsym*50, #samp_rate
             "", #name
             1, #number of inputs
             None # parent
@@ -201,7 +121,7 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.qtgui_time_sink_x_0.enable_autoscale(True)
         self.qtgui_time_sink_x_0.enable_grid(False)
         self.qtgui_time_sink_x_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_0.enable_control_panel(True)
+        self.qtgui_time_sink_x_0.enable_control_panel(False)
         self.qtgui_time_sink_x_0.enable_stem_plot(False)
 
 
@@ -236,10 +156,10 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
         self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
-            32768, #size
+            8192, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
             center_freq, #fc
-            samp_rate, #bw
+            2*baud_bit*spsym, #bw
             "", #name
             1,
             None # parent
@@ -252,7 +172,7 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
         self.qtgui_freq_sink_x_0.enable_grid(False)
         self.qtgui_freq_sink_x_0.set_fft_average(1.0)
         self.qtgui_freq_sink_x_0.enable_axis_labels(True)
-        self.qtgui_freq_sink_x_0.enable_control_panel(True)
+        self.qtgui_freq_sink_x_0.enable_control_panel(False)
         self.qtgui_freq_sink_x_0.set_fft_window_normalized(False)
 
 
@@ -284,41 +204,26 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
             verbose=False,
             log=False,
             do_unpack=True)
-        self.digital_gfsk_demod_0 = digital.gfsk_demod(
-            samples_per_symbol=spsym,
-            sensitivity=sensitivity,
-            gain_mu=0.275,
-            mu=0.5,
-            omega_relative_limit=0.005,
-            freq_error=0.0,
-            verbose=False,
-            log=False)
-        self.blocks_vector_source_x_0_0 = blocks.vector_source_b((0xaa,0xaa), True, 1, [])
-        self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(8)
-        self.blocks_repeat_1_0 = blocks.repeat(gr.sizeof_float*1, spsym)
-        self.blocks_repeat_1 = blocks.repeat(gr.sizeof_float*1, spsym)
-        self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
-        self.blocks_char_to_float_0_0 = blocks.char_to_float(1, 1)
-        self.blocks_char_to_float_0 = blocks.char_to_float(1, 1)
-        self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, 100000, 1, 0, 0)
+        self.blocks_unpacked_to_packed_xx_0 = blocks.unpacked_to_packed_bb(8, gr.GR_MSB_FIRST)
+        self.blocks_socket_pdu_1 = blocks.socket_pdu('TCP_SERVER', '127.0.0.1', '1234', 10000, False)
+        self.blocks_pdu_to_tagged_stream_0 = blocks.pdu_to_tagged_stream(blocks.byte_t, 'packet_len')
+        self.blocks_message_strobe_0_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'DDR', 'value': 1, 'mask': ((1 << 11) - 1)})), 8500)
+        self.blocks_message_strobe_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'CTRL', 'value': 1, 'mask': ((1 << 11) - 1)})), 7000)
+        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_TX', 'value': 1, 'mask': ((1 << 11) - 1)})), 10000)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.connect((self.analog_sig_source_x_0, 0), (self.blocks_multiply_xx_0, 1))
-        self.connect((self.blocks_char_to_float_0, 0), (self.blocks_repeat_1, 0))
-        self.connect((self.blocks_char_to_float_0_0, 0), (self.blocks_repeat_1_0, 0))
-        self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_freq_sink_x_0, 0))
-        self.connect((self.blocks_repeat_1, 0), (self.qtgui_time_sink_x_1, 0))
-        self.connect((self.blocks_repeat_1_0, 0), (self.qtgui_time_sink_x_1_0, 0))
-        self.connect((self.blocks_unpack_k_bits_bb_0, 0), (self.blocks_char_to_float_0, 0))
-        self.connect((self.blocks_vector_source_x_0_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
-        self.connect((self.blocks_vector_source_x_0_0, 0), (self.digital_gfsk_mod_0, 0))
-        self.connect((self.digital_gfsk_demod_0, 0), (self.blocks_char_to_float_0_0, 0))
-        self.connect((self.digital_gfsk_mod_0, 0), (self.blocks_multiply_xx_0, 0))
-        self.connect((self.digital_gfsk_mod_0, 0), (self.digital_gfsk_demod_0, 0))
+        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.uhd_usrp_sink_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_0, 'strobe'), (self.uhd_usrp_sink_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_0_0, 'strobe'), (self.uhd_usrp_sink_0, 'command'))
+        self.msg_connect((self.blocks_socket_pdu_1, 'pdus'), (self.blocks_pdu_to_tagged_stream_0, 'pdus'))
+        self.connect((self.blocks_pdu_to_tagged_stream_0, 0), (self.blocks_unpacked_to_packed_xx_0, 0))
+        self.connect((self.blocks_unpacked_to_packed_xx_0, 0), (self.digital_gfsk_mod_0, 0))
+        self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_freq_sink_x_0, 0))
         self.connect((self.digital_gfsk_mod_0, 0), (self.qtgui_time_sink_x_0, 0))
+        self.connect((self.digital_gfsk_mod_0, 0), (self.uhd_usrp_sink_0, 0))
 
 
     def closeEvent(self, event):
@@ -334,48 +239,40 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
 
     def set_spsym(self, spsym):
         self.spsym = spsym
-        self.set_samp_rate(self.baud_bit*self.spsym)
-        self.set_sensitivity(2*math.pi*(self.fsk_dev/(self.baud_bit*self.spsym)))
-        self.blocks_repeat_1.set_interpolation(self.spsym)
-        self.blocks_repeat_1_0.set_interpolation(self.spsym)
+        self.set_sensitivity(2*3.14159*(self.fsk_dev/(self.baud_bit*self.spsym)))
+        self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, 2*self.baud_bit*self.spsym)
+        self.qtgui_time_sink_x_0.set_samp_rate(self.spsym*50)
+        self.uhd_usrp_sink_0.set_samp_rate(self.baud_bit*self.spsym)
 
     def get_fsk_dev(self):
         return self.fsk_dev
 
     def set_fsk_dev(self, fsk_dev):
         self.fsk_dev = fsk_dev
-        self.set_sensitivity(2*math.pi*(self.fsk_dev/(self.baud_bit*self.spsym)))
+        self.set_sensitivity(2*3.14159*(self.fsk_dev/(self.baud_bit*self.spsym)))
 
     def get_baud_bit(self):
         return self.baud_bit
 
     def set_baud_bit(self, baud_bit):
         self.baud_bit = baud_bit
-        self.set_samp_rate(self.baud_bit*self.spsym)
-        self.set_sensitivity(2*math.pi*(self.fsk_dev/(self.baud_bit*self.spsym)))
+        self.set_baud_byte(self.baud_bit/8)
+        self.set_sensitivity(2*3.14159*(self.fsk_dev/(self.baud_bit*self.spsym)))
+        self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, 2*self.baud_bit*self.spsym)
+        self.uhd_usrp_sink_0.set_samp_rate(self.baud_bit*self.spsym)
 
     def get_tx_gain(self):
         return self.tx_gain
 
     def set_tx_gain(self, tx_gain):
         self.tx_gain = tx_gain
+        self.uhd_usrp_sink_0.set_gain(self.tx_gain, 0)
 
     def get_sensitivity(self):
         return self.sensitivity
 
     def set_sensitivity(self, sensitivity):
         self.sensitivity = sensitivity
-
-    def get_samp_rate(self):
-        return self.samp_rate
-
-    def set_samp_rate(self, samp_rate):
-        self.samp_rate = samp_rate
-        self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, self.samp_rate)
-        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
-        self.qtgui_time_sink_x_1.set_samp_rate(self.samp_rate)
-        self.qtgui_time_sink_x_1_0.set_samp_rate(self.samp_rate)
 
     def get_rx_gain(self):
         return self.rx_gain
@@ -388,7 +285,14 @@ class endurosat_e2e(gr.top_block, Qt.QWidget):
 
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
-        self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, self.samp_rate)
+        self.qtgui_freq_sink_x_0.set_frequency_range(self.center_freq, 2*self.baud_bit*self.spsym)
+        self.uhd_usrp_sink_0.set_center_freq(self.center_freq, 0)
+
+    def get_baud_byte(self):
+        return self.baud_byte
+
+    def set_baud_byte(self, baud_byte):
+        self.baud_byte = baud_byte
 
 
 
