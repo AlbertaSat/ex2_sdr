@@ -17,7 +17,6 @@
 # Copyright : University of Alberta, AlbertaSat, 2023
 #
 # Requirements : 
-#
 # InquirerPy - pip3 install InquirerPy
 # pycrc      - pip3 install pycrc
 #
@@ -73,9 +72,10 @@ esttc_msg_questions = [
             'Read Status Control Word (SCW)',
             'Enable beacons',
             'Disable beacons',
-            'Set beacon period',
+            'Set beacon period 5 s',
             'Get radio uptime',
             'Get radio received packets',
+            'Set RF Mode (DANGEROUS)',
             'Quit',
         ]
     },
@@ -87,7 +87,6 @@ baud_questions = [
         'name': 'baud',
         'message': 'Select the radio baud rate [sps is bps for 2GFSK]:',
         'choices': [
-            str(600),
             str(1200),
             str(2400),
             str(4800),
@@ -97,6 +96,25 @@ baud_questions = [
     },
 ]
 
+rf_mode_questions = [
+    {
+        'type': 'list',
+        'name': 'rf_mode',
+        'message': 'Which RF Mode would you like to set?',
+        'choices': [
+            str(0),
+            str(1),
+            str(2),
+            str(3),
+            str(4),
+            str(5),
+            str(6),
+            str(7),
+        ]
+    },
+]
+
+
 #
 # Functions to generate the ASCII ESTTC command strings
 #
@@ -104,6 +122,46 @@ def readSCW():
     print('Command is Read Status Control Word.')
     readSCWMsg = b"ES+R2200 BD888E1F"+b"\x0D"
     return readSCWMsg
+
+def writeSCWRFMode0():
+    print('Command is Write Status Control Word to set RF Mode 0.')
+    writeSCWRFModeMsg = b"ES+W22003040 958E47E6"+b"\x0D"
+    return writeSCWRFModeMsg
+
+def writeSCWRFMode1():
+    print('Command is Write Status Control Word to set RF Mode 1.')
+    writeSCWRFModeMsg = b"ES+W22003140 944C2DD1"+b"\x0D"
+    return writeSCWRFModeMsg
+
+def writeSCWRFMode2():
+    print('Command is Write Status Control Word to set RF Mode 2.')
+    writeSCWRFModeMsg = b"ES+W22003240 960A9388"+b"\x0D"
+    return writeSCWRFModeMsg
+
+def writeSCWRFMode3():
+    print('Command is Write Status Control Word to set RF Mode 3.')
+    writeSCWRFModeMsg = b"ES+W22003340 97C8F9BF"+b"\x0D"
+    return writeSCWRFModeMsg
+
+def writeSCWRFMode4():
+    print('Command is Write Status Control Word to set RF Mode 4.')
+    writeSCWRFModeMsg = b"ES+W22003440 9287EF3A"+b"\x0D"
+    return writeSCWRFModeMsg
+
+def writeSCWRFMode5():
+    print('Command is Write Status Control Word to set RF Mode 5.')
+    writeSCWRFModeMsg = b"ES+W22003540 9345850D"+b"\x0D"
+    return writeSCWRFModeMsg
+
+def writeSCWRFMode6():
+    print('Command is Write Status Control Word to set RF Mode 6.')
+    writeSCWRFModeMsg = b"ES+W22003640 91033B54"+b"\x0D"
+    return writeSCWRFModeMsg
+
+def writeSCWRFMode7():
+    print('Command is Write Status Control Word to set RF Mode 7.')
+    writeSCWRFModeMsg = b"ES+W22003740 90C15163"+b"\x0D"
+    return writeSCWRFModeMsg
 
 def enableBeacons():
     print('Command is Enable beacons bit in ESTTC Status Control Word and write SCW.')
@@ -246,6 +304,26 @@ def main():
 
         if result['esttc_msg'] == 'Get radio received packets':
             commandStr = readNumReceivedPackets()
+            
+        if result['esttc_msg'] == 'Set RF Mode (DANGEROUS)':
+            modeResult = prompt(rf_mode_questions)
+            rfMode = int(modeResult['rf_mode'])
+            if rfMode == 0:
+                commandStr = writeSCWRFMode0()
+            elif rfMode == 1: 
+                commandStr = writeSCWRFMode1()
+            elif rfMode == 2: 
+                commandStr = writeSCWRFMode2()
+            elif rfMode == 3: 
+                commandStr = writeSCWRFMode3()
+            elif rfMode == 4: 
+                commandStr = writeSCWRFMode4()
+            elif rfMode == 5: 
+                commandStr = writeSCWRFMode5()
+            elif rfMode == 6: 
+                commandStr = writeSCWRFMode6()
+            elif rfMode == 7: 
+                commandStr = writeSCWRFMode7()
 
         clear()
         print("The command string is : "+str(commandStr))
