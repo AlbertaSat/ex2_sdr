@@ -7,8 +7,8 @@
 # Purpose : Generate complete EnduroSAT ESTTC commands as selected
 #  by the user, place them in a packet as defined in the EnduroSat
 #  manual including the CRC16 at the end, and send via UDP to a
-#  client application for a specific duration at a specific rate. 
-#  For example, the client may be a GNU Radio flowgraph that 
+#  client application for a specific duration at a specific rate.
+#  For example, the client may be a GNU Radio flowgraph that
 #  modulates the received packet bits and sends the result to a
 #  UHD USRP Sink block.
 #
@@ -16,7 +16,7 @@
 # Date : June 22, 2023
 # Copyright : University of Alberta, AlbertaSat, 2023
 #
-# Requirements : 
+# Requirements :
 # InquirerPy - pip3 install InquirerPy
 # pycrc      - pip3 install pycrc
 #
@@ -41,7 +41,7 @@ clear = lambda: system('clear')
 
 #
 # The CRC parameters are selected to match the CRC16 algorithm used by
-# EnduroSat, namely 
+# EnduroSat, namely
 #
 #    CRC-16/CCITT-FALSE
 #
@@ -120,7 +120,7 @@ rf_mode_questions = [
 #
 def readSCW():
     print('Command is Read Status Control Word.')
-    readSCWMsg = b"ES+R2200 BD888E1F"+b"\x0D"
+    readSCWMsg = b"ES+R2200 BD888E1E"+b"\x0D"
     return readSCWMsg
 
 def writeSCWRFMode0():
@@ -165,27 +165,28 @@ def writeSCWRFMode7():
 
 def enableBeacons():
     print('Command is Enable beacons bit in ESTTC Status Control Word and write SCW.')
-    ebMsg = b"ES+W22003440 9287EF3A"+b"\0D"
+    ebMsg = b"ES+W22003440 9287EF3A"+b"\x0D"
     return ebMsg
 
 def disableBeacons():
     print('Command is Disable beacons bit in ESTTC Status Control Word and wrirte SCW.')
-    dbMsg = b"ES+W22003400 F6EB2A3E"+b"\0D"
+    dbMsg = b"ES+W22003400 F6EB2A3E"+b"\x0D"
     return dbMsg
 
 def setBeaconPeriod():
     print('Command is Set beacon period, which is hard-coded to 5 seconds.')
-    beaconPeriodMsg = b"ES+W220700000005 AE2A4F6E"+b"\0D"
+    beaconPeriodMsg = b"ES+W220700000005 AE2A4F6E"+b"\r"
+    #beaconPeriodMsg = b"ES+W22070000003C 3C61C8A4"+b"\r"
     return beaconPeriodMsg
 
 def readUptime():
     print('Read radio uptime.')
-    uptimeMsg = b"ES+R2202 5386EF33"+b"\0D"
+    uptimeMsg = b"ES+R2202 5386EF33"+b"\x0D"
     return uptimeMsg
 
 def readNumReceivedPackets():
     print('Read radio number of received packets.')
-    numPacketsMsg = b"ES+R2204 BAE54A06"+b"\0D"
+    numPacketsMsg = b"ES+R2204 BAE54A06"+b"\x0D"
     return numPacketsMsg
 
 #
@@ -249,7 +250,7 @@ def makeESTTCPacket(command):
     print('For '+str(dataFields)+' CRC is {:#04x}'.format(dataFieldsCRC))
     dataFieldsCRC = dataFields + dataFieldsCRC.to_bytes(2,"big")
     preambleSync = "AAAAAAAAAA7E"
-    packet = bytes.fromhex(preambleSync)+dataFieldsCRC
+    packet = bytes.fromhex(preambleSync)+dataFieldsCRC+bytes.fromhex(preambleSync)
     print("The whole packet is : "+str(packet))
     return packet
 
@@ -275,7 +276,7 @@ def main():
     # commands, and the command
     #
     txDuration = float(getTotalTransmissionDuration())
-    txIntervalMillis = float(getTransmissionInterval(minInterval)) 
+    txIntervalMillis = float(getTransmissionInterval(minInterval))
 
     clear()
     print("Command will be transmitted every "+str(txIntervalMillis)+" ms for "+str(txDuration)+" s")
@@ -296,7 +297,7 @@ def main():
         if result['esttc_msg'] == 'Disable beacons':
             commandStr = disableBeacons()
 
-        if result['esttc_msg'] == 'Set beacon period':
+        if result['esttc_msg'] == 'Set beacon period 5 s':
             commandStr = setBeaconPeriod()
 
         if result['esttc_msg'] == 'Get radio uptime':
@@ -304,31 +305,31 @@ def main():
 
         if result['esttc_msg'] == 'Get radio received packets':
             commandStr = readNumReceivedPackets()
-            
+
         if result['esttc_msg'] == 'Set RF Mode (DANGEROUS)':
             modeResult = prompt(rf_mode_questions)
             rfMode = int(modeResult['rf_mode'])
             if rfMode == 0:
                 commandStr = writeSCWRFMode0()
-            elif rfMode == 1: 
+            elif rfMode == 1:
                 commandStr = writeSCWRFMode1()
-            elif rfMode == 2: 
+            elif rfMode == 2:
                 commandStr = writeSCWRFMode2()
-            elif rfMode == 3: 
+            elif rfMode == 3:
                 commandStr = writeSCWRFMode3()
-            elif rfMode == 4: 
+            elif rfMode == 4:
                 commandStr = writeSCWRFMode4()
-            elif rfMode == 5: 
+            elif rfMode == 5:
                 commandStr = writeSCWRFMode5()
-            elif rfMode == 6: 
+            elif rfMode == 6:
                 commandStr = writeSCWRFMode6()
-            elif rfMode == 7: 
+            elif rfMode == 7:
                 commandStr = writeSCWRFMode7()
 
         clear()
         print("The command string is : "+str(commandStr))
         thePacket = makeESTTCPacket(commandStr)
-        
+
         txDuration = txDuration * 1000 # Change to milliseconds
         packetCount = 1
         while txDuration > 0:
