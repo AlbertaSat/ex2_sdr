@@ -123,7 +123,7 @@ class Grant_F_sig_gen(gr.top_block, Qt.QWidget):
         self.blocks_selector_0 = blocks.selector(gr.sizeof_gr_complex*1,source,0)
         self.blocks_selector_0.set_enabled(True)
         self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, 1000, 1, 0, 0)
-        self.analog_const_source_x_0 = analog.sig_source_c(0, analog.GR_CONST_WAVE, 0, 0, 1)
+        self.analog_const_source_x_0 = analog.sig_source_c(0, analog.GR_CONST_WAVE, 0, 0, 0)
 
 
         ##################################################

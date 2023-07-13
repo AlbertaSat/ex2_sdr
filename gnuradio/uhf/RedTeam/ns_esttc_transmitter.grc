@@ -108,7 +108,7 @@ blocks:
   parameters:
     comment: "EnduroSat Mode\n  = [0,1,2,3,4,5,6,7]\n\nChoose a value before\nrunning\
       \ this flowgraph"
-    value: '7'
+    value: '3'
   states:
     bus_sink: false
     bus_source: false
@@ -251,7 +251,28 @@ blocks:
     bus_structure: null
     coordinate: [200, 12.0]
     rotation: 0
-    state: enabled
+    state: disabled
+- name: tx_gain
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '.05'
+    stop: '1'
+    value: '.85'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1120, 312.0]
+    rotation: 0
+    state: true
 - name: blocks_message_debug_0
   id: blocks_message_debug
   parameters:

@@ -108,7 +108,7 @@ blocks:
   parameters:
     comment: "EnduroSat Mode\n  = [0,1,2,3,4,5,6,7]\n\nChoose a value before\nrunning\
       \ this flowgraph"
-    value: '5'
+    value: '3'
   states:
     bus_sink: false
     bus_source: false
@@ -228,7 +228,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '50'
+    value: '32'
   states:
     bus_sink: false
     bus_source: false
@@ -285,7 +285,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [520, 372.0]
+    coordinate: [640, 188.0]
     rotation: 0
     state: true
 - name: threshold
@@ -306,7 +306,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1120, 540.0]
+    coordinate: [1144, 444.0]
     rotation: 0
     state: enabled
 - name: analog_quadrature_demod_cf_0
@@ -324,7 +324,7 @@ blocks:
     bus_structure: null
     coordinate: [720, 276.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: analog_simple_squelch_cc_0
   id: analog_simple_squelch_cc
   parameters:
@@ -341,7 +341,7 @@ blocks:
     bus_structure: null
     coordinate: [528, 268.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_message_debug_0_0
   id: blocks_message_debug
   parameters:
@@ -370,6 +370,42 @@ blocks:
     coordinate: [1432, 400.0]
     rotation: 180
     state: enabled
+- name: blocks_message_strobe_0
+  id: blocks_message_strobe
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg: pmt.cons(pmt.make_dict(), pmt.init_u8vector(10, (1,2,3,4,5,6,7,8,9,10)))
+    period: '1000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 652.0]
+    rotation: 180
+    state: enabled
+- name: blocks_random_pdu_0
+  id: blocks_random_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    length_modulo: '2'
+    mask: '0xFF'
+    maxoutbuf: '0'
+    maxsize: '2'
+    minoutbuf: '0'
+    minsize: '2'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 556.0]
+    rotation: 0
+    state: true
 - name: blocks_socket_pdu_1
   id: blocks_socket_pdu
   parameters:
@@ -389,7 +425,7 @@ blocks:
     bus_structure: null
     coordinate: [24, 428.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: digital_binary_slicer_fb_0
   id: digital_binary_slicer_fb
   parameters:
@@ -419,7 +455,7 @@ blocks:
     minoutbuf: '0'
     osps: '1'
     sps: samples_per_symbol
-    taps: taps_0
+    taps: taps
     type: fff
   states:
     bus_sink: false
@@ -427,7 +463,7 @@ blocks:
     bus_structure: null
     coordinate: [920, 260.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: digital_pfb_clock_sync_xxx_0_0
   id: digital_pfb_clock_sync_xxx
   parameters:
@@ -451,6 +487,37 @@ blocks:
     coordinate: [920, 412.0]
     rotation: 0
     state: disabled
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Block\n\"\"\"\n\nimport numpy as np\nfrom\
+      \ gnuradio import gr\nimport pmt\n\nclass blk(gr.sync_block):\n    \"\"\"Packet\
+      \ Format\"\"\"\n\n    def __init__(self):\n        gr.sync_block.__init__(self,\n\
+      \            name = \"Packet Format\",\n            in_sig = None,\n       \
+      \     out_sig = None)\n        self.message_port_register_in(pmt.intern('pdu_in'))\n\
+      \        self.message_port_register_out(pmt.intern('pdu_out'))\n        self.set_msg_handler(pmt.intern('pdu_in'),\
+      \ self.handle_msg)\n\n    def handle_msg(self, msg):\n        inMsg = pmt.to_python\
+      \ (msg)\n        pld = inMsg[1]\n        # print (pld)\n        mLen = len(pld)\n\
+      \        # print (mLen)\n        if (mLen > 0):\n            # 10 preamble bytes,\
+      \ 4 access code bytes\n            char_list = [0xAA,0xAA,0xAA,0xAA,0xAA,0x7E]\n\
+      \            char_list.append (mLen & 255)\n            char_list.extend (pld)\n\
+      \            print (char_list)\n            out_len = len(char_list)\n     \
+      \       # print (out_len)\n            self.message_port_pub(pmt.intern('pdu_out'),\
+      \ pmt.cons(pmt.PMT_NIL,pmt.init_u8vector(out_len,(char_list))))\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    _io_cache: ('Packet Format', 'blk', [], [('pdu_in', 'message', 1)], [('pdu_out',
+      'message', 1)], 'Packet Format', [])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [248, 520.0]
+    rotation: 180
+    state: true
 - name: gpredict_doppler_1
   id: gpredict_doppler
   parameters:
@@ -465,7 +532,7 @@ blocks:
     bus_structure: null
     coordinate: [1248, 124.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: import_0
   id: import
   parameters:
@@ -528,7 +595,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1376, 340.0]
+    coordinate: [1368, 332.0]
     rotation: 0
     state: disabled
 - name: qtgui_time_sink_x_0
@@ -628,6 +695,26 @@ blocks:
     coordinate: [1208, 356.0]
     rotation: 0
     state: true
+- name: satellites_fsk_demodulator_0
+  id: satellites_fsk_demodulator
+  parameters:
+    affinity: ''
+    alias: ''
+    baudrate: data_rate
+    comment: ''
+    iq: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    options: '""'
+    samp_rate: samp_rate
+    subaudio: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [632, 564.0]
+    rotation: 0
+    state: enabled
 - name: satellites_sync_to_pdu_packed_0_0
   id: satellites_sync_to_pdu_packed
   parameters:
@@ -670,14 +757,20 @@ connections:
 - [analog_quadrature_demod_cf_0, '0', digital_pfb_clock_sync_xxx_0, '0']
 - [analog_quadrature_demod_cf_0, '0', digital_pfb_clock_sync_xxx_0_0, '0']
 - [analog_simple_squelch_cc_0, '0', analog_quadrature_demod_cf_0, '0']
+- [blocks_message_strobe_0, strobe, blocks_random_pdu_0, generate]
+- [blocks_random_pdu_0, pdus, epy_block_0, pdu_in]
 - [blocks_socket_pdu_1, pdus, blocks_message_debug_0_0, print_pdu]
 - [blocks_socket_pdu_1, pdus, uhf_pdu_modulate_0, pdus]
 - [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', qtgui_time_sink_x_0, '0']
 - [digital_pfb_clock_sync_xxx_0_0, '0', qtgui_time_sink_x_0, '0']
+- [epy_block_0, pdu_out, uhf_pdu_modulate_0, pdus]
+- [satellites_fsk_demodulator_0, '0', digital_binary_slicer_fb_0, '0']
+- [satellites_fsk_demodulator_0, '0', qtgui_time_sink_x_0, '0']
 - [satellites_sync_to_pdu_packed_0_0, out, blocks_message_debug_0_0_0, print]
 - [uhf_pdu_modulate_0, '0', analog_simple_squelch_cc_0, '0']
+- [uhf_pdu_modulate_0, '0', satellites_fsk_demodulator_0, '0']
 
 metadata:
   file_format: 1
