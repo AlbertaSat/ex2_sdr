@@ -110,7 +110,7 @@ blocks:
     bus_structure: null
     coordinate: [488, 252.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: analog_simple_squelch_cc_0
   id: analog_simple_squelch_cc
   parameters:
@@ -159,7 +159,7 @@ blocks:
     bus_structure: null
     coordinate: [992, 208.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: digital_correlate_access_code_tag_xx_0
   id: digital_correlate_access_code_tag_xx
   parameters:
@@ -178,7 +178,7 @@ blocks:
     bus_structure: null
     coordinate: [952, 300.0]
     rotation: 0
-    state: bypassed
+    state: disabled
 - name: digital_pfb_clock_sync_xxx_0
   id: digital_pfb_clock_sync_xxx
   parameters:
@@ -201,7 +201,7 @@ blocks:
     bus_structure: null
     coordinate: [720, 204.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: fm_modulation_index
   id: parameter
   parameters:
@@ -303,6 +303,24 @@ blocks:
     affinity: ''
     alias: ''
     comment: ''
+    label: raw_f
+    num_streams: '1'
+    optional: 'False'
+    type: float
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 268.0]
+    rotation: 0
+    state: enabled
+- name: pad_sink_0_0_0_0
+  id: pad_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
     label: raw_b
     num_streams: '1'
     optional: 'False'
@@ -312,9 +330,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1168, 268.0]
+    coordinate: [1280, 124.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: pad_source_0
   id: pad_source
   parameters:
@@ -368,7 +386,7 @@ blocks:
     bus_structure: null
     coordinate: [1224, 364.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: satellites_fsk_demodulator_0
   id: satellites_fsk_demodulator
   parameters:
@@ -388,7 +406,7 @@ blocks:
     bus_structure: null
     coordinate: [488, 348.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: satellites_sync_to_pdu_packed_0_0
   id: satellites_sync_to_pdu_packed
   parameters:
@@ -430,11 +448,15 @@ connections:
 - [analog_simple_squelch_cc_0, '0', analog_quadrature_demod_cf_0, '0']
 - [analog_simple_squelch_cc_0, '0', satellites_fsk_demodulator_0, '0']
 - [digital_binary_slicer_fb_0, '0', digital_correlate_access_code_tag_xx_0, '0']
+- [digital_binary_slicer_fb_0, '0', pad_sink_0_0_0_0, '0']
 - [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
 - [digital_correlate_access_code_tag_xx_0, '0', pad_sink_0_0_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
+- [digital_pfb_clock_sync_xxx_0, '0', pad_sink_0_0_0, '0']
+- [digital_pfb_clock_sync_xxx_0, '0', satellites_ax25_deframer_0, '0']
 - [pad_source_0, '0', analog_simple_squelch_cc_0, '0']
 - [satellites_ax25_deframer_0, out, pad_sink_0, in]
+- [satellites_fsk_demodulator_0, '0', pad_sink_0_0_0, '0']
 - [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
 - [satellites_sync_to_pdu_packed_0_0, out, pad_sink_0, in]
 

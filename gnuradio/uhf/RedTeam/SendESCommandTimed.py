@@ -224,7 +224,8 @@ def writeSCWRFMode7BeaconOff():
 
 def setBeaconPeriod():
     print('Command is Set beacon period, which is hard-coded to 5 seconds.')
-    beaconPeriodMsg = b"ES+W220700000005 AE2A4F6E"+b"\r"
+    beaconPeriodMsg = b"ES+W220700000002 304EDACD"+b"\r"
+    #beaconPeriodMsg = b"ES+W220700000005 AE2A4F6E"+b"\r"
     #beaconPeriodMsg = b"ES+W22070000003C 3C61C8A4"+b"\r"
     return beaconPeriodMsg
 
