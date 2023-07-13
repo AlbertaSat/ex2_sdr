@@ -42,18 +42,6 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [168, 396.0]
-    rotation: 0
-    state: true
-- name: fm_samples_per_symbol
-  id: variable
-  parameters:
-    comment: ''
-    value: '256'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
     coordinate: [8, 396.0]
     rotation: 0
     state: true
@@ -73,7 +61,7 @@ blocks:
   id: variable
   parameters:
     comment: ''
-    value: '8'
+    value: '8.0'
   states:
     bus_sink: false
     bus_source: false
@@ -81,11 +69,23 @@ blocks:
     coordinate: [8, 460.0]
     rotation: 0
     state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: fm_samples_per_symbol*baud_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 144.0]
+    rotation: 0
+    state: true
 - name: taps
   id: variable
   parameters:
     comment: ''
-    value: firdes.root_raised_cosine(nfilts,nfilts,1/float(fm_samples_per_symbol/oversample_rate),0.35,int(11*fm_samples_per_symbol/oversample_rate*nfilts))
+    value: firdes.root_raised_cosine(nfilts,nfilts,1/float(fm_samples_per_symbol),0.35,11*fm_samples_per_symbol*nfilts)
   states:
     bus_sink: false
     bus_source: false
@@ -98,7 +98,9 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    comment: ''
+    comment: 'Made QDemod Gain an if-then-else
+
+      stmt to avoid div by zero'
     gain: samp_rate/(2*math.pi*fm_freq_dev) if fm_freq_dev > 0 else samp_rate/(2*math.pi)
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -106,7 +108,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [744, 252.0]
+    coordinate: [488, 252.0]
     rotation: 0
     state: true
 - name: analog_simple_squelch_cc_0
@@ -115,15 +117,15 @@ blocks:
     affinity: ''
     alias: ''
     alpha: '1'
-    comment: ''
+    comment: range is [-50, 50] dB
     maxoutbuf: '0'
     minoutbuf: '0'
-    threshold: '-30'
+    threshold: squelch_threshold
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [528, 244.0]
+    coordinate: [272, 244.0]
     rotation: 0
     state: enabled
 - name: baud_rate
@@ -132,7 +134,7 @@ blocks:
     alias: ''
     comment: ''
     hide: none
-    label: Baud rate
+    label: Baud
     short_id: ''
     type: eng_float
     value: '0'
@@ -140,7 +142,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [560, 12.0]
+    coordinate: [744, 12.0]
     rotation: 0
     state: true
 - name: digital_binary_slicer_fb_0
@@ -155,9 +157,28 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1248, 208.0]
+    coordinate: [992, 208.0]
     rotation: 0
     state: true
+- name: digital_correlate_access_code_tag_xx_0
+  id: digital_correlate_access_code_tag_xx
+  parameters:
+    access_code: packet_sync_word
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    tagname: FS
+    threshold: '0'
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 300.0]
+    rotation: 0
+    state: bypassed
 - name: digital_pfb_clock_sync_xxx_0
   id: digital_pfb_clock_sync_xxx
   parameters:
@@ -171,14 +192,14 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     osps: '1'
-    sps: fm_samples_per_symbol/oversample_rate
+    sps: fm_samples_per_symbol
     taps: taps
     type: fff
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [976, 204.0]
+    coordinate: [720, 204.0]
     rotation: 0
     state: true
 - name: fm_modulation_index
@@ -195,7 +216,24 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [400, 12.0]
+    coordinate: [408, 12.0]
+    rotation: 0
+    state: true
+- name: fm_samples_per_symbol
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: FM Samples per Symbol
+    short_id: ''
+    type: intx
+    value: '256'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [568, 12.0]
     rotation: 0
     state: true
 - name: import_0
@@ -221,22 +259,26 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1328, 116.0]
+    coordinate: [1056, 148.0]
     rotation: 0
     state: enabled
-- name: note_0_0
-  id: note
+- name: packet_sync_word
+  id: parameter
   parameters:
     alias: ''
     comment: ''
-    note: Made QDemod Gain an if-then-else stmt to avoid div by zero
+    hide: none
+    label: Packet Sync (unpacked binary)
+    short_id: ''
+    type: str
+    value: '''0111111010000000'''
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [744, 204.0]
+    coordinate: [1000, 12.0]
     rotation: 0
-    state: enabled
+    state: true
 - name: pad_sink_0
   id: pad_sink
   parameters:
@@ -252,7 +294,25 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1728, 204.0]
+    coordinate: [1472, 204.0]
+    rotation: 0
+    state: true
+- name: pad_sink_0_0_0
+  id: pad_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    label: raw_b
+    num_streams: '1'
+    optional: 'False'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1168, 268.0]
     rotation: 0
     state: true
 - name: pad_source_0
@@ -275,41 +335,21 @@ blocks:
     coordinate: [96, 252.0]
     rotation: 0
     state: true
-- name: rational_resampler_xxx_0
-  id: rational_resampler_xxx
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    decim: fm_samples_per_symbol*baud_rate
-    fbw: '0.4'
-    interp: int(fm_samples_per_symbol/oversample_rate*baud_rate)
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    taps: '[]'
-    type: ccc
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [264, 228.0]
-    rotation: 0
-    state: true
-- name: samp_rate
+- name: pdu_nominal_length
   id: parameter
   parameters:
     alias: ''
     comment: ''
     hide: none
-    label: ''
+    label: Nominal PDU length (bytes)
     short_id: ''
-    type: eng_float
-    value: '0'
+    type: intx
+    value: '128'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [288, 12.0]
+    coordinate: [1208, 4.0]
     rotation: 0
     state: true
 - name: satellites_ax25_deframer_0
@@ -326,7 +366,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1480, 364.0]
+    coordinate: [1224, 364.0]
     rotation: 0
     state: enabled
 - name: satellites_fsk_demodulator_0
@@ -340,13 +380,13 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     options: '""'
-    samp_rate: fm_samples_per_symbol/oversample_rate*baud_rate
+    samp_rate: samp_rate
     subaudio: 'False'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [744, 348.0]
+    coordinate: [488, 348.0]
     rotation: 0
     state: enabled
 - name: satellites_sync_to_pdu_packed_0_0
@@ -357,25 +397,43 @@ blocks:
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
-    packlen: '128'
-    sync: '''0111111010000000'''
-    threshold: '0'
+    packlen: pdu_nominal_length
+    sync: packet_sync_word
+    threshold: int(len(packet_sync_word)/8)
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1424, 188.0]
+    coordinate: [1168, 188.0]
     rotation: 0
     state: enabled
+- name: squelch_threshold
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Squelch Threshold [-50, 50] dB
+    short_id: ''
+    type: eng_float
+    value: '-30'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [832, 20.0]
+    rotation: 0
+    state: true
 
 connections:
 - [analog_quadrature_demod_cf_0, '0', digital_pfb_clock_sync_xxx_0, '0']
 - [analog_simple_squelch_cc_0, '0', analog_quadrature_demod_cf_0, '0']
 - [analog_simple_squelch_cc_0, '0', satellites_fsk_demodulator_0, '0']
+- [digital_binary_slicer_fb_0, '0', digital_correlate_access_code_tag_xx_0, '0']
 - [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
+- [digital_correlate_access_code_tag_xx_0, '0', pad_sink_0_0_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
-- [pad_source_0, '0', rational_resampler_xxx_0, '0']
-- [rational_resampler_xxx_0, '0', analog_simple_squelch_cc_0, '0']
+- [pad_source_0, '0', analog_simple_squelch_cc_0, '0']
 - [satellites_ax25_deframer_0, out, pad_sink_0, in]
 - [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
 - [satellites_sync_to_pdu_packed_0_0, out, pad_sink_0, in]
