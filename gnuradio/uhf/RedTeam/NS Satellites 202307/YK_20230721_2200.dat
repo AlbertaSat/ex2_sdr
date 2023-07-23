@@ -1,0 +1,155 @@
+/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_transmitter.py:482: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_transmitter.py:78: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+[INFO] [UHD] linux; GNU C++ version 10.4.0; Boost_107800; UHD_4.2.0.HEAD-release
+[INFO] [B200] Detected Device: B200mini
+[INFO] [B200] Operating over USB 2.
+[INFO] [B200] Initialize CODEC control...
+[INFO] [B200] Initialize Radio control...
+[INFO] [B200] Performing register loopback test... 
+[INFO] [B200] Register loopback test passed
+[INFO] [B200] Setting master clock rate selection to 'automatic'.
+[INFO] [B200] Asking for clock rate 16.000000 MHz... 
+[INFO] [B200] Actually got clock rate 16.000000 MHz.
+[INFO] [B200] Asking for clock rate 39.321600 MHz... 
+[INFO] [B200] Actually got clock rate 39.321600 MHz.
+('127.0.0.1', 4532)
+[INFO] [B200] Asking for clock rate 39.321600 MHz... 
+[INFO] [B200] OK
+[INFO] [B200] Asking for clock rate 39.321600 MHz... 
+[INFO] [B200] OK
+Waiting for connection on: 127.0.0.1:4532
+Connected from: 127.0.0.1:40608
+New frequency: 437881818
+New frequency: 437881753
+New frequency: 437881665
+New frequency: 437881596
+New frequency: 437881527
+New frequency: 437881432
+New frequency: 437881359
+New frequency: 437881284
+New frequency: 437881183
+New frequency: 437881104
+New frequency: 437881025
+New frequency: 437880916
+New frequency: 437880833
+New frequency: 437880748
+New frequency: 437880631
+New frequency: 437880542
+New frequency: 437880452
+New frequency: 437880328
+New frequency: 437880233
+New frequency: 437880137
+New frequency: 437880005
+New frequency: 437879904
+New frequency: 437879802
+New frequency: 437879663
+New frequency: 437879556
+New frequency: 437879448
+New frequency: 437879300
+New frequency: 437879188
+New frequency: 437879074
+New frequency: 437878919
+New frequency: 437878800
+New frequency: 437878680
+New frequency: 437878518
+New frequency: 437878394
+New frequency: 437878269
+New frequency: 437878099
+New frequency: 437877969
+New frequency: 437877839
+New frequency: 437877662
+New frequency: 437877528
+New frequency: 437877393
+New frequency: 437877211
+New frequency: 437877072
+New frequency: 437876933
+New frequency: 437876746
+New frequency: 437876604
+New frequency: 437876461
+New frequency: 437876270
+New frequency: 437876125
+New frequency: 437875980
+New frequency: 437875786
+New frequency: 437875639
+New frequency: 437875493
+New frequency: 437875297
+New frequency: 437875150
+New frequency: 437875003
+New frequency: 437874806
+New frequency: 437874659
+New frequency: 437874512
+New frequency: 437874316
+New frequency: 437874170
+New frequency: 437874025
+New frequency: 437873831
+New frequency: 437873687
+New frequency: 437873543
+New frequency: 437873511
+New frequency: 437873212
+New frequency: 437873071
+New frequency: 437872886
+New frequency: 437872748
+New frequency: 437872611
+New frequency: 437872431
+New frequency: 437872298
+New frequency: 437872166
+New frequency: 437871992
+New frequency: 437871863
+New frequency: 437871736
+New frequency: 437871569
+New frequency: 437871445
+New frequency: 437871324
+New frequency: 437871164
+New frequency: 437871046
+New frequency: 437870930
+New frequency: 437870778
+New frequency: 437870666
+New frequency: 437870556
+New frequency: 437870412
+New frequency: 437870306
+New frequency: 437870201
+New frequency: 437870065
+New frequency: 437869965
+New frequency: 437869866
+New frequency: 437869738
+New frequency: 437869644
+New frequency: 437869551
+New frequency: 437869431
+New frequency: 437869342
+New frequency: 437869255
+New frequency: 437869142
+New frequency: 437869059
+New frequency: 437868978
+New frequency: 437868872
+New frequency: 437868880
+New frequency: 437868718
+New frequency: 437868619
+New frequency: 437868546
+New frequency: 437868475
+New frequency: 437868383
+New frequency: 437868315
+New frequency: 437868249
+New frequency: 437868163
+New frequency: 437868100
+New frequency: 437868038
+New frequency: 437867957
+New frequency: 437867898
+New frequency: 437867841
+New frequency: 437867766
+New frequency: 437867711
+New frequency: 437867657
+New frequency: 437867587
+******* MESSAGE DEBUG PRINT ********
+(() . #[128 254 84 157 114 229 110 168 50])
+************************************
+Raw data : 
+#[128 254 84 157 114 229 110 168 50]
+Dest Call Sign : þT(gnuradio) knud@G62-6QD:~/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam$ 
+(gnuradio) knud@G62-6QD:~/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam$ 
+(gnuradio) knud@G62-6QD:~/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam$ 
+
+NOTE : some how the output stopped after the non-beacon...
+
+
