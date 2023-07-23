@@ -1,0 +1,22 @@
+This 
+
+cp ex2_sdr_install_path/gnuradio/utils/gpredict_doppler_doppler.block.yml /home/josh/miniconda3/envs/gnuradio-3.9.4/share/gnuradio/grc
+
+should be
+
+cp ex2_sdr_install_path/gnuradio/utils/gpredict_doppler_doppler.block.yml /home/josh/miniconda3/envs/gnuradio-3.9.4/share/gnuradio/grc/blocks
+
+This
+
+conda install gnuradio python=3.9.4
+
+should be
+
+conda install gnuradio=3.9.4
+ or 
+conda install gnuradio=3.9.7
+
+To insteall gr-gpredict in the env, need to follow GNU Radio conda guide for building OOTs
+
+conda install gnuradio-build-deps
+
