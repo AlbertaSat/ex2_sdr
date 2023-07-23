@@ -108,7 +108,7 @@ blocks:
   parameters:
     comment: "EnduroSat Mode\n  = [0,1,2,3,4,5,6,7]\n\nChoose a value before\nrunning\
       \ this flowgraph"
-    value: '0'
+    value: '4'
   states:
     bus_sink: false
     bus_source: false
@@ -264,7 +264,7 @@ blocks:
     start: '-50'
     step: '1'
     stop: '50'
-    value: '-30'
+    value: '-10'
     widget: counter_slider
   states:
     bus_sink: false
@@ -286,7 +286,7 @@ blocks:
     bus_structure: null
     coordinate: [1168, 264.0]
     rotation: 180
-    state: true
+    state: enabled
 - name: blocks_message_strobe_0
   id: blocks_message_strobe
   parameters:
@@ -377,21 +377,6 @@ blocks:
     coordinate: [448, 356.0]
     rotation: 0
     state: enabled
-- name: blocks_uchar_to_float_0
-  id: blocks_uchar_to_float
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1328, 512.0]
-    rotation: 0
-    state: enabled
 - name: gpredict_doppler_1
   id: gpredict_doppler
   parameters:
@@ -406,7 +391,7 @@ blocks:
     bus_structure: null
     coordinate: [1248, 124.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: import_0
   id: import
   parameters:
@@ -539,7 +524,7 @@ blocks:
     bus_structure: null
     coordinate: [776, 260.0]
     rotation: 180
-    state: disabled
+    state: enabled
 - name: qtgui_time_sink_x_0
   id: qtgui_time_sink_x
   parameters:
@@ -594,7 +579,7 @@ blocks:
     marker8: '-1'
     marker9: '-1'
     name: '""'
-    nconnections: '2'
+    nconnections: '1'
     size: '1024'
     srate: samp_rate
     stemplot: 'False'
@@ -636,7 +621,7 @@ blocks:
     bus_structure: null
     coordinate: [1488, 480.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: uhd_usrp_source_0_0
   id: uhd_usrp_source
   parameters:
@@ -706,7 +691,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: center_freq
+    center_freq0: center_freq_rx
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1011,7 +996,7 @@ blocks:
     nchan: '1'
     num_mboards: '1'
     otw: ''
-    rx_agc0: Enabled
+    rx_agc0: Default
     rx_agc1: Default
     rx_agc10: Default
     rx_agc11: Default
@@ -1093,7 +1078,7 @@ blocks:
     bus_structure: null
     coordinate: [1024, 372.0]
     rotation: 0
-    state: true
+    state: enabled
 
 connections:
 - [blocks_message_strobe_0, strobe, uhd_usrp_source_0_0, command]
@@ -1101,11 +1086,9 @@ connections:
 - [blocks_message_strobe_0_0_0, strobe, uhd_usrp_source_0_0, command]
 - [blocks_message_strobe_0_1, strobe, uhd_usrp_source_0_0, command]
 - [blocks_message_strobe_0_1_0, strobe, uhd_usrp_source_0_0, command]
-- [blocks_uchar_to_float_0, '0', qtgui_time_sink_x_0, '1']
 - [uhd_usrp_source_0_0, '0', qtgui_freq_sink_x_0, '0']
 - [uhd_usrp_source_0_0, '0', uhf_pdu_demodulate_0, '0']
 - [uhf_pdu_demodulate_0, '0', qtgui_time_sink_x_0, '0']
-- [uhf_pdu_demodulate_0, '1', blocks_uchar_to_float_0, '0']
 - [uhf_pdu_demodulate_0, pdus, blocks_message_debug_0, print]
 
 metadata:

@@ -118,28 +118,6 @@ blocks:
     coordinate: [544, 88.0]
     rotation: 0
     state: enabled
-- name: analog_sig_source_x_0
-  id: analog_sig_source_x
-  parameters:
-    affinity: ''
-    alias: ''
-    amp: '1'
-    comment: ''
-    freq: '1000'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    offset: '0'
-    phase: '0'
-    samp_rate: samp_rate
-    type: complex
-    waveform: analog.GR_COS_WAVE
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [864, 444.0]
-    rotation: 0
-    state: disabled
 - name: audio_sink_0
   id: audio_sink
   parameters:
@@ -596,7 +574,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [960, 448.0]
+    coordinate: [1064, 428.0]
     rotation: 0
     state: disabled
 - name: uhf_pdu_modulate_0

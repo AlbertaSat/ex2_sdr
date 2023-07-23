@@ -38,6 +38,7 @@ from gnuradio import uhd
 import time
 from gnuradio.qtgui import Range, RangeWidget
 from PyQt5 import QtCore
+import gpredict_doppler
 import math
 import ns_esttc_transmitter_epy_block_0 as epy_block_0  # embedded python block
 import numpy as np
@@ -95,7 +96,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.threshold = threshold = -30
         self.sensitivity_label = sensitivity_label = sensitivity_tx
         self.samp_rate = samp_rate = data_rate*samples_per_symbol
-        self.rx_gain = rx_gain = 0.9
+        self.rx_gain = rx_gain = .9
         self.mod_index_label = mod_index_label = mod_index
         self.freq_dev_label = freq_dev_label = freq_dev
         self.es_mode_label = es_mode_label = es_mode
@@ -105,6 +106,13 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
+        self._rx_gain_range = Range(0, 1, .05, .9, 200)
+        self._rx_gain_win = RangeWidget(self._rx_gain_range, self.set_rx_gain, "'rx_gain'", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._rx_gain_win, 2, 0, 1, 5)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 5):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.uhd_usrp_source_0_0 = uhd.usrp_source(
             ",".join(("", "")),
             uhd.stream_args(
@@ -116,12 +124,17 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.uhd_usrp_source_0_0.set_samp_rate(samp_rate)
         self.uhd_usrp_source_0_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
 
-        self.uhd_usrp_source_0_0.set_center_freq(center_freq, 0)
+        self.uhd_usrp_source_0_0.set_center_freq(center_freq_rx, 0)
         self.uhd_usrp_source_0_0.set_antenna('RX2', 0)
-        self.uhd_usrp_source_0_0.set_rx_agc(True, 0)
+        self.uhd_usrp_source_0_0.set_rx_agc(False, 0)
+        self.uhd_usrp_source_0_0.set_normalized_gain(rx_gain, 0)
         self._threshold_range = Range(-50, 50, 1, -30, 200)
         self._threshold_win = RangeWidget(self._threshold_range, self.set_threshold, "threshold", "counter_slider", float, QtCore.Qt.Horizontal)
-        self.top_layout.addWidget(self._threshold_win)
+        self.top_grid_layout.addWidget(self._threshold_win, 1, 0, 1, 5)
+        for r in range(1, 2):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 5):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self._sensitivity_label_tool_bar = Qt.QToolBar(self)
 
         if None:
@@ -139,6 +152,61 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setColumnStretch(c, 1)
         self.satellites_fsk_demodulator_0 = satellites.components.demodulators.fsk_demodulator(baudrate = data_rate, samp_rate = samp_rate, iq = True, subaudio = False, options="")
         self.satellites_ax25_deframer_0 = satellites.components.deframers.ax25_deframer(g3ruh_scrambler=True, options="")
+        self.qtgui_time_sink_x_0 = qtgui.time_sink_c(
+            1024*15, #size
+            samp_rate, #samp_rate
+            "", #name
+            1, #number of inputs
+            None # parent
+        )
+        self.qtgui_time_sink_x_0.set_update_time(0.10)
+        self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
+
+        self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
+
+        self.qtgui_time_sink_x_0.enable_tags(True)
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_NORM, qtgui.TRIG_SLOPE_POS, 0.2, 0, 0, "")
+        self.qtgui_time_sink_x_0.enable_autoscale(False)
+        self.qtgui_time_sink_x_0.enable_grid(False)
+        self.qtgui_time_sink_x_0.enable_axis_labels(True)
+        self.qtgui_time_sink_x_0.enable_control_panel(True)
+        self.qtgui_time_sink_x_0.enable_stem_plot(False)
+
+
+        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
+            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ['blue', 'red', 'green', 'black', 'cyan',
+            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+        styles = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        markers = [-1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1]
+
+
+        for i in range(2):
+            if len(labels[i]) == 0:
+                if (i % 2 == 0):
+                    self.qtgui_time_sink_x_0.set_line_label(i, "Re{{Data {0}}}".format(i/2))
+                else:
+                    self.qtgui_time_sink_x_0.set_line_label(i, "Im{{Data {0}}}".format(i/2))
+            else:
+                self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_0.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
+        self.top_grid_layout.addWidget(self._qtgui_time_sink_x_0_win, 3, 3, 1, 2)
+        for r in range(3, 4):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(3, 5):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -180,7 +248,11 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
             self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
 
         self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
+        self.top_grid_layout.addWidget(self._qtgui_freq_sink_x_0_win, 3, 0, 1, 3)
+        for r in range(3, 4):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 3):
+            self.top_grid_layout.setColumnStretch(c, 1)
         self._mod_index_label_tool_bar = Qt.QToolBar(self)
 
         if None:
@@ -196,6 +268,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(3, 4):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.gpredict_doppler_1 = gpredict_doppler.doppler(self.set_center_freq_rx, center_freq_rx, "'localhost'", 4532)
         self._freq_dev_label_tool_bar = Qt.QToolBar(self)
 
         if None:
@@ -247,6 +320,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.blocks_message_strobe_0_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'DDR', 'value': 0x0FFF, 'mask': 0xFFFF})), 8000)
         self.blocks_message_strobe_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'CTRL', 'value': 1, 'mask': 0xFFFF})), 7000)
         self.blocks_message_strobe_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_TX', 'value': 1, 'mask': 1})), 10000)
+        self.blocks_message_debug_0 = blocks.message_debug(True)
 
 
         ##################################################
@@ -257,9 +331,11 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.msg_connect((self.blocks_message_strobe_0_0_0, 'strobe'), (self.uhd_usrp_source_0_0, 'command'))
         self.msg_connect((self.blocks_message_strobe_0_1, 'strobe'), (self.uhd_usrp_source_0_0, 'command'))
         self.msg_connect((self.blocks_message_strobe_0_1_0, 'strobe'), (self.uhd_usrp_source_0_0, 'command'))
+        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.blocks_message_debug_0, 'print'))
         self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.epy_block_0, 'msg_in'))
         self.connect((self.satellites_fsk_demodulator_0, 0), (self.satellites_ax25_deframer_0, 0))
         self.connect((self.uhd_usrp_source_0_0, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.uhd_usrp_source_0_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.uhd_usrp_source_0_0, 0), (self.satellites_fsk_demodulator_0, 0))
 
 
@@ -326,6 +402,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
     def set_center_freq_rx(self, center_freq_rx):
         self.center_freq_rx = center_freq_rx
         self.set_center_freq_tx(int(2 * self.center_freq - self.center_freq_rx))
+        self.uhd_usrp_source_0_0.set_center_freq(self.center_freq_rx, 0)
 
     def get_center_freq(self):
         return self.center_freq
@@ -333,7 +410,6 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
         self.set_center_freq_tx(int(2 * self.center_freq - self.center_freq_rx))
-        self.uhd_usrp_source_0_0.set_center_freq(self.center_freq, 0)
 
     def get_threshold(self):
         return self.threshold
@@ -354,6 +430,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
+        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.uhd_usrp_source_0_0.set_samp_rate(self.samp_rate)
 
     def get_rx_gain(self):
@@ -361,6 +438,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
 
     def set_rx_gain(self, rx_gain):
         self.rx_gain = rx_gain
+        self.uhd_usrp_source_0_0.set_normalized_gain(self.rx_gain, 0)
 
     def get_mod_index_label(self):
         return self.mod_index_label
