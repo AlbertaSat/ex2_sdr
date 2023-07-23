@@ -315,24 +315,6 @@ blocks:
     coordinate: [1168, 268.0]
     rotation: 0
     state: enabled
-- name: pad_sink_0_0_0_0
-  id: pad_sink
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    label: raw_b
-    num_streams: '1'
-    optional: 'False'
-    type: byte
-    vlen: '1'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1280, 124.0]
-    rotation: 0
-    state: enabled
 - name: pad_source_0
   id: pad_source
   parameters:
@@ -448,7 +430,6 @@ connections:
 - [analog_simple_squelch_cc_0, '0', analog_quadrature_demod_cf_0, '0']
 - [analog_simple_squelch_cc_0, '0', satellites_fsk_demodulator_0, '0']
 - [digital_binary_slicer_fb_0, '0', digital_correlate_access_code_tag_xx_0, '0']
-- [digital_binary_slicer_fb_0, '0', pad_sink_0_0_0_0, '0']
 - [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
 - [digital_correlate_access_code_tag_xx_0, '0', pad_sink_0_0_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']

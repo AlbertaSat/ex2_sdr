@@ -108,7 +108,7 @@ blocks:
   parameters:
     comment: "EnduroSat Mode\n  = [0,1,2,3,4,5,6,7]\n\nChoose a value before\nrunning\
       \ this flowgraph"
-    value: '3'
+    value: '4'
   states:
     bus_sink: false
     bus_source: false
@@ -411,7 +411,7 @@ blocks:
     bus_structure: null
     coordinate: [1248, 124.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: import_0
   id: import
   parameters:
