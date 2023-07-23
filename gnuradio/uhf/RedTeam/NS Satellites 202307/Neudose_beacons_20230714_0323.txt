@@ -1,0 +1,720 @@
+(gnuradio) ~ % grc  
+<<< Welcome to GNU Radio Companion 3.9.7.0 >>>
+
+Block paths:
+	/home/knud/.grc_gnuradio
+	/home/knud/anaconda3/envs/gnuradio/share/gnuradio/grc/blocks
+
+Loading: "/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/uhf_pdu_demodulator.grc"
+>>> Done
+
+Loading: "/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_loopback_temp.grc"
+>>> Done
+
+Loading: "/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/Grant_F_sig_gen.grc"
+>>> Done
+
+Loading: "/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_receiver.grc"
+>>> Done
+
+Loading: "/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_transmitter.grc"
+>>> Done
+
+Loading: "/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_receiver_ax25.grc"
+>>> Done
+
+Loading: "/home/knud/untitled.grc"
+>>> Done
+
+Generating: '/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_transmitter.py'
+
+Executing: /home/knud/anaconda3/envs/gnuradio/bin/python -u /home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_transmitter.py
+
+/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_transmitter.py:407: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_transmitter.py:78: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+[INFO] [UHD] linux; GNU C++ version 10.3.0; Boost_107400; UHD_4.2.0.HEAD-release
+[INFO] [B200] Detected Device: B200mini
+[INFO] [B200] Operating over USB 3.
+[INFO] [B200] Initialize CODEC control...
+[INFO] [B200] Initialize Radio control...
+[INFO] [B200] Performing register loopback test... 
+[INFO] [B200] Register loopback test passed
+[INFO] [B200] Setting master clock rate selection to 'automatic'.
+[INFO] [B200] Asking for clock rate 16.000000 MHz... 
+[INFO] [B200] Actually got clock rate 16.000000 MHz.
+[INFO] [B200] Asking for clock rate 39.321600 MHz... 
+[INFO] [B200] Actually got clock rate 39.321600 MHz.
+('127.0.0.1', 4532)
+[INFO] [B200] Asking for clock rate 39.321600 MHz... 
+[INFO] [B200] OK
+[INFO] [B200] Asking for clock rate 39.321600 MHz... 
+[INFO] [B200] OK
+Waiting for connection on: 127.0.0.1:4532
+Connected from: 127.0.0.1:55634
+New frequency: 437883733
+New frequency: 437883722
+New frequency: 437883711
+New frequency: 437883696
+New frequency: 437883684
+New frequency: 437883672
+New frequency: 437883660
+New frequency: 437883644
+New frequency: 437883632
+New frequency: 437883620
+New frequency: 437883604
+New frequency: 437883591
+New frequency: 437883578
+New frequency: 437883561
+New frequency: 437883548
+New frequency: 437883535
+New frequency: 437883517
+New frequency: 437883504
+New frequency: 437883490
+New frequency: 437883472
+New frequency: 437883458
+New frequency: 437883444
+New frequency: 437883425
+New frequency: 437883411
+New frequency: 437883396
+New frequency: 437883376
+New frequency: 437883361
+New frequency: 437883346
+New frequency: 437883326
+New frequency: 437883310
+New frequency: 437883295
+New frequency: 437883274
+New frequency: 437883258
+New frequency: 437883241
+New frequency: 437883220
+New frequency: 437883203
+New frequency: 437883186
+New frequency: 437883164
+New frequency: 437883146
+New frequency: 437883129
+New frequency: 437883106
+New frequency: 437883088
+New frequency: 437883070
+New frequency: 437883046
+New frequency: 437883027
+New frequency: 437883008
+New frequency: 437882983
+New frequency: 437882964
+New frequency: 437882945
+New frequency: 437882919
+New frequency: 437882899
+New frequency: 437882879
+New frequency: 437882852
+New frequency: 437882831
+New frequency: 437882811
+New frequency: 437882783
+New frequency: 437882761
+New frequency: 437882740
+New frequency: 437882711
+New frequency: 437882689
+New frequency: 437882666
+New frequency: 437882636
+New frequency: 437882614
+New frequency: 437882590
+New frequency: 437882559
+New frequency: 437882536
+New frequency: 437882512
+New frequency: 437882479
+New frequency: 437882455
+New frequency: 437882430
+New frequency: 437882397
+New frequency: 437882371
+New frequency: 437882345
+New frequency: 437882311
+New frequency: 437882284
+New frequency: 437882258
+New frequency: 437882231
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437882195
+New frequency: 437882167
+New frequency: 437882139
+New frequency: 437882101
+New frequency: 437882073
+New frequency: 437882044
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437882005
+New frequency: 437881975
+New frequency: 437881945
+New frequency: 437881905
+New frequency: 437881874
+New frequency: 437881843
+New frequency: 437881802
+New frequency: 437881770
+New frequency: 437881738
+New frequency: 437881694
+New frequency: 437881662
+New frequency: 437881628
+New frequency: 437881583
+New frequency: 437881549
+New frequency: 437881515
+New frequency: 437881469
+New frequency: 437881433
+New frequency: 437881398
+New frequency: 437881350
+New frequency: 437881313
+New frequency: 437881276
+New frequency: 437881227
+New frequency: 437881189
+New frequency: 437881151
+New frequency: 437881099
+New frequency: 437881060
+New frequency: 437881021
+New frequency: 437880968
+New frequency: 437880927
+New frequency: 437880887
+New frequency: 437880832
+New frequency: 437880790
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437880748
+New frequency: 437880691
+New frequency: 437880648
+New frequency: 437880605
+New frequency: 437880546
+New frequency: 437880502
+New frequency: 437880457
+New frequency: 437880396
+New frequency: 437880350
+New frequency: 437880304
+New frequency: 437880242
+New frequency: 437880195
+New frequency: 437880147
+New frequency: 437880083
+New frequency: 437880034
+New frequency: 437879985
+New frequency: 437879918
+New frequency: 437879868
+New frequency: 437879818
+New frequency: 437879750
+New frequency: 437879698
+New frequency: 437879646
+New frequency: 437879576
+New frequency: 437879523
+New frequency: 437879469
+New frequency: 437879397
+New frequency: 437879342
+New frequency: 437879287
+New frequency: 437879213
+New frequency: 437879157
+New frequency: 437879101
+New frequency: 437879025
+New frequency: 437878968
+New frequency: 437878910
+New frequency: 437878832
+New frequency: 437878773
+New frequency: 437878714
+New frequency: 437878654
+New frequency: 437878574
+New frequency: 437878513
+New frequency: 437878452
+New frequency: 437878370
+New frequency: 437878308
+New frequency: 437878246
+New frequency: 437878162
+New frequency: 437878099
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437878035
+New frequency: 437877950
+New frequency: 437877885
+New frequency: 437877821
+New frequency: 437877734
+New frequency: 437877668
+New frequency: 437877602
+New frequency: 437877513
+New frequency: 437877447
+New frequency: 437877380
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437877290
+New frequency: 437877222
+New frequency: 437877154
+New frequency: 437877062
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437876993
+New frequency: 437876924
+New frequency: 437876832
+New frequency: 437876762
+New frequency: 437876692
+New frequency: 437876599
+New frequency: 437876528
+New frequency: 437876458
+New frequency: 437876363
+New frequency: 437876292
+New frequency: 437876221
+New frequency: 437876126
+New frequency: 437876054
+New frequency: 437875982
+New frequency: 437875886
+New frequency: 437875814
+New frequency: 437875742
+New frequency: 437875645
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437875573
+New frequency: 437875500
+New frequency: 437875403
+New frequency: 437875331
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437875258
+New frequency: 437875161
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437875088
+New frequency: 437875015
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437874918
+New frequency: 437874845
+New frequency: 437874772
+New frequency: 437874675
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437874603
+New frequency: 437874530
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437874433
+New frequency: 437874361
+New frequency: 437874288
+New frequency: 437874192
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437874120
+New frequency: 437874048
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437873952
+New frequency: 437873880
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437873809
+New frequency: 437873714
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437873643
+New frequency: 437873572
+Raw data : 
+#[0 210 101]
+Dest Call Sign : Òe
+Src Call Sign : 
+Payload : 
+New frequency: 437873477
+New frequency: 437873407
+New frequency: 437873337
+New frequency: 437873244
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437873174
+New frequency: 437873105
+New frequency: 437873036
+New frequency: 437872944
+New frequency: 437872875
+New frequency: 437872807
+New frequency: 437872717
+New frequency: 437872649
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437872582
+New frequency: 437872493
+New frequency: 437872426
+New frequency: 437872360
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437872272
+New frequency: 437872207
+New frequency: 437872142
+New frequency: 437872056
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437871992
+New frequency: 437871928
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437871843
+New frequency: 437871781
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437871718
+New frequency: 437871635
+New frequency: 437871574
+New frequency: 437871513
+New frequency: 437871432
+New frequency: 437871371
+New frequency: 437871312
+New frequency: 437871232
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437871173
+New frequency: 437871115
+New frequency: 437871038
+New frequency: 437870980
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437870923
+New frequency: 437870848
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437870792
+New frequency: 437870736
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437870663
+New frequency: 437870608
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437870554
+New frequency: 437870482
+New frequency: 437870429
+New frequency: 437870377
+New frequency: 437870307
+New frequency: 437870255
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437870204
+New frequency: 437870136
+New frequency: 437870086
+New frequency: 437870036
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437869971
+New frequency: 437869922
+New frequency: 437869874
+New frequency: 437869810
+New frequency: 437869763
+New frequency: 437869716
+New frequency: 437869654
+New frequency: 437869608
+New frequency: 437869563
+New frequency: 437869518
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437869458
+New frequency: 437869414
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437869371
+New frequency: 437869313
+New frequency: 437869270
+New frequency: 437869228
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437869173
+New frequency: 437869131
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437869090
+New frequency: 437869037
+New frequency: 437868997
+New frequency: 437868957
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437868905
+New frequency: 437868866
+New frequency: 437868828
+New frequency: 437868778
+New frequency: 437868740
+New frequency: 437868703
+New frequency: 437868654
+New frequency: 437868618
+New frequency: 437868582
+New frequency: 437868535
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437868500
+New frequency: 437868466
+New frequency: 437868420
+New frequency: 437868387
+New frequency: 437868353
+New frequency: 437868309
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437868277
+New frequency: 437868245
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437868202
+New frequency: 437868171
+New frequency: 437868140
+New frequency: 437868099
+New frequency: 437868068
+New frequency: 437868038
+New frequency: 437867999
+New frequency: 437867969
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437867940
+New frequency: 437867902
+New frequency: 437867874
+New frequency: 437867846
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437867809
+New frequency: 437867782
+New frequency: 437867755
+New frequency: 437867719
+New frequency: 437867693
+New frequency: 437867667
+New frequency: 437867632
+New frequency: 437867607
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437867582
+New frequency: 437867548
+New frequency: 437867524
+New frequency: 437867500
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437867468
+New frequency: 437867444
+New frequency: 437867421
+New frequency: 437867390
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437867367
+New frequency: 437867344
+New frequency: 437867314
+New frequency: 437867292
+New frequency: 437867271
+New frequency: 437867242
+New frequency: 437867221
+New frequency: 437867199
+New frequency: 437867179
+New frequency: 437867151
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437867131
+New frequency: 437867111
+New frequency: 437867084
+New frequency: 437867065
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437867045
+New frequency: 437867020
+New frequency: 437867001
+New frequency: 437866982
+New frequency: 437866958
+New frequency: 437866939
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437866921
+New frequency: 437866897
+New frequency: 437866880
+New frequency: 437866862
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437866839
+New frequency: 437866822
+New frequency: 437866806
+New frequency: 437866783
+New frequency: 437866767
+New frequency: 437866751
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437866729
+New frequency: 437866713
+New frequency: 437866698
+New frequency: 437866677
+New frequency: 437866662
+New frequency: 437866647
+New frequency: 437866627
+New frequency: 437866612
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437866597
+New frequency: 437866578
+New frequency: 437866564
+New frequency: 437866550
+New frequency: 437866531
+New frequency: 437866517
+New frequency: 437866504
+New frequency: 437866486
+New frequency: 437866472
+New frequency: 437866459
+New frequency: 437866442
+New frequency: 437866429
+New frequency: 437866416
+New frequency: 437866399
+New frequency: 437866387
+New frequency: 437866375
+New frequency: 437866358
+New frequency: 437866346
+New frequency: 437866335
+New frequency: 437866319
+New frequency: 437866307
+New frequency: 437866296
+New frequency: 437866281
+New frequency: 437866269
+New frequency: 437866258
+New frequency: 437866244
+New frequency: 437866233
+New frequency: 437866222
+New frequency: 437866208
+New frequency: 437866198
+New frequency: 437866187
+New frequency: 437866174
+New frequency: 437866163
+New frequency: 437866153
+New frequency: 437866140
+New frequency: 437866130
+New frequency: 437866121
+Disconnected from: 127.0.0.1:55634
+Waiting for connection on: 127.0.0.1:4532
+[1]    24688 killed     gnuradio-companion
+(gnuradio) ~ % 
+
+

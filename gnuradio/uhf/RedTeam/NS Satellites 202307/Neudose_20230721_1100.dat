@@ -1,0 +1,43 @@
+New frequency: 437884906
+New frequency: 437884903
+New frequency: 437884900
+New frequency: 437884898
+New frequency: 437884895
+New frequency: 437884892
+New frequency: 437884890
+New frequency: 437884887
+New frequency: 437884884
+New frequency: 437884881
+New frequency: 437884879
+New frequency: 437884875
+New frequency: 437884872
+New frequency: 437884869
+New frequency: 437884866
+New frequency: 437884863
+New frequency: 437884860
+New frequency: 437884856
+New frequency: 437884853
+New frequency: 437884850
+New frequency: 437884846
+New frequency: 437884843
+New frequency: 437884840
+New frequency: 437884835
+New frequency: 437884832
+New frequency: 437884829
+New frequency: 437884824
+New frequency: 437884821
+New frequency: 437884818
+New frequency: 437884813
+New frequency: 437884809
+New frequency: 437884806
+New frequency: 437884801
+******* MESSAGE DEBUG PRINT ********
+(() . #[144 117 20 122 172 23 53 218 34 75 10 97 13 114])
+************************************
+Raw data : 
+#[144 117 20 122 172 23 53 218 34 75 10 97 13 114]
+Dest Call Sign : (gnuradio) knud@G62-6QD:~/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam$ 
+
+
+
+another lightning packet. Seems to mess up the terminal as in GR could still see console output.

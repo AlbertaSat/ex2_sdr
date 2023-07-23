@@ -1,0 +1,283 @@
+/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_transmitter.py:78: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+[INFO] [UHD] linux; GNU C++ version 10.4.0; Boost_107800; UHD_4.2.0.HEAD-release
+[INFO] [B200] Detected Device: B200mini
+[INFO] [B200] Operating over USB 2.
+[INFO] [B200] Initialize CODEC control...
+[INFO] [B200] Initialize Radio control...
+[INFO] [B200] Performing register loopback test... 
+[INFO] [B200] Register loopback test passed
+[INFO] [B200] Setting master clock rate selection to 'automatic'.
+[INFO] [B200] Asking for clock rate 16.000000 MHz... 
+[INFO] [B200] Actually got clock rate 16.000000 MHz.
+[INFO] [B200] Asking for clock rate 39.321600 MHz... 
+[INFO] [B200] Actually got clock rate 39.321600 MHz.
+('127.0.0.1', 4532)
+[INFO] [B200] Asking for clock rate 39.321600 MHz... 
+[INFO] [B200] OK
+[INFO] [B200] Asking for clock rate 39.321600 MHz... 
+[INFO] [B200] OK
+Waiting for connection on: 127.0.0.1:4532
+Connected from: 127.0.0.1:58568
+New frequency: 437868688
+New frequency: 437868586
+New frequency: 437868512
+New frequency: 437868438
+New frequency: 437868343
+New frequency: 437868273
+New frequency: 437868205
+New frequency: 437868117
+New frequency: 437868052
+New frequency: 437867988
+New frequency: 437867906
+New frequency: 437867846
+New frequency: 437867787
+New frequency: 437867710
+New frequency: 437867654
+New frequency: 437867600
+New frequency: 437867529
+New frequency: 437867476
+New frequency: 437867426
+New frequency: 437867359
+New frequency: 437867311
+New frequency: 437867264
+New frequency: 437867202
+New frequency: 437867157
+New frequency: 437867113
+New frequency: 437867056
+New frequency: 437867014
+New frequency: 437866973
+New frequency: 437866920
+New frequency: 437866881
+New frequency: 437866843
+New frequency: 437866794
+New frequency: 437866758
+New frequency: 437866722
+New frequency: 437866676
+New frequency: 437866643
+New frequency: 437866610
+New frequency: 437866567
+New frequency: 437866535
+New frequency: 437866505
+New frequency: 437866465
+New frequency: 437866435
+New frequency: 437866407
+New frequency: 437866370
+New frequency: 437866342
+New frequency: 437866316
+New frequency: 437866281
+New frequency: 437866255
+New frequency: 437866230
+New frequency: 437866206
+New frequency: 437866174
+New frequency: 437866151
+New frequency: 437866128
+New frequency: 437866098
+New frequency: 437866076
+New frequency: 437866055
+New frequency: 437866027
+New frequency: 437866006
+New frequency: 437865986
+New frequency: 437865960
+New frequency: 437865941
+New frequency: 437865922
+New frequency: 437865898
+New frequency: 437865880
+New frequency: 437865862
+New frequency: 437865839
+New frequency: 437865822
+New frequency: 437865806
+New frequency: 437865784
+New frequency: 437865768
+New frequency: 437865753
+New frequency: 437865732
+New frequency: 437865718
+New frequency: 437865703
+New frequency: 437865684
+New frequency: 437865670
+New frequency: 437865656
+New frequency: 437865638
+New frequency: 437865625
+New frequency: 437865612
+New frequency: 437865595
+New frequency: 437865583
+New frequency: 437865571
+New frequency: 437865555
+New frequency: 437865543
+New frequency: 437865532
+New frequency: 437865517
+New frequency: 437865506
+New frequency: 437865495
+New frequency: 437865481
+New frequency: 437865470
+New frequency: 437865460
+New frequency: 437865447
+New frequency: 437865437
+New frequency: 437865427
+New frequency: 437865415
+New frequency: 437865405
+New frequency: 437865396
+New frequency: 437865384
+New frequency: 437865376
+New frequency: 437865367
+New frequency: 437865356
+New frequency: 437865347
+New frequency: 437865339
+New frequency: 437865329
+New frequency: 437865321
+New frequency: 437865313
+New frequency: 437865303
+New frequency: 437865296
+New frequency: 437865288
+New frequency: 437865279
+New frequency: 437865272
+New frequency: 437865265
+New frequency: 437865256
+New frequency: 437865249
+New frequency: 437865242
+New frequency: 437865234
+New frequency: 437865227
+New frequency: 437865221
+New frequency: 437865213
+New frequency: 437865207
+New frequency: 437865201
+New frequency: 437865193
+New frequency: 437865188
+New frequency: 437865182
+New frequency: 437865175
+New frequency: 437865169
+New frequency: 437865164
+New frequency: 437865157
+New frequency: 437865152
+New frequency: 437865147
+New frequency: 437865140
+New frequency: 437865136
+New frequency: 437865131
+New frequency: 437865126
+New frequency: 437865120
+New frequency: 437865115
+New frequency: 437865111
+New frequency: 437865105
+New frequency: 437865101
+New frequency: 437865096
+New frequency: 437865091
+New frequency: 437865087
+New frequency: 437865083
+New frequency: 437865077
+New frequency: 437865073
+New frequency: 437865070
+New frequency: 437865064
+New frequency: 437865061
+New frequency: 437865057
+New frequency: 437865052
+New frequency: 437865049
+New frequency: 437865045
+New frequency: 437865041
+New frequency: 437865037
+New frequency: 437865034
+New frequency: 437865030
+New frequency: 437865027
+******* MESSAGE DEBUG PRINT ********
+(() . #[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33])
+************************************
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437865023
+New frequency: 437865019
+New frequency: 437865016
+New frequency: 437865013
+New frequency: 437865009
+New frequency: 437865006
+New frequency: 437865004
+New frequency: 437865000
+New frequency: 437864997
+New frequency: 437864994
+New frequency: 437864991
+New frequency: 437864988
+New frequency: 437864986
+New frequency: 437864982
+New frequency: 437864980
+New frequency: 437864977
+New frequency: 437864974
+New frequency: 437864972
+New frequency: 437864970
+New frequency: 437864967
+New frequency: 437864964
+New frequency: 437864962
+New frequency: 437864959
+New frequency: 437864957
+New frequency: 437864955
+New frequency: 437864952
+New frequency: 437864950
+New frequency: 437864948
+New frequency: 437864946
+New frequency: 437864944
+New frequency: 437864942
+New frequency: 437864939
+New frequency: 437864938
+New frequency: 437864936
+New frequency: 437864934
+New frequency: 437864932
+New frequency: 437864930
+New frequency: 437864928
+New frequency: 437864926
+New frequency: 437864925
+New frequency: 437864923
+New frequency: 437864921
+New frequency: 437864920
+New frequency: 437864918
+New frequency: 437864916
+New frequency: 437864915
+New frequency: 437864913
+New frequency: 437864911
+New frequency: 437864910
+New frequency: 437864909
+New frequency: 437864907
+New frequency: 437864906
+New frequency: 437864904
+New frequency: 437864903
+New frequency: 437864902
+New frequency: 437864900
+New frequency: 437864899
+New frequency: 437864898
+New frequency: 437864897
+New frequency: 437864895
+******* MESSAGE DEBUG PRINT ********
+(() . #[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33])
+************************************
+Raw data : 
+#[134 162 64 64 64 64 224 176 176 96 170 144 140 225 3 240 72 101 108 108 111 44 32 119 111 114 108 100 33]
+Dest Call Sign : ¢@@@@
+Src Call Sign : °°`ª
+Payload : Hello, world!
+New frequency: 437864894
+New frequency: 437864893
+New frequency: 437864892
+New frequency: 437864891
+New frequency: 437864890
+New frequency: 437864888
+New frequency: 437864887
+New frequency: 437864885
+New frequency: 437864884
+New frequency: 437864883
+New frequency: 437864882
+New frequency: 437864881
+New frequency: 437864880
+New frequency: 437864879
+New frequency: 437864878
+New frequency: 437864877
+New frequency: 437864876
+New frequency: 437864875
+New frequency: 437864874
+New frequency: 437864873
+New frequency: 437864872
+New frequency: 437864871
+Disconnected from: 127.0.0.1:58568
+Waiting for connection on: 127.0.0.1:4532
+Killed
+(gnuradio) knud@G62-6QD:~/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam$ 
+
+
