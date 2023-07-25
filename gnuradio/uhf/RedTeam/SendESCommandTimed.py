@@ -91,7 +91,10 @@ esttc_msg_questions = [
         'message': 'What ESTTC command would you like to send?',
         'choices': [
             'Read Status Control Word (SCW)',
+            'Set beacon period 2 s',
             'Set beacon period 5 s',
+            'Set beacon period 30 s',
+            'Set beacon period 60 s',
             'Get radio uptime',
             'Get radio received packets',
             'Set RF Mode w/ Beacon On (DANGEROUS)',
@@ -222,11 +225,24 @@ def writeSCWRFMode7BeaconOff():
     writeSCWRFModeMsg = b"ES+W22003703 6DA4C5DD"+b"\r"
     return writeSCWRFModeMsg
 
-def setBeaconPeriod():
-    print('Command is Set beacon period, which is hard-coded to 5 seconds.')
+def setBeaconPeriod_2s():
+    print('Command is Set beacon period, which is hard-coded to 2 seconds.')
     beaconPeriodMsg = b"ES+W220700000002 304EDACD"+b"\r"
-    #beaconPeriodMsg = b"ES+W220700000005 AE2A4F6E"+b"\r"
-    #beaconPeriodMsg = b"ES+W22070000003C 3C61C8A4"+b"\r"
+    return beaconPeriodMsg
+
+def setBeaconPeriod_5s():
+    print('Command is Set beacon period, which is hard-coded to 5 seconds.')
+    beaconPeriodMsg = b"ES+W220700000005 AE2A4F6E"+b"\r"
+    return beaconPeriodMsg
+
+def setBeaconPeriod_30s():
+    print('Command is Set beacon period, which is hard-coded to 30 seconds.')
+    beaconPeriodMsg = b"ES+W22070000001E E7340F13"+b"\r"
+    return beaconPeriodMsg
+
+def setBeaconPeriod_60s():
+    print('Command is Set beacon period, which is hard-coded to 60 seconds.')
+    beaconPeriodMsg = b"ES+W22070000003C 3C61C8A4"+b"\r"
     return beaconPeriodMsg
 
 def readUptime():
@@ -359,8 +375,17 @@ def main():
         if result['esttc_msg'] == 'Read Status Control Word (SCW)':
             commandStr = readSCW()
 
+        if result['esttc_msg'] == 'Set beacon period 2 s':
+            commandStr = setBeaconPeriod_2s()
+
         if result['esttc_msg'] == 'Set beacon period 5 s':
-            commandStr = setBeaconPeriod()
+            commandStr = setBeaconPeriod_5s()
+
+        if result['esttc_msg'] == 'Set beacon period 30 s':
+            commandStr = setBeaconPeriod_30s()
+
+        if result['esttc_msg'] == 'Set beacon period 60 s':
+            commandStr = setBeaconPeriod_60s()
 
         if result['esttc_msg'] == 'Get radio uptime':
             commandStr = readUptime()
