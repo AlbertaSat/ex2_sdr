@@ -97,6 +97,8 @@ esttc_msg_questions = [
             'Set beacon period 60 s',
             'Get radio uptime',
             'Get radio received packets',
+            'Set SRC call sign to VA6UAB',
+            'Set DST call sign to VA6UAB',
             'Set RF Mode w/ Beacon On (DANGEROUS)',
             'Set RF Mode w/ Beacon Off (DANGEROUS)',
             'Quit',
@@ -255,6 +257,17 @@ def readNumReceivedPackets():
     numPacketsMsg = b"ES+R2204 BAE54A06"+b"\r"
     return numPacketsMsg
 
+def setSRCCallSign():
+    print('Set SRC call sign to VA6UAB.')
+    numPacketsMsg = b"ES+W22F6VA6UAB A184622B"+b"\r"
+    return numPacketsMsg
+
+def setDSTCallSign():
+    print('Set DST call sign to VA6UAB.')
+    numPacketsMsg = b"ES+W22F5VA6UAB 906C78B6"+b"\r"
+    return numPacketsMsg
+
+
 #
 # Functions to query for program parameters
 #
@@ -392,6 +405,12 @@ def main():
 
         if result['esttc_msg'] == 'Get radio received packets':
             commandStr = readNumReceivedPackets()
+
+        if result['esttc_msg'] == 'Set SRC call sign to VA6UAB':
+            commandStr = setSRCCallSign()
+
+        if result['esttc_msg'] == 'Set DST call sign to VA6UAB':
+            commandStr = setDSTCallSign()
 
         if result['esttc_msg'] == 'Set RF Mode w/ Beacon On (DANGEROUS)':
             modeResult = prompt(rf_mode_questions)
