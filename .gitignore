@@ -5,3 +5,4 @@ Debug**
 .settings
 .obsidian
 *pycache*
+*.raw
