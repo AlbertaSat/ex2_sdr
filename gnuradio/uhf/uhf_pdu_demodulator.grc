@@ -28,7 +28,7 @@ options:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 12.0]
+    coordinate: [8, 8.0]
     rotation: 0
     state: enabled
 
@@ -42,9 +42,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 396.0]
+    coordinate: [8, 392.0]
     rotation: 0
-    state: true
+    state: enabled
 - name: nfilts
   id: variable
   parameters:
@@ -54,7 +54,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [280, 396.0]
+    coordinate: [208, 392.0]
     rotation: 0
     state: enabled
 - name: oversample_rate
@@ -66,7 +66,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 460.0]
+    coordinate: [8, 464.0]
     rotation: 0
     state: enabled
 - name: samp_rate
@@ -78,7 +78,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [400, 144.0]
+    coordinate: [112, 392.0]
     rotation: 0
     state: true
 - name: taps
@@ -90,7 +90,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [280, 460.0]
+    coordinate: [128, 464.0]
     rotation: 0
     state: true
 - name: analog_quadrature_demod_cf_0
@@ -108,7 +108,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 252.0]
+    coordinate: [424, 208.0]
     rotation: 0
     state: enabled
 - name: analog_simple_squelch_cc_0
@@ -125,7 +125,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [272, 244.0]
+    coordinate: [224, 200.0]
     rotation: 0
     state: enabled
 - name: baud_rate
@@ -142,7 +142,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [744, 12.0]
+    coordinate: [744, 8.0]
     rotation: 0
     state: true
 - name: digital_binary_slicer_fb_0
@@ -157,28 +157,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [992, 208.0]
+    coordinate: [904, 168.0]
     rotation: 0
     state: enabled
-- name: digital_correlate_access_code_tag_xx_0
-  id: digital_correlate_access_code_tag_xx
-  parameters:
-    access_code: packet_sync_word
-    affinity: ''
-    alias: ''
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    tagname: FS
-    threshold: '0'
-    type: byte
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [952, 300.0]
-    rotation: 0
-    state: disabled
 - name: digital_pfb_clock_sync_xxx_0
   id: digital_pfb_clock_sync_xxx
   parameters:
@@ -199,7 +180,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [720, 204.0]
+    coordinate: [632, 160.0]
     rotation: 0
     state: enabled
 - name: fm_modulation_index
@@ -216,7 +197,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [408, 12.0]
+    coordinate: [408, 8.0]
     rotation: 0
     state: true
 - name: fm_samples_per_symbol
@@ -233,7 +214,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [568, 12.0]
+    coordinate: [568, 8.0]
     rotation: 0
     state: true
 - name: import_0
@@ -246,22 +227,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [192, 12.0]
+    coordinate: [192, 8.0]
     rotation: 0
     state: true
-- name: note_0
-  id: note
-  parameters:
-    alias: ''
-    comment: ''
-    note: Unpacked
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1056, 148.0]
-    rotation: 0
-    state: enabled
 - name: packet_sync_word
   id: parameter
   parameters:
@@ -276,7 +244,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1000, 12.0]
+    coordinate: [1000, 8.0]
     rotation: 0
     state: true
 - name: pad_sink_0
@@ -294,27 +262,27 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1472, 204.0]
+    coordinate: [1376, 160.0]
     rotation: 0
     state: true
-- name: pad_sink_0_0_0
+- name: pad_sink_0_0
   id: pad_sink
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    label: raw_f
+    label: beacons
     num_streams: '1'
     optional: 'False'
-    type: float
+    type: message
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1168, 268.0]
+    coordinate: [1352, 352.0]
     rotation: 0
-    state: enabled
+    state: true
 - name: pad_source_0
   id: pad_source
   parameters:
@@ -332,7 +300,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [96, 252.0]
+    coordinate: [8, 208.0]
     rotation: 0
     state: true
 - name: pdu_nominal_length
@@ -349,7 +317,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1208, 4.0]
+    coordinate: [1168, 8.0]
     rotation: 0
     state: true
 - name: satellites_ax25_deframer_0
@@ -366,9 +334,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1224, 364.0]
+    coordinate: [1080, 352.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: satellites_fsk_demodulator_0
   id: satellites_fsk_demodulator
   parameters:
@@ -386,9 +354,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [488, 348.0]
+    coordinate: [424, 336.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: satellites_sync_to_pdu_packed_0_0
   id: satellites_sync_to_pdu_packed
   parameters:
@@ -404,7 +372,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1168, 188.0]
+    coordinate: [1080, 144.0]
     rotation: 0
     state: enabled
 - name: squelch_threshold
@@ -421,23 +389,18 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [832, 20.0]
+    coordinate: [832, 8.0]
     rotation: 0
     state: true
 
 connections:
 - [analog_quadrature_demod_cf_0, '0', digital_pfb_clock_sync_xxx_0, '0']
 - [analog_simple_squelch_cc_0, '0', analog_quadrature_demod_cf_0, '0']
-- [analog_simple_squelch_cc_0, '0', satellites_fsk_demodulator_0, '0']
-- [digital_binary_slicer_fb_0, '0', digital_correlate_access_code_tag_xx_0, '0']
 - [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
-- [digital_correlate_access_code_tag_xx_0, '0', pad_sink_0_0_0, '0']
 - [digital_pfb_clock_sync_xxx_0, '0', digital_binary_slicer_fb_0, '0']
-- [digital_pfb_clock_sync_xxx_0, '0', pad_sink_0_0_0, '0']
-- [digital_pfb_clock_sync_xxx_0, '0', satellites_ax25_deframer_0, '0']
 - [pad_source_0, '0', analog_simple_squelch_cc_0, '0']
-- [satellites_ax25_deframer_0, out, pad_sink_0, in]
-- [satellites_fsk_demodulator_0, '0', pad_sink_0_0_0, '0']
+- [pad_source_0, '0', satellites_fsk_demodulator_0, '0']
+- [satellites_ax25_deframer_0, out, pad_sink_0_0, in]
 - [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
 - [satellites_sync_to_pdu_packed_0_0, out, pad_sink_0, in]
 

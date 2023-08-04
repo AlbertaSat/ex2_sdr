@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Northern SPIRIT Receiver with beacon decode and raw signal save to file
+    title: Northern SPIRIT Ground Station received signal read from file
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -33,6 +33,18 @@ options:
     state: enabled
 
 blocks:
+- name: center_freq
+  id: variable
+  parameters:
+    comment: ''
+    value: '437875000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [200, 8.0]
+    rotation: 0
+    state: enabled
 - name: data_rate
   id: variable
   parameters:
@@ -71,7 +83,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [232, 192.0]
+    coordinate: [200, 208.0]
     rotation: 0
     state: enabled
 - name: es_mode_label
@@ -143,28 +155,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 84.0]
-    rotation: 0
-    state: true
-- name: rx_gain
-  id: variable_qtgui_range
-  parameters:
-    comment: ''
-    gui_hint: 2,0,1,5
-    label: ''
-    min_len: '200'
-    orient: QtCore.Qt.Horizontal
-    rangeType: float
-    start: '0'
-    step: '.05'
-    stop: '1'
-    value: '.9'
-    widget: counter_slider
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [208, 356.0]
+    coordinate: [960, 88.0]
     rotation: 0
     state: true
 - name: samp_rate
@@ -176,7 +167,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 76.0]
+    coordinate: [592, 80.0]
     rotation: 0
     state: enabled
 - name: samples_per_symbol
@@ -188,7 +179,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 76.0]
+    coordinate: [200, 80.0]
     rotation: 0
     state: enabled
 - name: sensitivity_label
@@ -204,7 +195,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [800, 84.0]
+    coordinate: [800, 88.0]
     rotation: 0
     state: true
 - name: sensitivity_tx
@@ -216,7 +207,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 76.0]
+    coordinate: [480, 80.0]
     rotation: 0
     state: enabled
 - name: blocks_file_source_0
@@ -226,7 +217,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /media/Michael/SAT_rcv_20230801_1809.raw
+    file: /media/Michael/test_three_commands.dat
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'
@@ -238,7 +229,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [504, 392.0]
+    coordinate: [8, 392.0]
     rotation: 0
     state: true
 - name: blocks_message_debug_0
@@ -252,8 +243,29 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1288, 304.0]
-    rotation: 180
+    coordinate: [1280, 400.0]
+    rotation: 0
+    state: enabled
+- name: blocks_socket_pdu_0
+  id: blocks_socket_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: "Command Response PDUs\nare passed to the ground\nstation software for\
+      \ \nprocessing."
+    host: 127.0.0.1
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mtu: '10000'
+    port: '4321'
+    tcp_no_delay: 'False'
+    type: TCP_SERVER
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1280, 224.0]
+    rotation: 0
     state: enabled
 - name: blocks_throttle_0
   id: blocks_throttle
@@ -264,14 +276,14 @@ blocks:
     ignoretag: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: samp_rate*10
+    samples_per_second: samp_rate
     type: complex
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [792, 424.0]
+    coordinate: [328, 360.0]
     rotation: 0
     state: enabled
 - name: epy_block_0
@@ -308,8 +320,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1312, 488.0]
-    rotation: 180
+    coordinate: [1280, 504.0]
+    rotation: 0
     state: true
 - name: import_0
   id: import
@@ -347,7 +359,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 140.0]
+    coordinate: [200, 152.0]
     rotation: 0
     state: true
 - name: note_0_0
@@ -360,7 +372,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 140.0]
+    coordinate: [480, 152.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0
@@ -441,8 +453,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [776, 260.0]
-    rotation: 180
+    coordinate: [744, 272.0]
+    rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
   id: qtgui_waterfall_sink_x
@@ -502,55 +514,39 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1056, 176.0]
+    coordinate: [744, 512.0]
     rotation: 0
     state: true
-- name: satellites_ax25_deframer_0
-  id: satellites_ax25_deframer
+- name: uhf_pdu_demodulate_0
+  id: uhf_pdu_demodulate
   parameters:
     affinity: ''
     alias: ''
+    baud_rate: data_rate
     comment: ''
-    g3ruh_scrambler: 'True'
+    fm_modulation_index: mod_index
+    fm_samples_per_symbol: samples_per_symbol
     maxoutbuf: '0'
     minoutbuf: '0'
-    options: '""'
+    packet_sync_word: '''10101010101010100111111010000000'''
+    pdu_nominal_length: '128'
+    squelch_threshold: '-10'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1256, 424.0]
+    coordinate: [744, 368.0]
     rotation: 0
-    state: enabled
-- name: satellites_fsk_demodulator_0
-  id: satellites_fsk_demodulator
-  parameters:
-    affinity: ''
-    alias: ''
-    baudrate: data_rate
-    comment: ''
-    iq: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    options: '""'
-    samp_rate: samp_rate
-    subaudio: 'False'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1048, 408.0]
-    rotation: 0
-    state: enabled
+    state: true
 
 connections:
 - [blocks_file_source_0, '0', blocks_throttle_0, '0']
 - [blocks_throttle_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_throttle_0, '0', qtgui_waterfall_sink_x_0, '0']
-- [blocks_throttle_0, '0', satellites_fsk_demodulator_0, '0']
-- [satellites_ax25_deframer_0, out, blocks_message_debug_0, print]
-- [satellites_ax25_deframer_0, out, epy_block_0, msg_in]
-- [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
+- [blocks_throttle_0, '0', uhf_pdu_demodulate_0, '0']
+- [uhf_pdu_demodulate_0, beacons, epy_block_0, msg_in]
+- [uhf_pdu_demodulate_0, pdus, blocks_message_debug_0, print]
+- [uhf_pdu_demodulate_0, pdus, blocks_socket_pdu_0, pdus]
 
 metadata:
   file_format: 1

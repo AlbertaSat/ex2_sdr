@@ -428,7 +428,7 @@ blocks:
     bus_structure: null
     coordinate: [1248, 124.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: import_0
   id: import
   parameters:
