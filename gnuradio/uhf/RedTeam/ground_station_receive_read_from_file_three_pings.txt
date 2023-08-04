@@ -1,0 +1,61 @@
+
+Generating: '/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_receiver_file_save.py'
+
+Executing: /home/knud/anaconda3/envs/gnuradio/bin/python -u /home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_receiver_file_save.py
+
+/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_receiver_file_save.py:405: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if StrictVersion("4.5.0") <= StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+/home/knud/Development/AlbertaSat/ex2_sdr/gnuradio/uhf/RedTeam/ns_esttc_receiver_file_save.py:75: DeprecationWarning: distutils Version classes are deprecated. Use packaging.version instead.
+  if StrictVersion(Qt.qVersion()) < StrictVersion("5.0.0"):
+gr::log :DEBUG: correlate_access_code_tag_bb0 - Access code: 7e80
+gr::log :DEBUG: correlate_access_code_tag_bb0 - Mask: ffff
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 570
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 613
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 641
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 672
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 708
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 709
+******* MESSAGE DEBUG PRINT ********
+(() . #[202 150 0 199 80 1 111 221 0 58 135 122 1 138 115 79 176 0 0 58 132 1 71 180 176 0 0 0 0 0 0 0 228 134 98 206 113 71 100 19 84 86 204 78 192 233 101 8 62 211 203 10 80 105 32 77 140 242 93 47 66 141 82 199 138 197 81 196 176 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
+************************************
+******* MESSAGE DEBUG PRINT ********
+(() . #[11 126 232 1 212 59 208 12 83 154 125 128 0 1 212 32 10 61 165 128 0 0 0 0 0 0 7 36 51 22 115 138 59 32 154 162 182 98 118 7 75 40 65 246 158 88 82 131 73 2 108 103 146 233 122 20 106 150 60 86 42 142 37 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 197 197 85 85 85])
+************************************
+******* MESSAGE DEBUG PRINT ********
+(() . #[29 67 189 0 197 57 167 216 0 0 29 66 0 163 218 88 0 0 0 0 0 0 0 114 67 49 103 56 163 178 9 170 43 102 39 96 116 178 132 31 105 229 133 40 52 144 38 198 121 46 151 161 70 169 99 197 98 168 226 88 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 44 92 85 85 85 85 85 85 85])
+************************************
+******* MESSAGE DEBUG PRINT ********
+(() . #[98 156 211 236 0 0 14 161 0 81 237 44 0 0 0 0 0 0 0 57 33 152 179 156 81 217 4 213 21 179 19 176 58 89 66 15 180 242 194 148 26 72 19 99 60 151 75 208 163 84 177 226 177 84 113 44 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 22 46 42 170 170 170 170 170 170 170 170 170 170])
+************************************
+******* MESSAGE DEBUG PRINT ********
+(() . #[0 0 234 16 5 30 210 192 0 0 0 0 0 0 3 146 25 139 57 197 29 144 77 81 91 49 59 3 165 148 32 251 79 44 41 65 164 129 54 51 201 116 189 10 53 75 30 43 21 71 18 192 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 98 226 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170])
+************************************
+******* MESSAGE DEBUG PRINT ********
+(() . #[0 1 212 32 10 61 165 128 0 0 0 0 0 0 7 36 51 22 115 138 59 32 154 162 182 98 118 7 75 40 65 246 158 88 82 131 73 2 108 103 146 233 122 20 106 150 60 86 42 142 37 128 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 197 197 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85])
+************************************
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 1834
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 1877
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 1905
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 2046
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 2047
+******* MESSAGE DEBUG PRINT ********
+(() . #[202 150 0 199 80 1 111 221 0 231 46 197 16 160 198 65 2 198 102 214 126 72 187 177 163 236 0 0 0 0 0 0 228 134 98 195 79 135 106 98 36 177 226 97 205 127 158 200 32 245 62 140 89 195 65 40 24 235 179 208 239 52 183 135 38 56 145 98 192 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0])
+************************************
+******* MESSAGE DEBUG PRINT ********
+(() . #[11 126 232 7 57 118 40 133 6 50 8 22 51 54 179 242 69 221 141 31 96 0 0 0 0 0 7 36 51 22 26 124 59 83 17 37 143 19 14 107 252 246 65 7 169 244 98 206 26 9 64 199 93 158 135 121 165 188 57 49 196 139 22 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 168 61 85 85 85])
+************************************
+******* MESSAGE DEBUG PRINT ********
+(() . #[115 151 98 136 80 99 32 129 99 51 107 63 36 93 216 209 246 0 0 0 0 0 0 114 67 49 97 167 195 181 49 18 88 241 48 230 191 207 100 16 122 159 70 44 225 160 148 12 117 217 232 119 154 91 195 147 28 72 177 96 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 26 131 213 85 85 85 85 85 85])
+************************************
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 3098
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 3141
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 3169
+******* MESSAGE DEBUG PRINT ********
+(() . #[0 0 0 0 0 14 72 102 44 52 248 118 166 34 75 30 38 28 215 249 236 130 15 83 232 197 156 52 18 129 142 187 61 14 243 75 120 114 99 137 22 44 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 3 80 122 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170 170])
+************************************
+******* MESSAGE DEBUG PRINT ********
+(() . #[0 0 0 0 0 28 144 204 88 105 240 237 76 68 150 60 76 57 175 243 217 4 30 167 209 139 56 104 37 3 29 118 122 29 230 150 240 228 199 18 44 88 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 6 160 245 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85 85])
+************************************
+gr::log :DEBUG: correlate_access_code_tag_bb0 - writing tag at sample 3643
+
+>>> Done

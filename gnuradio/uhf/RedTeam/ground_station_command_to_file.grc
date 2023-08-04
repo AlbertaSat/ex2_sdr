@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Northern SPIRIT Receiver with beacon decode and raw signal save to file
+    title: Northern SPIRIT Ground Station received signal read from file
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -33,6 +33,54 @@ options:
     state: enabled
 
 blocks:
+- name: baud_bit
+  id: variable
+  parameters:
+    comment: ''
+    value: '437875000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 400.0]
+    rotation: 0
+    state: enabled
+- name: center_freq
+  id: variable
+  parameters:
+    comment: ''
+    value: '437875000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [200, 8.0]
+    rotation: 0
+    state: enabled
+- name: center_freq_rx
+  id: variable
+  parameters:
+    comment: ''
+    value: '437875000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 248.0]
+    rotation: 0
+    state: enabled
+- name: center_freq_tx
+  id: variable
+  parameters:
+    comment: ''
+    value: '437875000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 320.0]
+    rotation: 0
+    state: enabled
 - name: data_rate
   id: variable
   parameters:
@@ -71,7 +119,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [232, 192.0]
+    coordinate: [200, 208.0]
     rotation: 0
     state: enabled
 - name: es_mode_label
@@ -118,6 +166,18 @@ blocks:
     coordinate: [1088, 4.0]
     rotation: 0
     state: true
+- name: fsk_dev
+  id: variable
+  parameters:
+    comment: ''
+    value: '437875000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 472.0]
+    rotation: 0
+    state: enabled
 - name: mod_index
   id: variable
   parameters:
@@ -143,28 +203,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 84.0]
-    rotation: 0
-    state: true
-- name: rx_gain
-  id: variable_qtgui_range
-  parameters:
-    comment: ''
-    gui_hint: 2,0,1,5
-    label: ''
-    min_len: '200'
-    orient: QtCore.Qt.Horizontal
-    rangeType: float
-    start: '0'
-    step: '.05'
-    stop: '1'
-    value: '.9'
-    widget: counter_slider
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [208, 356.0]
+    coordinate: [960, 88.0]
     rotation: 0
     state: true
 - name: samp_rate
@@ -176,7 +215,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 76.0]
+    coordinate: [592, 80.0]
     rotation: 0
     state: enabled
 - name: samples_per_symbol
@@ -188,7 +227,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 76.0]
+    coordinate: [200, 80.0]
     rotation: 0
     state: enabled
 - name: sensitivity_label
@@ -204,7 +243,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [800, 84.0]
+    coordinate: [800, 88.0]
     rotation: 0
     state: true
 - name: sensitivity_tx
@@ -216,29 +255,25 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 76.0]
+    coordinate: [480, 80.0]
     rotation: 0
     state: enabled
-- name: blocks_file_source_0
-  id: blocks_file_source
+- name: blocks_file_sink_0
+  id: blocks_file_sink
   parameters:
     affinity: ''
     alias: ''
-    begin_tag: pmt.PMT_NIL
+    append: 'False'
     comment: ''
-    file: /media/Michael/SAT_rcv_20230801_1809.raw
-    length: '0'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    offset: '0'
-    repeat: 'False'
+    file: test.dat
     type: complex
+    unbuffered: 'False'
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [504, 392.0]
+    coordinate: [728, 520.0]
     rotation: 0
     state: true
 - name: blocks_message_debug_0
@@ -252,65 +287,208 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1288, 304.0]
-    rotation: 180
-    state: enabled
-- name: blocks_throttle_0
-  id: blocks_throttle
+    coordinate: [688, 640.0]
+    rotation: 0
+    state: true
+- name: blocks_socket_pdu_0
+  id: blocks_socket_pdu
   parameters:
     affinity: ''
     alias: ''
     comment: ''
-    ignoretag: 'True'
+    host: 127.0.0.1
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: samp_rate*10
-    type: complex
-    vlen: '1'
+    mtu: '10000'
+    port: '4321'
+    tcp_no_delay: 'False'
+    type: TCP_SERVER
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [792, 424.0]
+    coordinate: [1008, 256.0]
     rotation: 0
     state: enabled
-- name: epy_block_0
-  id: epy_block
+- name: blocks_socket_pdu_0_0
+  id: blocks_socket_pdu
   parameters:
-    _source_code: "\"\"\"\nBeacon Info:\n\nExtract info from decoded AX.25 beacon\n\
-      \nNote : This is a hack, no error checking or other proper stuff...\n\"\"\"\n\
-      \nimport numpy as np\nfrom gnuradio import gr\n\nimport pmt\n\n\nclass blk(gr.sync_block):\
-      \  # other base classes are basic_block, decim_block, interp_block\n    \"\"\
-      \"Extract Beacon Info\"\"\"\n\n    def __init__(self):  # only default arguments\
-      \ here\n        \"\"\"arguments to this function show up as parameters in GRC\"\
-      \"\"\n        gr.sync_block.__init__(\n            self,\n            name='Beacon\
-      \ Info',\n            in_sig=None,\n            out_sig=None\n        )\n  \
-      \      self.message_port_register_in(pmt.intern('msg_in'))\n        self.set_msg_handler(pmt.intern('msg_in'),\
-      \ self.handle_msg)\n\n\n\n    def handle_msg(self, msg):\n  \n        msg_data\
-      \ = pmt.cdr(msg)\n        parray = pmt.to_python(msg_data)\n        destCallSign\
-      \ = \"\"\n        raw = parray[0:6]\n        for asc in raw:\n            destCallSign\
-      \ += chr(asc)\n            \n        srcCallSign = \"\"\n        raw = parray[7:7+6]\n\
-      \        for asc in raw:\n            srcCallSign += chr(asc)\n\n        payload\
-      \ = \"\"\n        parrayLen = len(parray)\n        raw = parray[16:parrayLen]\n\
-      \        for asc in raw:\n            payload += chr(asc)\n            \n  \
-      \      print(\"Raw data : \")\n        print(msg_data)\n        print(\"Dest\
-      \ Call Sign : \"+destCallSign)\n        print(\"Src Call Sign : \"+srcCallSign)\n\
-      \        print(\"Payload : \"+payload)\n        \n    def work(self, input_items,\
-      \ output_items):\n            return (0)\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    host: 127.0.0.1
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mtu: '10000'
+    port: '4322'
+    tcp_no_delay: 'False'
+    type: TCP_SERVER
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1016, 360.0]
+    rotation: 0
+    state: enabled
+- name: blocks_socket_pdu_1
+  id: blocks_socket_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    host: 127.0.0.1
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mtu: '10000'
+    port: '1234'
+    tcp_no_delay: 'False'
+    type: TCP_SERVER
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [96, 400.0]
+    rotation: 0
+    state: enabled
+- name: blocks_socket_pdu_1_0
+  id: blocks_socket_pdu
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    host: 127.0.0.1
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    mtu: '10000'
+    port: '1235'
+    tcp_no_delay: 'False'
+    type: TCP_SERVER
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [96, 504.0]
+    rotation: 0
+    state: enabled
+- name: blocks_var_to_msg_0
+  id: blocks_var_to_msg
+  parameters:
     affinity: ''
     alias: ''
     comment: ''
     maxoutbuf: '0'
     minoutbuf: '0'
+    msgname: fsk_dev
+    target: fsk_dev
   states:
-    _io_cache: ('Beacon Info', 'blk', [], [('msg_in', 'message', 1)], [], 'Extract
-      Beacon Info', [])
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1312, 488.0]
-    rotation: 180
+    coordinate: [304, 624.0]
+    rotation: 0
     state: true
+- name: blocks_var_to_msg_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: baud_bit
+    target: baud_bit
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [304, 704.0]
+    rotation: 0
+    state: true
+- name: blocks_var_to_msg_0_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: center_freq
+    target: center_freq_rx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 792.0]
+    rotation: 0
+    state: enabled
+- name: blocks_var_to_msg_0_0_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: center_freq
+    target: center_freq_tx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [320, 864.0]
+    rotation: 0
+    state: enabled
+- name: gpredict_doppler
+  id: epy_module
+  parameters:
+    alias: ''
+    comment: ''
+    source_code: "# this module will be imported in the into your flowgraph\nfrom\
+      \ gnuradio import gr\nimport threading\nimport time\nimport socket\n\nclass\
+      \ doppler_runner(threading.Thread):\n  def __init__(self, callback, freq, gpredict_host,\
+      \ gpredict_port):\n    threading.Thread.__init__(self)\n\n    self.callback\
+      \ = callback\n    self.gpredict_host = gpredict_host\n    self.gpredict_port\
+      \ = gpredict_port\n    self.freq = freq\n\n\n  def run(self):\n    #bind_to\
+      \ = (self.gpredict_host, self.gpredict_port)\n    bind_to = ('127.0.0.1', 4532)\n\
+      \    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)\n    print(bind_to)\n\
+      \    server.bind(bind_to)\n    server.listen(0)\n\n    time.sleep(0.5) # TODO:\
+      \ Find better way to know if init is all done\n\n    while True:\n      print(\"\
+      Waiting for connection on: %s:%d\" % bind_to)\n      sock, addr = server.accept()\n\
+      \      print(\"Connected from: %s:%d\" % (addr[0], addr[1]))\n\n      cur_freq\
+      \ = 0\n      while True:\n        data = sock.recv(1024)\n        if not data:\n\
+      \          break\n\n        if data.startswith(b'F'):\n          self.freq =\
+      \ int(data[1:].strip())\n          if cur_freq != self.freq:\n            print(\"\
+      New frequency: %d\" % self.freq)\n            self.callback(self.freq)\n   \
+      \         cur_freq = self.freq\n          sock.sendall(b'RPRT 0\\n')\n     \
+      \   elif data.startswith(b'f'):\n          sock.sendall(b'f: %d\\n' % cur_freq)\n\
+      \n      sock.close()\n      print(\"Disconnected from: %s:%d\" % (addr[0], addr[1]))\n\
+      \n    #sys.exit()\n\nclass doppler(gr.sync_block):\n  def __init__(self, callback,\
+      \ freq, gpredict_host, gpredict_port):\n    gr.sync_block.__init__(self,\n \
+      \                          name = \"Gpredict Doppler\",\n                  \
+      \         in_sig = None,\n                           out_sig = None)\n    doppler_runner(callback,\
+      \ freq, gpredict_host, gpredict_port).start()\n\n"
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1176, 176.0]
+    rotation: 0
+    state: disabled
+- name: gpredict_doppler_1
+  id: gpredict_doppler
+  parameters:
+    alias: ''
+    comment: ''
+    gpredict_host: localhost
+    gpredict_port: '4532'
+    target: center_freq_rx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1296, 160.0]
+    rotation: 0
+    state: disabled
 - name: import_0
   id: import
   parameters:
@@ -347,7 +525,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 140.0]
+    coordinate: [200, 152.0]
     rotation: 0
     state: true
 - name: note_0_0
@@ -360,7 +538,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [480, 140.0]
+    coordinate: [480, 152.0]
     rotation: 0
     state: true
 - name: qtgui_freq_sink_x_0
@@ -441,8 +619,8 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [776, 260.0]
-    rotation: 180
+    coordinate: [744, 272.0]
+    rotation: 0
     state: enabled
 - name: qtgui_waterfall_sink_x_0
   id: qtgui_waterfall_sink_x
@@ -502,55 +680,52 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1056, 176.0]
+    coordinate: [744, 360.0]
+    rotation: 0
+    state: disabled
+- name: uhf_pdu_modulate_0
+  id: uhf_pdu_modulate
+  parameters:
+    FSK_level: '2'
+    affinity: ''
+    alias: ''
+    comment: ''
+    fm_baud: data_rate
+    fm_modulation_index: mod_index
+    fm_samples_per_symbol: samples_per_symbol
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 400.0]
     rotation: 0
     state: true
-- name: satellites_ax25_deframer_0
-  id: satellites_ax25_deframer
+- name: xmlrpc_server_0
+  id: xmlrpc_server
   parameters:
-    affinity: ''
+    addr: localhost
     alias: ''
     comment: ''
-    g3ruh_scrambler: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    options: '""'
+    port: '8080'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1256, 424.0]
+    coordinate: [304, 544.0]
     rotation: 0
-    state: enabled
-- name: satellites_fsk_demodulator_0
-  id: satellites_fsk_demodulator
-  parameters:
-    affinity: ''
-    alias: ''
-    baudrate: data_rate
-    comment: ''
-    iq: 'True'
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    options: '""'
-    samp_rate: samp_rate
-    subaudio: 'False'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1048, 408.0]
-    rotation: 0
-    state: enabled
+    state: true
 
 connections:
-- [blocks_file_source_0, '0', blocks_throttle_0, '0']
-- [blocks_throttle_0, '0', qtgui_freq_sink_x_0, '0']
-- [blocks_throttle_0, '0', qtgui_waterfall_sink_x_0, '0']
-- [blocks_throttle_0, '0', satellites_fsk_demodulator_0, '0']
-- [satellites_ax25_deframer_0, out, blocks_message_debug_0, print]
-- [satellites_ax25_deframer_0, out, epy_block_0, msg_in]
-- [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
+- [blocks_socket_pdu_1, pdus, uhf_pdu_modulate_0, pdus]
+- [blocks_socket_pdu_1_0, pdus, uhf_pdu_modulate_0, pdus]
+- [blocks_var_to_msg_0, msgout, blocks_message_debug_0, print]
+- [blocks_var_to_msg_0_0, msgout, blocks_message_debug_0, print]
+- [blocks_var_to_msg_0_0_0, msgout, blocks_message_debug_0, print]
+- [blocks_var_to_msg_0_0_0_0, msgout, blocks_message_debug_0, print]
+- [uhf_pdu_modulate_0, '0', blocks_file_sink_0, '0']
+- [uhf_pdu_modulate_0, '0', qtgui_freq_sink_x_0, '0']
 
 metadata:
   file_format: 1

@@ -38,6 +38,7 @@ from gnuradio import uhd
 import time
 from gnuradio.qtgui import Range, RangeWidget
 from PyQt5 import QtCore
+import gpredict_doppler
 import math
 import ns_esttc_receiver_epy_block_0 as epy_block_0  # embedded python block
 import numpy as np
@@ -243,6 +244,7 @@ class ns_esttc_receiver(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(3, 4):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.gpredict_doppler_1 = gpredict_doppler.doppler(self.set_center_freq_rx, center_freq_rx, "'localhost'", 4532)
         self._freq_dev_label_tool_bar = Qt.QToolBar(self)
 
         if None:
@@ -398,8 +400,8 @@ class ns_esttc_receiver(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
-        self.uhd_usrp_source_0_0.set_samp_rate(self.samp_rate)
         self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
+        self.uhd_usrp_source_0_0.set_samp_rate(self.samp_rate)
 
     def get_rx_gain(self):
         return self.rx_gain

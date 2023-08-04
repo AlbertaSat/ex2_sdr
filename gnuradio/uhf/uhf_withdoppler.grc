@@ -23,6 +23,7 @@ options:
     sizing_mode: fixed
     thread_safe_setters: ''
     title: Not titled yet
+    window_size: (1000,1000)
   states:
     bus_sink: false
     bus_source: false
@@ -55,7 +56,7 @@ blocks:
     bus_structure: null
     coordinate: [280, 12.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: center_freq
   id: variable
   parameters:
@@ -1869,3 +1870,4 @@ connections:
 
 metadata:
   file_format: 1
+  grc_version: 3.9.7.0
