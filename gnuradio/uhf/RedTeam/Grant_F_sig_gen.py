@@ -23,10 +23,13 @@ if __name__ == '__main__':
 
 from PyQt5 import Qt
 from PyQt5.QtCore import QObject, pyqtSlot
+from gnuradio import qtgui
+from gnuradio.filter import firdes
+import sip
 from gnuradio import analog
 from gnuradio import blocks
+import pmt
 from gnuradio import gr
-from gnuradio.filter import firdes
 from gnuradio.fft import window
 import sys
 import signal
@@ -78,7 +81,7 @@ class Grant_F_sig_gen(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.tx_gain = tx_gain = 40
+        self.tx_gain = tx_gain = 5
         self.source = source = 0
         self.samp_rate = samp_rate = 32000
         self.center_freq = center_freq = 437875000
@@ -86,7 +89,7 @@ class Grant_F_sig_gen(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
-        self._tx_gain_range = Range(0, 89, 1, 40, 200)
+        self._tx_gain_range = Range(0, 89, 1, 5, 200)
         self._tx_gain_win = RangeWidget(self._tx_gain_range, self.set_tx_gain, "TX Gain [0,89.8]", "counter_slider", int, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._tx_gain_win)
         # Create the options list
@@ -105,7 +108,7 @@ class Grant_F_sig_gen(gr.top_block, Qt.QWidget):
             lambda i: self.set_source(self._source_options[i]))
         # Create the radio buttons
         self.top_layout.addWidget(self._source_tool_bar)
-        self.uhd_usrp_sink_0 = uhd.usrp_sink(
+        self.uhd_usrp_sink_0_0 = uhd.usrp_sink(
             ",".join(("", "")),
             uhd.stream_args(
                 cpu_format="fc32",
@@ -114,14 +117,61 @@ class Grant_F_sig_gen(gr.top_block, Qt.QWidget):
             ),
             '',
         )
-        self.uhd_usrp_sink_0.set_samp_rate(1000000)
-        self.uhd_usrp_sink_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
+        self.uhd_usrp_sink_0_0.set_samp_rate(1000000)
+        self.uhd_usrp_sink_0_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
 
-        self.uhd_usrp_sink_0.set_center_freq(center_freq, 0)
-        self.uhd_usrp_sink_0.set_antenna('TX/RX', 0)
-        self.uhd_usrp_sink_0.set_gain(tx_gain, 0)
+        self.uhd_usrp_sink_0_0.set_center_freq(center_freq, 0)
+        self.uhd_usrp_sink_0_0.set_antenna('TX/RX', 0)
+        self.uhd_usrp_sink_0_0.set_gain(tx_gain, 0)
+        self.qtgui_freq_sink_x_0 = qtgui.freq_sink_c(
+            1024, #size
+            window.WIN_BLACKMAN_hARRIS, #wintype
+            437875000, #fc
+            samp_rate, #bw
+            "", #name
+            1,
+            None # parent
+        )
+        self.qtgui_freq_sink_x_0.set_update_time(0.10)
+        self.qtgui_freq_sink_x_0.set_y_axis(-140, 10)
+        self.qtgui_freq_sink_x_0.set_y_label('Relative Gain', 'dB')
+        self.qtgui_freq_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, 0.0, 0, "")
+        self.qtgui_freq_sink_x_0.enable_autoscale(False)
+        self.qtgui_freq_sink_x_0.enable_grid(False)
+        self.qtgui_freq_sink_x_0.set_fft_average(1.0)
+        self.qtgui_freq_sink_x_0.enable_axis_labels(True)
+        self.qtgui_freq_sink_x_0.enable_control_panel(False)
+        self.qtgui_freq_sink_x_0.set_fft_window_normalized(False)
+
+
+
+        labels = ['', '', '', '', '',
+            '', '', '', '', '']
+        widths = [1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1]
+        colors = ["blue", "red", "green", "black", "cyan",
+            "magenta", "yellow", "dark red", "dark green", "dark blue"]
+        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0, 1.0]
+
+        for i in range(1):
+            if len(labels[i]) == 0:
+                self.qtgui_freq_sink_x_0.set_line_label(i, "Data {0}".format(i))
+            else:
+                self.qtgui_freq_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_freq_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_freq_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_freq_sink_x_0.set_line_alpha(i, alphas[i])
+
+        self._qtgui_freq_sink_x_0_win = sip.wrapinstance(self.qtgui_freq_sink_x_0.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_freq_sink_x_0_win)
         self.blocks_selector_0 = blocks.selector(gr.sizeof_gr_complex*1,source,0)
         self.blocks_selector_0.set_enabled(True)
+        self.blocks_message_strobe_0_1_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_RX', 'value': 0, 'mask': 1})), 9000)
+        self.blocks_message_strobe_0_1 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_0X', 'value': 0, 'mask': 1})), 8500)
+        self.blocks_message_strobe_0_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'DDR', 'value': 0x0FFF, 'mask': 0xFFFF})), 8000)
+        self.blocks_message_strobe_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'CTRL', 'value': 1, 'mask': 0xFFFF})), 7000)
+        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_TX', 'value': 1, 'mask': 1})), 10000)
         self.analog_sig_source_x_0 = analog.sig_source_c(samp_rate, analog.GR_COS_WAVE, 1000, 1, 0, 0)
         self.analog_const_source_x_0 = analog.sig_source_c(0, analog.GR_CONST_WAVE, 0, 0, 0)
 
@@ -129,9 +179,15 @@ class Grant_F_sig_gen(gr.top_block, Qt.QWidget):
         ##################################################
         # Connections
         ##################################################
+        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_0_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_1, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_1_0, 'strobe'), (self.uhd_usrp_sink_0_0, 'command'))
         self.connect((self.analog_const_source_x_0, 0), (self.blocks_selector_0, 0))
         self.connect((self.analog_sig_source_x_0, 0), (self.blocks_selector_0, 1))
-        self.connect((self.blocks_selector_0, 0), (self.uhd_usrp_sink_0, 0))
+        self.connect((self.blocks_selector_0, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.blocks_selector_0, 0), (self.uhd_usrp_sink_0_0, 0))
 
 
     def closeEvent(self, event):
@@ -147,7 +203,7 @@ class Grant_F_sig_gen(gr.top_block, Qt.QWidget):
 
     def set_tx_gain(self, tx_gain):
         self.tx_gain = tx_gain
-        self.uhd_usrp_sink_0.set_gain(self.tx_gain, 0)
+        self.uhd_usrp_sink_0_0.set_gain(self.tx_gain, 0)
 
     def get_source(self):
         return self.source
@@ -163,13 +219,14 @@ class Grant_F_sig_gen(gr.top_block, Qt.QWidget):
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
         self.analog_sig_source_x_0.set_sampling_freq(self.samp_rate)
+        self.qtgui_freq_sink_x_0.set_frequency_range(437875000, self.samp_rate)
 
     def get_center_freq(self):
         return self.center_freq
 
     def set_center_freq(self, center_freq):
         self.center_freq = center_freq
-        self.uhd_usrp_sink_0.set_center_freq(self.center_freq, 0)
+        self.uhd_usrp_sink_0_0.set_center_freq(self.center_freq, 0)
 
 
 

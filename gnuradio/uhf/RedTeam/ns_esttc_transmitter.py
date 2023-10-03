@@ -86,7 +86,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.es_mode = es_mode = 4
+        self.es_mode = es_mode = 3
         self.samples_per_symbol = samples_per_symbol = 256
         self.freq_dev = freq_dev = {es_mode == 0: 600, es_mode==1: 600, es_mode==2:1200,es_mode==3:2400,es_mode==4:4800,es_mode==5:4800,es_mode==6:9600}.get(True,19200)
         self.data_rate = data_rate = {es_mode == 0: 1200, es_mode==1: 2400, es_mode==2:4800,es_mode==3:9600,es_mode==4:9600}.get(True,19200)
@@ -94,7 +94,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         self.mod_index = mod_index = {es_mode == 0: 1, es_mode==1: 0.5, es_mode==2:0.5,es_mode==3:0.5,es_mode==4:1,es_mode==5:0.5,es_mode==6:1}.get(True,2)
         self.center_freq_rx = center_freq_rx = 437875000
         self.center_freq = center_freq = 437875000
-        self.tx_gain = tx_gain = .85
+        self.tx_gain = tx_gain = .9
         self.sensitivity_label = sensitivity_label = sensitivity_tx
         self.samp_rate = samp_rate = data_rate*samples_per_symbol
         self.mod_index_label = mod_index_label = mod_index
@@ -106,7 +106,7 @@ class ns_esttc_transmitter(gr.top_block, Qt.QWidget):
         ##################################################
         # Blocks
         ##################################################
-        self._tx_gain_range = Range(0, 1, .05, .85, 200)
+        self._tx_gain_range = Range(0, 1, .05, .9, 200)
         self._tx_gain_win = RangeWidget(self._tx_gain_range, self.set_tx_gain, "'tx_gain'", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._tx_gain_win)
         self.uhf_pdu_modulate_0 = uhf_pdu_modulate(

@@ -8,10 +8,10 @@
    ```
 3. GPredict will start and all the satellites of interest should be displayed.
    ![GPredict main window](GPredict_main.png)
-	1. Under the "hamburger" mention at the top right, select "Radio Control". The GPredict Radio Control window will open. Select the satellite you want to track and set the up/down frequencies to match. 
+	1. Under the "hamburger" menu at the top right, select "Radio Control". The GPredict Radio Control window will open. Select the satellite you want to track and set the up/down frequencies to match. 
 	2. Click the "Track" button, but not "Engage", yet.
 	   ![GPredict Radio Control Window](GPredict_radio_control.png)
-	    The GNU Radio flowgraph will connect to this instance of GPredict to get real-time updates for the corrected receive frequency. The GNU Radio flowgraph uses that value directly for direct receive downconversion to baseband, and calculates the transmit frequency for transmit upconversion from baseband.
+	    The GNU Radio flowgraph will connect to this instance of GPredict to get real-time updates for the corrected receive frequency. The GNU Radio flowgraph uses that value directly for direct receive down-conversion to baseband, and calculates the transmit frequency for transmit up-conversion from baseband.
 4. Open a second terminal (shortcut ctrl-alt-t)
 5. Enter the commands
    ```
@@ -42,4 +42,8 @@
     ```
     kill -9 15641
     ```
-16. 
+16. If you can't find the process number easily, try the following command in the terminal
+    ```
+    ps ax | grep gnuradio
+    ```
+        It will filter only those processes that have somethng to do with gnuradio, and it's safe to kill all of them (though there should be only one.)

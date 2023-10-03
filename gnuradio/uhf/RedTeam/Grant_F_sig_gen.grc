@@ -99,7 +99,7 @@ blocks:
     start: '0'
     step: '1'
     stop: '89'
-    value: '40'
+    value: '5'
     widget: counter_slider
   states:
     bus_sink: false
@@ -147,6 +147,96 @@ blocks:
     coordinate: [88, 288.0]
     rotation: 0
     state: true
+- name: blocks_message_strobe_0
+  id: blocks_message_strobe
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg: 'pmt.dict_add( pmt.make_dict(), pmt.to_pmt(''gpio''), pmt.to_pmt({''bank'':''FP0'',
+      ''attr'':''ATR_TX'', ''value'': 1, ''mask'': 1}))'
+    period: '10000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1200, 168.0]
+    rotation: 180
+    state: true
+- name: blocks_message_strobe_0_0
+  id: blocks_message_strobe
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg: 'pmt.dict_add( pmt.make_dict(), pmt.to_pmt(''gpio''), pmt.to_pmt({''bank'':''FP0'',
+      ''attr'':''CTRL'', ''value'': 1, ''mask'': 0xFFFF}))'
+    period: '7000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [904, 296.0]
+    rotation: 0
+    state: true
+- name: blocks_message_strobe_0_0_0
+  id: blocks_message_strobe
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg: 'pmt.dict_add( pmt.make_dict(), pmt.to_pmt(''gpio''), pmt.to_pmt({''bank'':''FP0'',
+      ''attr'':''DDR'', ''value'': 0x0FFF, ''mask'': 0xFFFF}))'
+    period: '8000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [904, 360.0]
+    rotation: 0
+    state: true
+- name: blocks_message_strobe_0_1
+  id: blocks_message_strobe
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg: 'pmt.dict_add( pmt.make_dict(), pmt.to_pmt(''gpio''), pmt.to_pmt({''bank'':''FP0'',
+      ''attr'':''ATR_0X'', ''value'': 0, ''mask'': 1}))'
+    period: '8500'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1200, 296.0]
+    rotation: 180
+    state: enabled
+- name: blocks_message_strobe_0_1_0
+  id: blocks_message_strobe
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msg: 'pmt.dict_add( pmt.make_dict(), pmt.to_pmt(''gpio''), pmt.to_pmt({''bank'':''FP0'',
+      ''attr'':''ATR_RX'', ''value'': 0, ''mask'': 1}))'
+    period: '9000'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1200, 232.0]
+    rotation: 180
+    state: enabled
 - name: blocks_selector_0
   id: blocks_selector
   parameters:
@@ -170,7 +260,88 @@ blocks:
     coordinate: [400, 208.0]
     rotation: 0
     state: true
-- name: uhd_usrp_sink_0
+- name: qtgui_freq_sink_x_0
+  id: qtgui_freq_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    average: '1.0'
+    axislabels: 'True'
+    bw: samp_rate
+    color1: '"blue"'
+    color10: '"dark blue"'
+    color2: '"red"'
+    color3: '"green"'
+    color4: '"black"'
+    color5: '"cyan"'
+    color6: '"magenta"'
+    color7: '"yellow"'
+    color8: '"dark red"'
+    color9: '"dark green"'
+    comment: ''
+    ctrlpanel: 'False'
+    fc: '437875000'
+    fftsize: '1024'
+    freqhalf: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label: Relative Gain
+    label1: ''
+    label10: ''''''
+    label2: ''''''
+    label3: ''''''
+    label4: ''''''
+    label5: ''''''
+    label6: ''''''
+    label7: ''''''
+    label8: ''''''
+    label9: ''''''
+    legend: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '""'
+    nconnections: '1'
+    norm_window: 'False'
+    showports: 'False'
+    tr_chan: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_tag: '""'
+    type: complex
+    units: dB
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    wintype: window.WIN_BLACKMAN_hARRIS
+    ymax: '10'
+    ymin: '-140'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [784, 456.0]
+    rotation: 0
+    state: true
+- name: uhd_usrp_sink_0_0
   id: uhd_usrp_sink
   parameters:
     affinity: ''
@@ -444,14 +615,20 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [712, 192.0]
+    coordinate: [1200, 376.0]
     rotation: 0
     state: enabled
 
 connections:
 - [analog_const_source_x_0, '0', blocks_selector_0, '0']
 - [analog_sig_source_x_0, '0', blocks_selector_0, '1']
-- [blocks_selector_0, '0', uhd_usrp_sink_0, '0']
+- [blocks_message_strobe_0, strobe, uhd_usrp_sink_0_0, command]
+- [blocks_message_strobe_0_0, strobe, uhd_usrp_sink_0_0, command]
+- [blocks_message_strobe_0_0_0, strobe, uhd_usrp_sink_0_0, command]
+- [blocks_message_strobe_0_1, strobe, uhd_usrp_sink_0_0, command]
+- [blocks_message_strobe_0_1_0, strobe, uhd_usrp_sink_0_0, command]
+- [blocks_selector_0, '0', qtgui_freq_sink_x_0, '0']
+- [blocks_selector_0, '0', uhd_usrp_sink_0_0, '0']
 
 metadata:
   file_format: 1

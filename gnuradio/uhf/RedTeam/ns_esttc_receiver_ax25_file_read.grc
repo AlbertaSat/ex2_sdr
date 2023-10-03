@@ -226,7 +226,7 @@ blocks:
     alias: ''
     begin_tag: pmt.PMT_NIL
     comment: ''
-    file: /media/Michael/SAT_rcv_20230801_1809.raw
+    file: /media/Michael/aurorasat_deployment_pass1.raw
     length: '0'
     maxoutbuf: '0'
     minoutbuf: '0'

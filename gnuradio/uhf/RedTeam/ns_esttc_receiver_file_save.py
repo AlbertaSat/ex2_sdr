@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: GPL-3.0
 #
 # GNU Radio Python Flow Graph
-# Title: Northern SPIRIT Ground Station received signal read from file
+# Title: Northern SPIRIT Receiver with beacon decode and raw signal save to file
 # Author: knud
 # GNU Radio version: 3.9.7.0
 
@@ -21,10 +21,6 @@ if __name__ == '__main__':
         except:
             print("Warning: failed to XInitThreads()")
 
-import os
-import sys
-sys.path.append(os.environ.get('GRC_HIER_PATH', os.path.expanduser('~/.grc_gnuradio')))
-
 from PyQt5 import Qt
 from gnuradio import eng_notation
 from gnuradio import qtgui
@@ -34,13 +30,20 @@ from gnuradio import blocks
 import pmt
 from gnuradio import gr
 from gnuradio.fft import window
+import sys
 import signal
 from argparse import ArgumentParser
 from gnuradio.eng_arg import eng_float, intx
-from uhf_pdu_demodulate import uhf_pdu_demodulate  # grc-generated hier_block
+from gnuradio import uhd
+import time
+from gnuradio.qtgui import Range, RangeWidget
+from PyQt5 import QtCore
+import gpredict_doppler
 import math
 import ns_esttc_receiver_file_save_epy_block_0 as epy_block_0  # embedded python block
 import numpy as np
+import satellites.components.deframers
+import satellites.components.demodulators
 
 
 
@@ -49,9 +52,9 @@ from gnuradio import qtgui
 class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
 
     def __init__(self):
-        gr.top_block.__init__(self, "Northern SPIRIT Ground Station received signal read from file", catch_exceptions=True)
+        gr.top_block.__init__(self, "Northern SPIRIT Receiver with beacon decode and raw signal save to file", catch_exceptions=True)
         Qt.QWidget.__init__(self)
-        self.setWindowTitle("Northern SPIRIT Ground Station received signal read from file")
+        self.setWindowTitle("Northern SPIRIT Receiver with beacon decode and raw signal save to file")
         qtgui.util.check_set_qss()
         try:
             self.setWindowIcon(Qt.QIcon.fromTheme('gnuradio-grc'))
@@ -82,31 +85,48 @@ class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
         ##################################################
         # Variables
         ##################################################
-        self.es_mode = es_mode = 4
+        self.es_mode = es_mode = 3
         self.samples_per_symbol = samples_per_symbol = 32
         self.freq_dev = freq_dev = {es_mode == 0: 600, es_mode==1: 600, es_mode==2:1200,es_mode==3:2400,es_mode==4:4800,es_mode==5:4800,es_mode==6:9600}.get(True,19200)
         self.data_rate = data_rate = {es_mode == 0: 1200, es_mode==1: 2400, es_mode==2:4800,es_mode==3:9600,es_mode==4:9600}.get(True,19200)
         self.sensitivity_tx = sensitivity_tx = 2*np.math.pi*(freq_dev/(data_rate*samples_per_symbol))
         self.mod_index = mod_index = {es_mode == 0: 1, es_mode==1: 0.5, es_mode==2:0.5,es_mode==3:0.5,es_mode==4:1,es_mode==5:0.5,es_mode==6:1}.get(True,2)
+        self.center_freq_rx = center_freq_rx = 437875000
+        self.center_freq = center_freq = 437875000
         self.sensitivity_label = sensitivity_label = sensitivity_tx
         self.samp_rate = samp_rate = data_rate*samples_per_symbol
+        self.rx_gain = rx_gain = .9
         self.mod_index_label = mod_index_label = mod_index
         self.freq_dev_label = freq_dev_label = freq_dev
         self.es_mode_label = es_mode_label = es_mode
         self.data_rate_label = data_rate_label = data_rate
-        self.center_freq = center_freq = 437875000
+        self.center_freq_tx = center_freq_tx = int(2 * center_freq - center_freq_rx)
 
         ##################################################
         # Blocks
         ##################################################
-        self.uhf_pdu_demodulate_0 = uhf_pdu_demodulate(
-            baud_rate=data_rate,
-            fm_modulation_index=mod_index,
-            fm_samples_per_symbol=samples_per_symbol,
-            packet_sync_word='10101010101010100111111010000000',
-            pdu_nominal_length=128,
-            squelch_threshold=-10,
+        self._rx_gain_range = Range(0, 1, .05, .9, 200)
+        self._rx_gain_win = RangeWidget(self._rx_gain_range, self.set_rx_gain, "'rx_gain'", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_grid_layout.addWidget(self._rx_gain_win, 2, 0, 1, 5)
+        for r in range(2, 3):
+            self.top_grid_layout.setRowStretch(r, 1)
+        for c in range(0, 5):
+            self.top_grid_layout.setColumnStretch(c, 1)
+        self.uhd_usrp_source_0_0 = uhd.usrp_source(
+            ",".join(("", "")),
+            uhd.stream_args(
+                cpu_format="fc32",
+                args='',
+                channels=list(range(0,1)),
+            ),
         )
+        self.uhd_usrp_source_0_0.set_samp_rate(samp_rate)
+        self.uhd_usrp_source_0_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
+
+        self.uhd_usrp_source_0_0.set_center_freq(center_freq_rx, 0)
+        self.uhd_usrp_source_0_0.set_antenna('RX2', 0)
+        self.uhd_usrp_source_0_0.set_rx_agc(False, 0)
+        self.uhd_usrp_source_0_0.set_normalized_gain(rx_gain, 0)
         self._sensitivity_label_tool_bar = Qt.QToolBar(self)
 
         if None:
@@ -122,6 +142,8 @@ class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(4, 5):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.satellites_fsk_demodulator_0 = satellites.components.demodulators.fsk_demodulator(baudrate = data_rate, samp_rate = samp_rate, iq = True, subaudio = False, options="")
+        self.satellites_ax25_deframer_0 = satellites.components.deframers.ax25_deframer(g3ruh_scrambler=True, options="")
         self.qtgui_waterfall_sink_x_0 = qtgui.waterfall_sink_c(
             1024, #size
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -222,6 +244,7 @@ class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(3, 4):
             self.top_grid_layout.setColumnStretch(c, 1)
+        self.gpredict_doppler_1 = gpredict_doppler.doppler(self.set_center_freq_rx, center_freq_rx, "'localhost'", 4532)
         self._freq_dev_label_tool_bar = Qt.QToolBar(self)
 
         if None:
@@ -268,23 +291,31 @@ class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
             self.top_grid_layout.setRowStretch(r, 1)
         for c in range(1, 2):
             self.top_grid_layout.setColumnStretch(c, 1)
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_gr_complex*1, samp_rate,True)
-        self.blocks_socket_pdu_0 = blocks.socket_pdu('TCP_SERVER', '127.0.0.1', '4321', 10000, False)
+        self.blocks_message_strobe_0_1_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_RX', 'value': 0, 'mask': 1})), 9000)
+        self.blocks_message_strobe_0_1 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_0X', 'value': 0, 'mask': 1})), 8500)
+        self.blocks_message_strobe_0_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'DDR', 'value': 0x0FFF, 'mask': 0xFFFF})), 8000)
+        self.blocks_message_strobe_0_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'CTRL', 'value': 1, 'mask': 0xFFFF})), 7000)
+        self.blocks_message_strobe_0 = blocks.message_strobe(pmt.dict_add( pmt.make_dict(), pmt.to_pmt('gpio'), pmt.to_pmt({'bank':'FP0', 'attr':'ATR_TX', 'value': 1, 'mask': 1})), 10000)
         self.blocks_message_debug_0 = blocks.message_debug(True)
-        self.blocks_file_source_0 = blocks.file_source(gr.sizeof_gr_complex*1, '/media/Michael/test_three_commands.dat', False, 0, 0)
-        self.blocks_file_source_0.set_begin_tag(pmt.PMT_NIL)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'ND_rcv_20230823_1008.raw', False)
+        self.blocks_file_sink_0.set_unbuffered(False)
 
 
         ##################################################
         # Connections
         ##################################################
-        self.msg_connect((self.uhf_pdu_demodulate_0, 'pdus'), (self.blocks_message_debug_0, 'print'))
-        self.msg_connect((self.uhf_pdu_demodulate_0, 'pdus'), (self.blocks_socket_pdu_0, 'pdus'))
-        self.msg_connect((self.uhf_pdu_demodulate_0, 'beacons'), (self.epy_block_0, 'msg_in'))
-        self.connect((self.blocks_file_source_0, 0), (self.blocks_throttle_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.qtgui_freq_sink_x_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
-        self.connect((self.blocks_throttle_0, 0), (self.uhf_pdu_demodulate_0, 0))
+        self.msg_connect((self.blocks_message_strobe_0, 'strobe'), (self.uhd_usrp_source_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_0, 'strobe'), (self.uhd_usrp_source_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_0_0, 'strobe'), (self.uhd_usrp_source_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_1, 'strobe'), (self.uhd_usrp_source_0_0, 'command'))
+        self.msg_connect((self.blocks_message_strobe_0_1_0, 'strobe'), (self.uhd_usrp_source_0_0, 'command'))
+        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.blocks_message_debug_0, 'print'))
+        self.msg_connect((self.satellites_ax25_deframer_0, 'out'), (self.epy_block_0, 'msg_in'))
+        self.connect((self.satellites_fsk_demodulator_0, 0), (self.satellites_ax25_deframer_0, 0))
+        self.connect((self.uhd_usrp_source_0_0, 0), (self.blocks_file_sink_0, 0))
+        self.connect((self.uhd_usrp_source_0_0, 0), (self.qtgui_freq_sink_x_0, 0))
+        self.connect((self.uhd_usrp_source_0_0, 0), (self.qtgui_waterfall_sink_x_0, 0))
+        self.connect((self.uhd_usrp_source_0_0, 0), (self.satellites_fsk_demodulator_0, 0))
 
 
     def closeEvent(self, event):
@@ -312,7 +343,6 @@ class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
         self.samples_per_symbol = samples_per_symbol
         self.set_samp_rate(self.data_rate*self.samples_per_symbol)
         self.set_sensitivity_tx(2*np.math.pi*(self.freq_dev/(self.data_rate*self.samples_per_symbol)))
-        self.uhf_pdu_demodulate_0.set_fm_samples_per_symbol(self.samples_per_symbol)
 
     def get_freq_dev(self):
         return self.freq_dev
@@ -330,7 +360,6 @@ class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
         self.set_data_rate_label(self.data_rate)
         self.set_samp_rate(self.data_rate*self.samples_per_symbol)
         self.set_sensitivity_tx(2*np.math.pi*(self.freq_dev/(self.data_rate*self.samples_per_symbol)))
-        self.uhf_pdu_demodulate_0.set_baud_rate(self.data_rate)
 
     def get_sensitivity_tx(self):
         return self.sensitivity_tx
@@ -345,7 +374,21 @@ class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
     def set_mod_index(self, mod_index):
         self.mod_index = mod_index
         self.set_mod_index_label(self.mod_index)
-        self.uhf_pdu_demodulate_0.set_fm_modulation_index(self.mod_index)
+
+    def get_center_freq_rx(self):
+        return self.center_freq_rx
+
+    def set_center_freq_rx(self, center_freq_rx):
+        self.center_freq_rx = center_freq_rx
+        self.set_center_freq_tx(int(2 * self.center_freq - self.center_freq_rx))
+        self.uhd_usrp_source_0_0.set_center_freq(self.center_freq_rx, 0)
+
+    def get_center_freq(self):
+        return self.center_freq
+
+    def set_center_freq(self, center_freq):
+        self.center_freq = center_freq
+        self.set_center_freq_tx(int(2 * self.center_freq - self.center_freq_rx))
 
     def get_sensitivity_label(self):
         return self.sensitivity_label
@@ -359,9 +402,16 @@ class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
 
     def set_samp_rate(self, samp_rate):
         self.samp_rate = samp_rate
-        self.blocks_throttle_0.set_sample_rate(self.samp_rate)
         self.qtgui_freq_sink_x_0.set_frequency_range(0, self.samp_rate)
         self.qtgui_waterfall_sink_x_0.set_frequency_range(0, self.samp_rate)
+        self.uhd_usrp_source_0_0.set_samp_rate(self.samp_rate)
+
+    def get_rx_gain(self):
+        return self.rx_gain
+
+    def set_rx_gain(self, rx_gain):
+        self.rx_gain = rx_gain
+        self.uhd_usrp_source_0_0.set_normalized_gain(self.rx_gain, 0)
 
     def get_mod_index_label(self):
         return self.mod_index_label
@@ -391,11 +441,11 @@ class ns_esttc_receiver_file_save(gr.top_block, Qt.QWidget):
         self.data_rate_label = data_rate_label
         Qt.QMetaObject.invokeMethod(self._data_rate_label_label, "setText", Qt.Q_ARG("QString", str(self._data_rate_label_formatter(self.data_rate_label))))
 
-    def get_center_freq(self):
-        return self.center_freq
+    def get_center_freq_tx(self):
+        return self.center_freq_tx
 
-    def set_center_freq(self, center_freq):
-        self.center_freq = center_freq
+    def set_center_freq_tx(self, center_freq_tx):
+        self.center_freq_tx = center_freq_tx
 
 
 

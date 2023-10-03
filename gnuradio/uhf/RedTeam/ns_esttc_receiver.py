@@ -92,7 +92,7 @@ class ns_esttc_receiver(gr.top_block, Qt.QWidget):
         self.sensitivity_tx = sensitivity_tx = 2*np.math.pi*(freq_dev/(data_rate*samples_per_symbol))
         self.mod_index = mod_index = {es_mode == 0: 1, es_mode==1: 0.5, es_mode==2:0.5,es_mode==3:0.5,es_mode==4:1,es_mode==5:0.5,es_mode==6:1}.get(True,2)
         self.center_freq_rx = center_freq_rx = 437875000
-        self.center_freq = center_freq = 437875000
+        self.center_freq = center_freq = 438000000
         self.sensitivity_label = sensitivity_label = sensitivity_tx
         self.samp_rate = samp_rate = data_rate*samples_per_symbol
         self.rx_gain = rx_gain = .9

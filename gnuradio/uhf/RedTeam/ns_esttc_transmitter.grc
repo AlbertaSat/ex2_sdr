@@ -108,7 +108,7 @@ blocks:
   parameters:
     comment: "EnduroSat Mode\n  = [0,1,2,3,4,5,6,7]\n\nChoose a value before\nrunning\
       \ this flowgraph"
-    value: '4'
+    value: '3'
   states:
     bus_sink: false
     bus_source: false
@@ -255,7 +255,9 @@ blocks:
 - name: tx_gain
   id: variable_qtgui_range
   parameters:
-    comment: ''
+    comment: "For the UofA Ground Station amplifier,\na setting of 0.5 to 0.56 will\
+      \ result in\nclose to max power out (44 dBm). Any\nhigher setting results in\
+      \ unacceptable \nsignal distortion."
     gui_hint: ''
     label: ''
     min_len: '200'
@@ -264,7 +266,7 @@ blocks:
     start: '0'
     step: '.05'
     stop: '1'
-    value: '.85'
+    value: '.9'
     widget: counter_slider
   states:
     bus_sink: false
