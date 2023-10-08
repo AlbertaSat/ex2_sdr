@@ -11,12 +11,12 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: endurosat_e2e
+    id: ns_UHF_groundstation
     max_nouts: '0'
     output_language: python
     placement: (0,0)
     qt_qss_theme: ''
-    realtime_scheduling: '1'
+    realtime_scheduling: ''
     run: 'True'
     run_command: '{python} -u {filename}'
     run_options: prompt
@@ -665,23 +665,6 @@ blocks:
     coordinate: [808, 312.0]
     rotation: 0
     state: enabled
-- name: digital_hdlc_deframer_bp_0
-  id: digital_hdlc_deframer_bp
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    max: '500'
-    maxoutbuf: '0'
-    min: '32'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [880, 824.0]
-    rotation: 0
-    state: true
 - name: digital_pfb_clock_sync_xxx_0
   id: digital_pfb_clock_sync_xxx
   parameters:
@@ -1935,7 +1918,6 @@ connections:
 - [network_socket_pdu_0, pdus, pdu_pdu_to_tagged_stream_0, pdus]
 - [network_socket_pdu_0_0, pdus, pdu_pdu_to_tagged_stream_0, pdus]
 - [pdu_pdu_to_tagged_stream_0, '0', blocks_unpacked_to_packed_xx_0, '0']
-- [satellites_ax25_deframer_0, out, network_socket_pdu_1, pdus]
 - [satellites_ax25_deframer_0, out, network_socket_pdu_1_0, pdus]
 - [satellites_ax25_deframer_0, out, satellites_hexdump_sink_0, in]
 - [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
