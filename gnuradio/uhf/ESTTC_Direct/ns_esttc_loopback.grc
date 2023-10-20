@@ -1,6 +1,6 @@
 options:
   parameters:
-    author: knud
+    author: knud, tganley
     catch_exceptions: 'True'
     category: '[GRC Hier Blocks]'
     cmake_opt: ''
@@ -11,7 +11,7 @@ options:
     gen_linking: dynamic
     generate_options: qt_gui
     hier_block_src_path: '.:'
-    id: ns_esttc_transmitter
+    id: ns_esttc_loopback
     max_nouts: '0'
     output_language: python
     placement: (0,0)
@@ -22,7 +22,7 @@ options:
     run_options: prompt
     sizing_mode: fixed
     thread_safe_setters: ''
-    title: Not titled yet
+    title: ESTTC Loopback
     window_size: (1000,1000)
   states:
     bus_sink: false
@@ -45,6 +45,22 @@ blocks:
     coordinate: [288, 12.0]
     rotation: 0
     state: enabled
+- name: center_freq_label
+  id: variable_qtgui_label
+  parameters:
+    comment: ''
+    formatter: None
+    gui_hint: 0,3,1,1
+    label: Center Freq
+    type: real
+    value: center_freq_rx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [952, 1024.0]
+    rotation: 0
+    state: true
 - name: center_freq_rx
   id: variable
   parameters:
@@ -172,22 +188,6 @@ blocks:
     coordinate: [656, 12.0]
     rotation: 0
     state: enabled
-- name: mod_index_label
-  id: variable_qtgui_label
-  parameters:
-    comment: ''
-    formatter: None
-    gui_hint: 0,3,1,1
-    label: Mod Index
-    type: real
-    value: mod_index
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [952, 1024.0]
-    rotation: 0
-    state: true
 - name: rx_gain
   id: variable_qtgui_range
   parameters:
@@ -338,7 +338,7 @@ blocks:
     bus_structure: null
     coordinate: [1040, 872.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: blocks_message_debug_0_0
   id: blocks_message_debug
   parameters:
@@ -354,6 +354,21 @@ blocks:
     coordinate: [448, 560.0]
     rotation: 0
     state: disabled
+- name: blocks_message_debug_0_1
+  id: blocks_message_debug
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    en_uvec: 'True'
+    log_level: info
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1696, 896.0]
+    rotation: 0
+    state: true
 - name: blocks_message_strobe_0
   id: blocks_message_strobe
   parameters:
@@ -498,6 +513,54 @@ blocks:
     bus_structure: null
     coordinate: [1240, 720.0]
     rotation: 180
+    state: enabled
+- name: blocks_msgpair_to_var_0
+  id: blocks_msgpair_to_var
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    target: center_freq_rx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1784, 12.0]
+    rotation: 0
+    state: true
+- name: blocks_var_to_msg_0_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: center_freq_rx
+    target: center_freq_rx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1344, 916.0]
+    rotation: 0
+    state: enabled
+- name: blocks_var_to_msg_0_0_0_0
+  id: blocks_var_to_msg
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    msgname: center_freq_tx
+    target: center_freq_tx
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1344, 988.0]
+    rotation: 0
     state: enabled
 - name: gpredict_doppler_1
   id: gpredict_doppler
@@ -874,7 +937,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: center_freq
+    center_freq0: center_freq_tx
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1151,7 +1214,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: center_freq
+    center_freq0: center_freq_rx
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -1570,6 +1633,9 @@ connections:
 - [blocks_message_strobe_0_1_1, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_1_2, strobe, uhd_usrp_sink_0, command]
 - [blocks_message_strobe_0_1_4, strobe, uhd_usrp_sink_0, command]
+- [blocks_var_to_msg_0_0_0, msgout, blocks_message_debug_0_1, print]
+- [blocks_var_to_msg_0_0_0_0, msgout, blocks_message_debug_0_1, print]
+- [gpredict_doppler_1, freq, blocks_msgpair_to_var_0, inpair]
 - [network_socket_pdu_0, pdus, blocks_message_debug_0_0, print]
 - [network_socket_pdu_0, pdus, uhf_pdu_modulate_0, pdus]
 - [uhd_usrp_source_0_0, '0', analog_simple_squelch_cc_0, '0']
