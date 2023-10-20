@@ -1,0 +1,384 @@
+options:
+  parameters:
+    author: Josh Lazaruk, Steven Knudsen
+    catch_exceptions: 'True'
+    category: '[AlbertaSat]'
+    cmake_opt: ''
+    comment: ''
+    copyright: AlbertaSat 2022-20xx
+    description: The basic UHF demodulation block to match the EnduroSat II radio
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: hb
+    hier_block_src_path: '.:'
+    id: uhf_pdu_demodulate
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: UHF PDU Demodulate
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8.0]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: oversample_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: '8.0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1240, 8.0]
+    rotation: 0
+    state: enabled
+- name: samp_rate
+  id: variable
+  parameters:
+    comment: ''
+    value: fm_samples_per_symbol*baud_rate
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1144, 8.0]
+    rotation: 0
+    state: true
+- name: analog_quadrature_demod_cf_0
+  id: analog_quadrature_demod_cf
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: 'Made QDemod Gain an if-then-else
+
+      stmt to avoid div by zero'
+    gain: samp_rate/(2*math.pi*frequency_deviation) if frequency_deviation > 0 else
+      samp_rate/(2*math.pi)
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [328, 208.0]
+    rotation: 0
+    state: enabled
+- name: baud_rate
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Baud
+    short_id: ''
+    type: eng_float
+    value: '9600'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 8.0]
+    rotation: 0
+    state: true
+- name: digital_binary_slicer_fb_0
+  id: digital_binary_slicer_fb
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1048, 168.0]
+    rotation: 0
+    state: enabled
+- name: digital_symbol_sync_xx_0
+  id: digital_symbol_sync_xx
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    constellation: digital.constellation_bpsk().base()
+    damping: '1.0'
+    loop_bw: '0.1'
+    max_dev: '1.5'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    nfilters: '128'
+    osps: '1'
+    pfb_mf_taps: '[]'
+    resamp_type: digital.IR_MMSE_8TAP
+    sps: fm_samples_per_symbol
+    ted_gain: '0.1'
+    ted_type: digital.TED_EARLY_LATE
+    type: ff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [744, 148.0]
+    rotation: 0
+    state: true
+- name: fm_modulation_index
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: FM Modulation Index
+    short_id: ''
+    type: eng_float
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [280, 8.0]
+    rotation: 0
+    state: true
+- name: fm_samples_per_symbol
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: FM Samples per Symbol
+    short_id: ''
+    type: intx
+    value: '128'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [432, 8.0]
+    rotation: 0
+    state: true
+- name: frequency_deviation
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: ''
+    short_id: ''
+    type: eng_float
+    value: '4800'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1008, 8.0]
+    rotation: 0
+    state: true
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import math
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [192, 8.0]
+    rotation: 0
+    state: true
+- name: packet_sync_word
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Packet Sync (unpacked binary)
+    short_id: ''
+    type: str
+    value: '''0111111010000000'''
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [688, 8.0]
+    rotation: 0
+    state: true
+- name: pad_sink_0
+  id: pad_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    label: pdus
+    num_streams: '1'
+    optional: 'False'
+    type: message
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1488, 160.0]
+    rotation: 0
+    state: true
+- name: pad_sink_0_0
+  id: pad_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    label: beacons
+    num_streams: '1'
+    optional: 'True'
+    type: message
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1352, 352.0]
+    rotation: 0
+    state: true
+- name: pad_source_0
+  id: pad_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    label: in
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_streams: '1'
+    optional: 'False'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [88, 208.0]
+    rotation: 0
+    state: true
+- name: pdu_nominal_length
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Nominal PDU length (bytes)
+    short_id: ''
+    type: intx
+    value: '128'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 8.0]
+    rotation: 0
+    state: true
+- name: root_raised_cosine_filter_0
+  id: root_raised_cosine_filter
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha: '0.35'
+    comment: ''
+    decim: '1'
+    gain: '1'
+    interp: '1'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    ntaps: fm_samples_per_symbol*2
+    samp_rate: samp_rate
+    sym_rate: baud_rate*2
+    type: fir_filter_fff
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [520, 168.0]
+    rotation: 0
+    state: true
+- name: satellites_ax25_deframer_0
+  id: satellites_ax25_deframer
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    g3ruh_scrambler: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    options: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1080, 352.0]
+    rotation: 0
+    state: enabled
+- name: satellites_fsk_demodulator_0
+  id: satellites_fsk_demodulator
+  parameters:
+    affinity: ''
+    alias: ''
+    baudrate: baud_rate
+    comment: ''
+    iq: 'True'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    options: '""'
+    samp_rate: samp_rate
+    subaudio: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [424, 336.0]
+    rotation: 0
+    state: enabled
+- name: satellites_sync_to_pdu_packed_0_0
+  id: satellites_sync_to_pdu_packed
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    packlen: pdu_nominal_length
+    sync: packet_sync_word
+    threshold: int(len(packet_sync_word)/8)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1192, 144.0]
+    rotation: 0
+    state: enabled
+
+connections:
+- [analog_quadrature_demod_cf_0, '0', root_raised_cosine_filter_0, '0']
+- [digital_binary_slicer_fb_0, '0', satellites_sync_to_pdu_packed_0_0, '0']
+- [digital_symbol_sync_xx_0, '0', digital_binary_slicer_fb_0, '0']
+- [pad_source_0, '0', analog_quadrature_demod_cf_0, '0']
+- [pad_source_0, '0', satellites_fsk_demodulator_0, '0']
+- [root_raised_cosine_filter_0, '0', digital_symbol_sync_xx_0, '0']
+- [satellites_ax25_deframer_0, out, pad_sink_0_0, in]
+- [satellites_fsk_demodulator_0, '0', satellites_ax25_deframer_0, '0']
+- [satellites_sync_to_pdu_packed_0_0, out, pad_sink_0, in]
+
+metadata:
+  file_format: 1
+  grc_version: 3.10.7.0

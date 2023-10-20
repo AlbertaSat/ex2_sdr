@@ -1,0 +1,201 @@
+options:
+  parameters:
+    author: Josh Lazaruk, Steven Knudsen
+    catch_exceptions: 'True'
+    category: '[AlbertaSat]'
+    cmake_opt: ''
+    comment: ''
+    copyright: AlbertaSat 2022-20xx
+    description: The basic UHF modulation block to match the EnduroSat II radio
+    gen_cmake: 'On'
+    gen_linking: dynamic
+    generate_options: hb
+    hier_block_src_path: '.:'
+    id: uhf_pdu_modulate
+    max_nouts: '0'
+    output_language: python
+    placement: (0,0)
+    qt_qss_theme: ''
+    realtime_scheduling: ''
+    run: 'True'
+    run_command: '{python} -u {filename}'
+    run_options: prompt
+    sizing_mode: fixed
+    thread_safe_setters: ''
+    title: UHF PDU Modulate
+    window_size: (1000,1000)
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+
+blocks:
+- name: FSK_level
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: FSK Level (M)
+    short_id: ''
+    type: intx
+    value: '2'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [856, 16.0]
+    rotation: 0
+    state: true
+- name: digital_gfsk_mod_0
+  id: digital_gfsk_mod
+  parameters:
+    affinity: ''
+    alias: ''
+    bt: '0.5'
+    comment: GFSK Mod input is packed bytes (eg. 0b01110000)
+    do_unpack: 'True'
+    log: 'False'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    samples_per_symbol: fm_samples_per_symbol
+    sensitivity: math.pi*fm_modulation_index*(FSK_level - 1)/fm_samples_per_symbol
+    verbose: 'False'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [592, 204.0]
+    rotation: 0
+    state: enabled
+- name: fm_baud
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: Baud
+    short_id: ''
+    type: eng_float
+    value: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 16.0]
+    rotation: 0
+    state: true
+- name: fm_modulation_index
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: FM Modulation Index
+    short_id: ''
+    type: eng_float
+    value: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [376, 16.0]
+    rotation: 0
+    state: true
+- name: fm_samples_per_symbol
+  id: parameter
+  parameters:
+    alias: ''
+    comment: ''
+    hide: none
+    label: FM Samples per Symbol
+    short_id: ''
+    type: eng_float
+    value: '128'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 16.0]
+    rotation: 0
+    state: true
+- name: import_0
+  id: import
+  parameters:
+    alias: ''
+    comment: ''
+    imports: import math
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [192, 12.0]
+    rotation: 0
+    state: true
+- name: pad_sink_0
+  id: pad_sink
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    label: out
+    num_streams: '1'
+    optional: 'False'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [848, 220.0]
+    rotation: 0
+    state: true
+- name: pad_source_0
+  id: pad_source
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    label: pdus
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_streams: '1'
+    optional: 'False'
+    type: message
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [88, 220.0]
+    rotation: 0
+    state: true
+- name: pdu_pdu_to_tagged_stream_0
+  id: pdu_pdu_to_tagged_stream
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    tag: packet_len
+    type: byte
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [312, 216.0]
+    rotation: 0
+    state: true
+
+connections:
+- [digital_gfsk_mod_0, '0', pad_sink_0, '0']
+- [pad_source_0, out, pdu_pdu_to_tagged_stream_0, pdus]
+- [pdu_pdu_to_tagged_stream_0, '0', digital_gfsk_mod_0, '0']
+
+metadata:
+  file_format: 1
+  grc_version: 3.10.7.0
