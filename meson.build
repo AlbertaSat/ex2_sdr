@@ -17,11 +17,11 @@ project('ex2_obc_sdr', 'c', 'cpp',
 
 cpp = meson.get_compiler('cpp')
 
-home = run_command('sh', '-c', 'echo $HOME')
+home = run_command('sh', '-c', 'echo $HOME', check: true)
 HOME_DIR = home.stdout().strip()
 message('home = ' + HOME_DIR)
 
-prj_dir = run_command('sh', '-c', 'echo $PWD')
+prj_dir = run_command('sh', '-c', 'echo $PWD', check: true)
 PRJ_DIR = prj_dir.stdout().strip()
 message('prj_dir = ' + PRJ_DIR)
 
